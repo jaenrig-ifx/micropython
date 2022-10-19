@@ -10,12 +10,17 @@ $(info MYP_PATH_TO_THIS_MAKEFILE : $(MYP_PATH_TO_THIS_MAKEFILE))
 MYP_DIR_OF_THIS_MAKEFILE := $(dir $(MYP_PATH_TO_THIS_MAKEFILE))
 $(info MYP_DIR_OF_THIS_MAKEFILE : $(MYP_DIR_OF_THIS_MAKEFILE))
 
-MTB_BOARD_BUILD_DIR := $(MYP_DIR_OF_THIS_MAKEFILE)/$(BOARD_DIR)/build
+MTB_APP_DIR_NAME = mtb-app
+MTB_APP_DIR := $(BOARD_DIR)/$(MTB_APP_DIR_NAME)
+
+MTB_BOARD_BUILD_DIR := $(MYP_DIR_OF_THIS_MAKEFILE)/$(MTB_APP_DIR)/build
 $(info MTB_BOARD_BUILD_DIR : $(MTB_BOARD_BUILD_DIR))
 
 
 # get variable definitions from main makefile
-MYP_MTB_MAKEFILE="$(MYP_DIR_OF_THIS_MAKEFILE)/$(BOARD_DIR)/Makefile"
+ifneq ($(wildcard $(MTB_APP_DIR)/.),)
+
+MYP_MTB_MAKEFILE="$(MYP_DIR_OF_THIS_MAKEFILE)/$(MTB_APP_DIR)/Makefile"
 $(info MYP_MTB_MAKEFILE : $(MYP_MTB_MAKEFILE))
 
 MYP_MTB_TARGET=$(shell egrep '^ *TARGET' $(MYP_MTB_MAKEFILE) | sed 's/^.*= *//g')
@@ -26,15 +31,18 @@ $(info MYP_MTB_CONFIG : $(MYP_MTB_CONFIG))
 
 MYP_MTB_APPNAME=$(shell egrep '^ *APPNAME' $(MYP_MTB_MAKEFILE) | sed 's/^.*= *//g')
 $(info MYP_MTB_APPNAME : $(MYP_MTB_APPNAME))
+endif
 
 
 # MYP_MTB_BOARD_NAME=CY8CPROTO-062-4343W
 
+hello:
+	$(info "hello from hello target")
 
 # build MTB project
-mtb:
-	$(info "Building $(MYP_MTB_BOARD_NAME) using MTB ...")
-	-$(Q) cd $(BOARD_DIR); make build
+mtb: 
+	$(info "Building $(BOARD) using MTB ...")
+	-$(Q) cd $(MTB_APP_DIR); make build
 #	-$(Q) cd boards/$(MYP_MTB_BOARD_NAME) ; rm -rf build ; make build
 
 
@@ -54,7 +62,7 @@ myp_define_mtb_vars: mtb
 	$(eval MYP_MTB_INCLUDE_DIRS = $(file < $(MTB_BOARD_BUILD_DIR)/$(MYP_MTB_TARGET)/$(MYP_MTB_CONFIG)/inclist.rsp))
 	$(info MYP_MTB_INCLUDE_DIRS : $(MYP_MTB_INCLUDE_DIRS))
 	$(info )
-	$(eval INC += $(subst -I,-Iboards/$(BOARD)/,$(MYP_MTB_INCLUDE_DIRS)))
+	$(eval INC += $(subst -I,-I$(MTB_APP_DIR)/,$(MYP_MTB_INCLUDE_DIRS)))
 	$(info )
 	$(eval MYP_MTB_ALL_OBJECTS = $(file < $(MTB_BOARD_BUILD_DIR)/$(MYP_MTB_TARGET)/$(MYP_MTB_CONFIG)/objlist.rsp))
 	$(eval MYP_MTB_OBJECTS = $(filter-out %/main.o,$(MYP_MTB_ALL_OBJECTS)))
@@ -85,10 +93,9 @@ program: $(BUILD)/firmware.hex
 	$(info Programming using MTB programmer)
 	$(Q) cd $(BOARD_DIR); $(MAKE) program
 
-
 mtb-init:
-	$(info Create a mtb-example-hal-hello-world for $(MYP_MTB_BOARD_NAME))
-	./project-creator-cli --board-id $(MPY_MTB_BOARD_NAME) --app-id mtb-example-hal-hello-world --user-app-name $(MPY_MTB_BOARD_NAME) --target-dir ./boards
+	$(info Create a mtb-example-hal-hello-world base project for $(BOARD))
+	project-creator-cli --board-id $(BOARD) --app-id mtb-example-hal-hello-world --user-app-name $(MTB_APP_DIR_NAME) --target-dir boards/$(BOARD)
 
 
 .PHONY: program  mtb-init
