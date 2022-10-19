@@ -89,7 +89,7 @@ myp_define_mtb_vars: mtb
 
 program: $(BUILD)/firmware.hex
 	$(info Replacing firmware.hex MTB build folder)
-	$(Q)cp $(BUILD)/firmware.hex $(MTB_APP_DIR)/$(MYP_MTB_TARGET)/$(MYP_MTB_CONFIG)/$(MYP_MTB_APPNAME).hex
+	$(Q)cp $(BUILD)/firmware.hex $(MTB_APP_DIR)/build/$(MYP_MTB_TARGET)/$(MYP_MTB_CONFIG)/$(MYP_MTB_APPNAME).hex
 	$(info Programming using MTB programmer)
 	$(Q) cd $(BOARD_DIR); $(MAKE) program
 
