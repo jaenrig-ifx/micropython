@@ -1,9 +1,10 @@
-BOARD ?= CY8CPROTO-062-4343W
+#BOARD ?= CY8CPROTO-062-4343W
+BOARD ?= CY8CKIT-062-WIFI-BT
 BOARD_DIR = boards/$(BOARD)
 
-ifeq ($(wildcard $(BOARD_DIR)/.),)
-$(error Invalid BOARD specified)
-endif
+# ifeq ($(wildcard $(BOARD_DIR)/.),)
+# $(error Invalid BOARD specified)
+# endif
 
 include ../../py/mkenv.mk
 
@@ -87,7 +88,7 @@ $(BUILD)/_frozen_mpy.c: frozentest.mpy $(BUILD)/genhdr/qstrdefs.generated.h
 	$(Q)$(TOP)/tools/mpy-tool.py -f -q $(BUILD)/genhdr/qstrdefs.preprocessed.h -mlongint-impl=none $< > $@
 
 
-$(OBJ): myp_define_mtb_vars
+$(OBJ): myp_define_mtb_vars 
 
 
 $(BUILD)/firmware.elf: $(OBJ)
