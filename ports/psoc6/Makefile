@@ -1,3 +1,10 @@
+BOARD ?= CY8CPROTO-062-4343W
+BOARD_DIR = boards/$(BOARD)
+
+ifeq ($(wildcard $(BOARD_DIR)/.),)
+$(error Invalid BOARD specified)
+endif
+
 include ../../py/mkenv.mk
 
 # qstr definitions (must come before including py.mk)
@@ -91,9 +98,14 @@ $(BUILD)/firmware.elf: $(OBJ)
 #	/home/jensb/ModusToolbox/tools_3.0/gcc/bin/arm-none-eabi-g++ $(LDFLAGS) -o $@ $^ $(LIBS)  
 	$(Q)$(SIZE) $@
 
+$(BUILD)/firmware.hex: $(BUILD)/firmware.elf
+	$(Q)$(OBJCOPY) -O ihex $^ $@
+
+#	$(Q)$(OBJCOPY) -O binary -j .isr_vector -j .text -j .data $^ $(BUILD)/firmware.bin
+# $(Q)$(OBJCOPY) -O ihex -j .isr_vector -j .text -j .data $^ $@
 
 include $(TOP)/py/mkrules.mk
 
 # TODO: get path to board from variables/command line option !
-include ./boards/CY8CPROTO-062-4343W/makefile_mtb.mk
+include makefile_mtb.mk
 
