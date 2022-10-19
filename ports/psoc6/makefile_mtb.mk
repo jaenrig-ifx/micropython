@@ -91,7 +91,7 @@ program: $(BUILD)/firmware.hex
 	$(info Replacing firmware.hex MTB build folder)
 	$(Q)cp $(BUILD)/firmware.hex $(MTB_APP_DIR)/build/$(MYP_MTB_TARGET)/$(MYP_MTB_CONFIG)/$(MYP_MTB_APPNAME).hex
 	$(info Programming using MTB programmer)
-	$(Q) cd $(BOARD_DIR); $(MAKE) program
+	$(Q) cd $(MTB_APP_DIR); $(MAKE) program
 
 mtb-init:
 	$(info Create a mtb-example-hal-hello-world base project for $(BOARD))
