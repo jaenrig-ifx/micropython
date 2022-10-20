@@ -7,9 +7,14 @@ This port is intended to run on Infineon PSoC™ 6 microcontrollers.
 The following port is using Infineon ModusToolbox™ to resolve the specific PSoC™ board resources and building flags. Before working with micropython:
 
 1. Install [ModusToolbox](https://www.infineon.com/cms/en/design-support/tools/sdk/modustoolbox-software/). Minimum version required is 3.0.
+
 2. Add `project-creator-cli` to the system PATH. This tool is usually installed in *{ModusToolbox™ software install directory}/tools_{version}/project-creator/*. In your Linux terminal, for the default installation path of ModusToolbox™(only for the current terminal session):
 
     $ export PATH=$PATH:/home/{user}/ModusToolbox/tools_{version}/project-creator
+
+3. In order to use the same gcc for compiling both mpy sources and ModusToolbox™ add also the latest to the system PATH.
+
+    $ export PATH=/home/{user}/ModusToolbox/tools_{version}/gcc/bin:$PATH
 
 ## Building and running Linux version
 
