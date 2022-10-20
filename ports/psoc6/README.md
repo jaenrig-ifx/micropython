@@ -11,7 +11,11 @@ The following port is using Infineon ModusToolbox™ to resolve the specific PSo
 
 ## Building and running Linux version
 
-First, initialize the ModusToolbox™ environment: 
+As we are working on the ports/psoc6 branch (for now), first checkout that branch after cloning this repo:
+
+    $ git checkout --track origin/ports/psoc6
+
+Then initialize the ModusToolbox™ environment: 
 
     $ make mtb-init
 
