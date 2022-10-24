@@ -95,7 +95,7 @@ OBJ += $(PY_CORE_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_CXX:.cpp=.o))
 
 
-all: $(MPY_MAIN_BUILD_DIR)/firmware.elf
+all: $(MPY_MAIN_BUILD_DIR)/firmware.hex
 
 
 $(BUILD)/_frozen_mpy.c: frozentest.mpy $(BUILD)/genhdr/qstrdefs.generated.h
@@ -109,6 +109,10 @@ $(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ)
 	$(info "Linking $@ ...   $(OBJ)")
 	$(Q)$(LD) $(LDFLAGS) -o $@ $^ 
 	$(Q)$(SIZE) $@
+
+
+$(MPY_MAIN_BUILD_DIR)/firmware.hex: $(MPY_MAIN_BUILD_DIR)/firmware.elf
+	$(Q)$(OBJCOPY) -O ihex $^ $@
 
 
 # include adapter makefile
