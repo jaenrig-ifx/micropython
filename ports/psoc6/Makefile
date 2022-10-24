@@ -100,13 +100,13 @@ all: $(MPY_MAIN_BUILD_DIR)/firmware.hex
 
 $(BUILD)/_frozen_mpy.c: frozentest.mpy $(BUILD)/genhdr/qstrdefs.generated.h
 	$(info )
-	$(ECHO) "MISC freezing bytecode"
+	$(info Freezing bytecode)
 	$(Q)$(TOP)/tools/mpy-tool.py -f -q $(BUILD)/genhdr/qstrdefs.preprocessed.h -mlongint-impl=none $< > $@
 
 
 $(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ)
 	$(info )
-	$(info "Linking $@ ...   $(OBJ)")
+	$(info Linking $@ ...)
 	$(Q)$(LD) $(LDFLAGS) -o $@ $^ 
 	$(Q)$(SIZE) $@
 

@@ -45,7 +45,10 @@ mpy_mtb_init:
 mpy_mtb_build:
 	$(info )
 	$(info Building $(BOARD) using MTB ...)
-	-$(Q) cd $(BOARD_DIR); $(MPY_REMOVE_MTB_BUILD_DIR) $(MAKE) build DEFINES+=CY_RETARGET_IO_CONVERT_LF_TO_CRLF=1
+	-$(Q) cd $(BOARD_DIR); $(MPY_REMOVE_MTB_BUILD_DIR) $(MAKE) build
+
+# added the following flag to MTB Makefile in order to reduce recomile runsS
+# DEFINES+=CY_RETARGET_IO_CONVERT_LF_TO_CRLF=1
 
 
 # get variables set for includes, objects, etc. and add to mpy makefile variables
@@ -77,7 +80,7 @@ mpy_define_mtb_vars: mpy_mtb_build
 	$(info )
 	$(eval LIBS += $(filter-out %/main.o,$(MPY_MTB_LIBRARIES)))
 	$(info )
-	$(eval CFLAGS +=   -mcpu=cortex-m4 --specs=nano.specs -Og -mfloat-abi=softfp -mfpu=fpv4-sp-d16 -mthumb -ffunction-sections -fdata-sections -ffat-lto-objects -g -Wall -pipe -DCOMPONENT_4343W -DCOMPONENT_APP_CY8CPROTO_062_4343W -DCOMPONENT_CAT1 -DCOMPONENT_CAT1A -DCOMPONENT_CM0P_SLEEP -DCOMPONENT_CM4 -DCOMPONENT_CM4_0 -DCOMPONENT_Debug -DCOMPONENT_GCC_ARM -DCOMPONENT_HCI_UART -DCOMPONENT_MURATA_1DX -DCOMPONENT_MW_CAT1CM0P -DCOMPONENT_MW_CMSIS -DCOMPONENT_MW_CORE_LIB -DCOMPONENT_MW_CORE_MAKE -DCOMPONENT_MW_MTB_HAL_CAT1 -DCOMPONENT_MW_MTB_PDL_CAT1 -DCOMPONENT_MW_RECIPE_MAKE_CAT1A -DCOMPONENT_MW_RETARGET_IO -DCOMPONENT_PSOC6_02 -DCOMPONENT_SOFTFP -DCOMPONENT_WIFI_INTERFACE_SDIO -DCORE_NAME_CM4_0=1 -DCY8C624ABZI_S2D44 -DCY_APPNAME_mtb_example_hal_hello_world -DCY_SUPPORTS_DEVICE_VALIDATION -DCY_TARGET_BOARD=APP_CY8CPROTO_062_4343W -DCY_USING_HAL -DDEBUG -DTARGET_APP_CY8CPROTO_062_4343W)
+	$(eval CFLAGS += -mcpu=cortex-m4 --specs=nano.specs -Og -mfloat-abi=softfp -mfpu=fpv4-sp-d16 -mthumb -ffunction-sections -fdata-sections -ffat-lto-objects -g -Wall -pipe -DCOMPONENT_4343W -DCOMPONENT_APP_CY8CPROTO_062_4343W -DCOMPONENT_CAT1 -DCOMPONENT_CAT1A -DCOMPONENT_CM0P_SLEEP -DCOMPONENT_CM4 -DCOMPONENT_CM4_0 -DCOMPONENT_Debug -DCOMPONENT_GCC_ARM -DCOMPONENT_HCI_UART -DCOMPONENT_MURATA_1DX -DCOMPONENT_MW_CAT1CM0P -DCOMPONENT_MW_CMSIS -DCOMPONENT_MW_CORE_LIB -DCOMPONENT_MW_CORE_MAKE -DCOMPONENT_MW_MTB_HAL_CAT1 -DCOMPONENT_MW_MTB_PDL_CAT1 -DCOMPONENT_MW_RECIPE_MAKE_CAT1A -DCOMPONENT_MW_RETARGET_IO -DCOMPONENT_PSOC6_02 -DCOMPONENT_SOFTFP -DCOMPONENT_WIFI_INTERFACE_SDIO -DCORE_NAME_CM4_0=1 -DCY8C624ABZI_S2D44 -DCY_APPNAME_mtb_example_hal_hello_world -DCY_SUPPORTS_DEVICE_VALIDATION -DCY_TARGET_BOARD=APP_CY8CPROTO_062_4343W -DCY_USING_HAL -DDEBUG -DTARGET_APP_CY8CPROTO_062_4343W)
 	$(info )
 	$(eval CXXFLAGS += $(CFLAGS))
 	$(info )
@@ -86,6 +89,7 @@ mpy_define_mtb_vars: mpy_mtb_build
 	$(info LD : $(LD))
 	$(info )
 	$(eval QSTR_GEN_CFLAGS += $(INC))
+	touch mpy_define_mtb_vars
 
 
 mpy_program: $(MPY_MAIN_BUILD_DIR)/firmware.elf
@@ -93,7 +97,7 @@ mpy_program: $(MPY_MAIN_BUILD_DIR)/firmware.elf
 	$(info Replacing firmware.hex MTB build folder)
 	$(Q)cp $(MPY_MAIN_BUILD_DIR)/firmware.elf $(MPY_MTB_BOARD_BUILD_OUTPUT_DIR)/$(MPY_MTB_APPNAME).elf
 	$(info Programming using MTB programmer)
-	$(Q) cd $(BOARD_DIR); $(MAKE) qprogram
+	$(Q) cd $(BOARD_DIR); $(MAKE) program
 
 
 .PHONY: mpy_mtb_init mpy_mtb_build mpy_define_mtb_vars mpy_program
