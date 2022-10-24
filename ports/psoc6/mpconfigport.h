@@ -41,6 +41,7 @@ typedef long mp_off_t;
 #define MICROPY_MIN_USE_STM32_MCU (0)
 #endif
 
+
 #define MP_STATE_PORT MP_STATE_VM
 
 
@@ -109,7 +110,6 @@ extern const struct _mp_obj_module_t mp_module_time;
     { MP_ROM_QSTR(MP_QSTR_time), MP_ROM_PTR(&mp_module_time) }
 
 
-#define MP_STATE_PORT MP_STATE_VM
 //#define MICROPY_MODULE_FROZEN_STR       (1)
 #define MICROPY_COMP_CONST_FOLDING      (0)
 #define MICROPY_COMP_CONST              (0)
