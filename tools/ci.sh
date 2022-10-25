@@ -237,7 +237,7 @@ function ci_powerpc_build {
 ########################################################################################
 # ports/psoc6
 
-MPY_MTB_CI_DOCKER_VERSION=v0.1.0
+MPY_MTB_CI_DOCKER_VERSION=0.1.0
 
 function ci_psoc6_setup {
     docker pull ifxmakers/mpy-mtb-ci:${MPY_MTB_CI_DOCKER_VERSION}
