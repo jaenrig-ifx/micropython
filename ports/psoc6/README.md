@@ -8,11 +8,7 @@ The following port is using Infineon ModusToolbox™ to resolve the specific PSo
 
 1. Install [ModusToolbox](https://www.infineon.com/cms/en/design-support/tools/sdk/modustoolbox-software/). Minimum version required is 3.0.
 
-2. Add `project-creator-cli` to the system PATH. This tool is usually installed in *{ModusToolbox™ software install directory}/tools_{version}/project-creator/*. In your Linux terminal, for the default installation path of ModusToolbox™(only for the current terminal session):
-
-    $ export PATH=$PATH:/home/{user}/ModusToolbox/tools_{version}/project-creator
-
-3. In order to use the same gcc for compiling both mpy sources and ModusToolbox™ add also the latest to the system PATH.
+2. In order to use the same gcc for compiling both mpy sources and ModusToolbox™ add also the latest to the system PATH.
 
     $ export PATH=/home/{user}/ModusToolbox/tools_{version}/gcc/bin:$PATH
 
@@ -24,7 +20,7 @@ As we are working on the ports/psoc6 branch (for now), first checkout that branc
 
 Then initialize the ModusToolbox™ environment: 
 
-    $ make mtb-init
+    $ make mpy_mtb_init
 
 Build the firmare:
 
@@ -32,7 +28,7 @@ Build the firmare:
 
 To build and program the device:
 
-    $ make program
+    $ make myp_program
 
 ### Working from WSL
 
