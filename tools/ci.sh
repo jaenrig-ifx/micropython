@@ -249,7 +249,7 @@ function ci_psoc6_setup {
 }
 
 function ci_psoc6_build {
-    docker exec mtb-ci /bin/bash -c "source /home/mtb-export.sh && make mtb-init"
+    docker exec mtb-ci /bin/bash -c "source /home/mtb-export.sh && make mpy_mtb_init"
     docker exec mtb-ci /bin/bash -c "source /home/mtb-export.sh && make"
 }
 
