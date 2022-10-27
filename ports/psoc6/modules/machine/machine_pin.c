@@ -14,6 +14,31 @@
 #include "modmachine.h"
 
 
+/* 
+  test functionality  
+  
+
+import machine
+from machine import Pin
+a=Pin("P13_7", Pin.IN, "Pin.PULL_UP")
+
+# toggle red LED
+a.toggle()
+a.toggle()
+
+a.init()
+
+# should give 1
+a.value()
+
+print(a)
+
+# then connect P6_0 to GNG and
+# should yield 0
+a.value()
+  
+*/
+
 
 typedef struct _machine_pin_obj_t {
     mp_obj_base_t base;
