@@ -78,6 +78,9 @@ SRC_C = \
 	shared/readline/readline.c \
 	shared/runtime/stdout_helpers.c \
 	\
+	drivers/*.c \
+	\
+	mphalport.c \
 	$(BUILD)/_frozen_mpy.c \
 
 
