@@ -14,12 +14,6 @@
 #include "extmod/machine_signal.h"
 #include "extmod/machine_spi.h"
 
-
-// MTB includes
-#include "cybsp.h"
-#include "cyhal.h"
-
-
 #include "modmachine.h"
 
 
@@ -65,11 +59,23 @@ STATIC mp_obj_t machine_info(size_t n_args, const mp_obj_t *args) {
 //STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_info_obj, machine_info);
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_info_obj, 0, 1, machine_info);
 
+//machine.freq()
+STATIC mp_obj_t machine_freq(size_t n_args, const mp_obj_t *args) {
+    if (n_args == 0) {
+        mp_printf(&mp_plat_print, "System core freq (CM4) in Hz:\n");
+        return MP_OBJ_NEW_SMALL_INT(mp_hal_get_cpu_freq());
+    } else {
+        mp_printf(&mp_plat_print, "Not implemented!!!\n");
+        return mp_const_none;
+    }
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_freq_obj, 0, 1, machine_freq);
 
 
 STATIC const mp_rom_map_elem_t machine_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__),            MP_ROM_QSTR(MP_QSTR_machine) },
     { MP_ROM_QSTR(MP_QSTR_info),                MP_ROM_PTR(&machine_info_obj) },
+    { MP_ROM_QSTR(MP_QSTR_freq),                MP_ROM_PTR(&machine_freq_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_Pin),                 MP_ROM_PTR(&machine_pin_type) }
 };
