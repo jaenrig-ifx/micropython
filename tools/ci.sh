@@ -235,6 +235,25 @@ function ci_powerpc_build {
 }
 
 ########################################################################################
+# ports/psoc6
+
+MPY_MTB_CI_DOCKER_VERSION=0.1.0
+
+function ci_psoc6_setup {
+    docker pull ifxmakers/mpy-mtb-ci:${MPY_MTB_CI_DOCKER_VERSION}
+    docker run --name mtb-ci -d -it \
+      -v "$(pwd)":/micropython \
+      -w /micropython/ports/psoc6 \
+      ifxmakers/mpy-mtb-ci:${MPY_MTB_CI_DOCKER_VERSION}
+    docker ps -a
+}
+
+function ci_psoc6_build {
+    docker exec mtb-ci /bin/bash -c "source /home/mtb-export.sh && make mpy_mtb_init"
+    docker exec mtb-ci /bin/bash -c "source /home/mtb-export.sh && make"
+}
+
+########################################################################################
 # ports/qemu-arm
 
 function ci_qemu_arm_setup {
