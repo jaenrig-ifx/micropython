@@ -22,6 +22,11 @@
 #include "cy_retarget_io.h"
 
 
+
+extern int mp_hal_stdin_rx_chr(void);
+extern void mp_hal_stdout_tx_strn(const char *str, mp_uint_t len);
+
+
 #if MICROPY_ENABLE_COMPILER
 
 void do_str(const char *src, mp_parse_input_kind_t input_kind) {
@@ -150,6 +155,174 @@ int main(int argc, char **argv) {
     mp_deinit();
     return 0;
 }
+
+
+
+// // extern unsigned int __bss_start__, __bss_end__, __data_start__, __data_end__, __HeapLimit, __StackLimit, __StackTop, __etext;
+// // extern uint32_t __bss_start__, __bss_end__, __data_start__, __data_end__, __HeapLimit, __StackLimit, __StackTop, __etext;
+// // #define CY_CPU_VTOR_ADDR            0xE000ED08
+// #define __STARTUP_COPY_MULTIPLE       (1)
+// #define __STARTUP_CLEAR_BSS_MULTIPLE  (1)
+
+// void Reset_Handler(void) __attribute__((naked));
+
+// // ResetHandler stolen from
+// //    boards/CY8CPROTO-062-4343W/bsps/TARGET_APP_CY8CPROTO-062-4343W/COMPONENT_CM4/TOOLCHAIN_GCC_ARM/startup_psoc6_02_cm4.S
+// void Reset_Handler(void) {
+//     __asm volatile ("bl Cy_OnResetUser");
+//     __asm volatile ("cpsid i");
+
+// /*  Firstly it copies data from read only memory to RAM. There are two schemes
+//  *  to copy. One can copy more than one sections. Another can only copy
+//  *  one section.  The former scheme needs more instructions and read-only
+//  *  data to implement than the latter.
+//  *  Macro __STARTUP_COPY_MULTIPLE is used to choose between two schemes.  */
+
+// #ifdef __STARTUP_COPY_MULTIPLE
+// /*  Multiple sections scheme.
+//  *
+//  *  Between symbol address __copy_table_start__ and __copy_table_end__,
+//  *  there are array of triplets, each of which specify:
+//  *    offset 0: LMA of start of a section to copy from
+//  *    offset 4: VMA of start of a section to copy to
+//  *    offset 8: size of the section to copy. Must be multiply of 4
+//  *
+//  *  All addresses must be aligned to 4 bytes boundary.
+//  */
+//     __asm volatile ("ldr    r4, =__copy_table_start__");
+//     __asm volatile ("ldr    r5, =__copy_table_end__");
+
+// __asm volatile (".L_loop0:");
+//     __asm volatile ("cmp    r4, r5");
+//     __asm volatile ("bge    .L_loop0_done");
+//     __asm volatile ("ldr    r1, [r4]");
+//     __asm volatile ("ldr    r2, [r4, #4]");
+//     __asm volatile ("ldr    r3, [r4, #8]");
+
+// __asm volatile (".L_loop0_0:");
+//     __asm volatile ("subs    r3, #4");
+//     __asm volatile ("ittt    ge");
+//     __asm volatile ("ldrge    r0, [r1, r3]");
+//     __asm volatile ("strge    r0, [r2, r3]");
+//     __asm volatile ("bge    .L_loop0_0");
+
+//     __asm volatile ("adds    r4, #12");
+//     __asm volatile ("b    .L_loop0");
+
+// __asm volatile (".L_loop0_done:");
+// #else
+// /*  Single section scheme.
+//  *
+//  *  The ranges of copy from/to are specified by following symbols
+//  *    __etext: LMA of start of the section to copy from. Usually end of text
+//  *    __data_start__: VMA of start of the section to copy to
+//  *    __data_end__: VMA of end of the section to copy to
+//  *
+//  *  All addresses must be aligned to 4 bytes boundary.
+//  */
+//     __asm volatile ("ldr    r1, =__etext");
+//     __asm volatile ("ldr    r2, =__data_start__");
+//     __asm volatile ("ldr    r3, =__data_end__");
+
+//     __asm volatile (".L_loop1:");
+//     __asm volatile ("cmp    r2, r3");
+//     __asm volatile ("ittt    lt");
+//     __asm volatile ("ldrlt    r0, [r1], #4");
+//     __asm volatile ("strlt    r0, [r2], #4");
+//     __asm volatile ("blt    .L_loop1");
+// #endif /*__STARTUP_COPY_MULTIPLE */
+
+// /*  This part of work usually is done in C library startup code. Otherwise,
+//  *  define this macro to enable it in this startup.
+//  *
+//  *  There are two schemes too. One can clear multiple BSS sections. Another
+//  *  can only clear one section. The former is more size expensive than the
+//  *  latter.
+//  *
+//  *  Define macro __STARTUP_CLEAR_BSS_MULTIPLE to choose the former.
+//  *  Otherwise define macro __STARTUP_CLEAR_BSS to choose the later.
+//  */
+// #ifdef __STARTUP_CLEAR_BSS_MULTIPLE
+// /*  Multiple sections scheme.
+//  *
+//  *  Between symbol address __copy_table_start__ and __copy_table_end__,
+//  *  there are array of tuples specifying:
+//  *    offset 0: Start of a BSS section
+//  *    offset 4: Size of this BSS section. Must be multiply of 4
+//  */
+//     __asm volatile ("ldr    r3, =__zero_table_start__");
+//     __asm volatile ("ldr    r4, =__zero_table_end__");
+
+// __asm volatile (".L_loop2:");
+//     __asm volatile ("cmp    r3, r4");
+//     __asm volatile ("bge    .L_loop2_done");
+//     __asm volatile ("ldr    r1, [r3]");
+//     __asm volatile ("ldr    r2, [r3, #4]");
+//     __asm volatile ("movs    r0, 0");
+
+// __asm volatile (".L_loop2_0:");
+//     __asm volatile ("subs    r2, #4");
+//     __asm volatile ("itt    ge");
+//     __asm volatile ("strge    r0, [r1, r2]");
+//     __asm volatile ("bge    .L_loop2_0");
+
+//     __asm volatile ("adds    r3, #8");
+//     __asm volatile ("b    .L_loop2");
+// __asm volatile (".L_loop2_done:");
+// #elif defined (__STARTUP_CLEAR_BSS)
+// /*  Single BSS section scheme.
+//  *
+//  *  The BSS section is specified by following symbols
+//  *    __bss_start__: start of the BSS section.
+//  *    __bss_end__: end of the BSS section.
+//  *
+//  *  Both addresses must be aligned to 4 bytes boundary.
+//  */
+//     __asm volatile ("ldr    r1, =__bss_start__");
+//     __asm volatile ("ldr    r2, =__bss_end__");
+
+//     __asm volatile ("movs    r0, 0");
+// __asm volatile (".L_loop3:");
+//     __asm volatile ("cmp    r1, r2");
+//     __asm volatile ("itt    lt");
+//     __asm volatile ("strlt    r0, [r1], #4");
+//     __asm volatile ("blt    .L_loop3");
+// #endif /* __STARTUP_CLEAR_BSS_MULTIPLE || __STARTUP_CLEAR_BSS */
+
+//     /* Update Vector Table Offset Register. */
+//     __asm volatile ("ldr r0, =__ramVectors");
+//     __asm volatile ("ldr r1, =0xE000ED08");
+// //    __asm volatile ("ldr r1, =CY_CPU_VTOR_ADDR");
+//     __asm volatile ("str r0, [r1]");
+//     __asm volatile ("dsb 0xF");
+
+//     /* Enable the FPU if used */
+//     __asm volatile ("bl Cy_SystemInitFpuEnable");
+
+// #ifndef __NO_SYSTEM_INIT
+//     __asm volatile ("bl    SystemInit");
+// #endif
+
+//     /* OS-specific low-level initialization */
+//     __asm volatile ("bl    cy_toolchain_init");
+
+//     /* Call C/C++ static constructors */
+//     __asm volatile ("bl    __libc_init_array");
+
+//     /* Execute main application */
+//     __asm volatile ("bl    main");
+
+//     /* Call C/C++ static destructors */
+//     __asm volatile ("bl    __libc_fini_array");
+
+//     /* Should never get here */
+//     __asm volatile ("b   .");
+
+//     __asm volatile (".pool");
+//     __asm volatile (".size    Reset_Handler, . - Reset_Handler");
+ 
+// //    main(0, NULL);
+// }
 
 
 #if MICROPY_ENABLE_GC

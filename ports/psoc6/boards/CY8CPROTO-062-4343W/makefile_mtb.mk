@@ -95,7 +95,7 @@ mpy_define_mtb_vars: mpy_mtb_build
 mpy_program: $(MPY_MAIN_BUILD_DIR)/firmware.elf
 	$(info )
 	$(info Replacing firmware.hex MTB build folder)
-	$(Q)cp $(MPY_MAIN_BUILD_DIR)/firmware.elf $(MPY_MTB_BOARD_BUILD_OUTPUT_DIR)/$(MPY_MTB_APPNAME).elf
+	$(Q) cp $(MPY_MAIN_BUILD_DIR)/firmware.elf $(MPY_MTB_BOARD_BUILD_OUTPUT_DIR)/$(MPY_MTB_APPNAME).elf
 	$(info Programming using MTB programmer)
 	$(Q) cd $(BOARD_DIR); $(MAKE) program
 

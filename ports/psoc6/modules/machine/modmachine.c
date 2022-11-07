@@ -34,6 +34,9 @@ void machine_deinit(void) {
     mp_printf(&mp_plat_print, "machine deinit\n");
 }
 
+extern unsigned int __bss_start__, __bss_end__, __data_start__, __data_end__, __HeapLimit, __StackLimit, __StackTop, __etext;
+// uint32_t 
+
 
 // machine.info([dump_alloc_table])
 // Print out lots of information about the board.
@@ -47,18 +50,35 @@ STATIC mp_obj_t machine_info(size_t n_args, const mp_obj_t *args) {
     {
         size_t n_pool, n_qstr, n_str_data_bytes, n_total_bytes;
         qstr_pool_info(&n_pool, &n_qstr, &n_str_data_bytes, &n_total_bytes);
-        printf("qstr:\n  n_pool=%u\n  n_qstr=%u\n  n_str_data_bytes=%u\n  n_total_bytes=%u\n", n_pool, n_qstr, n_str_data_bytes, n_total_bytes);
+        printf("qstr :\n  n_pool=%u\n  n_qstr=%u\n  n_str_data_bytes=%u\n  n_total_bytes=%u\n", n_pool, n_qstr, n_str_data_bytes, n_total_bytes);
     }
 
     // GC info
     {
         gc_info_t info;
         gc_info(&info);
-        printf("GC:\n");
+        printf("GC :\n");
         printf("  %u total\n", info.total);
         printf("  %u : %u\n", info.used, info.free);
         printf("  1=%u 2=%u m=%u\n", info.num_1block, info.num_2block, info.max_block);
     }
+
+    // Linker info
+    {
+       printf("Linker :\n");
+       printf("  %x   %u  __etext\n", __etext, __etext);
+
+       printf("  %x   %u  __bss_start__\n", __bss_start__, __bss_start__);
+       printf("  %x   %u  __bss_end__\n", __bss_end__, __bss_end__);
+
+       printf("  %x   %u  __data_start__\n", __data_start__, __data_start__);
+       printf("  %x   %u  __data_end__\n", __data_end__, __data_end__);
+       printf("  %x   %u  data size\n", __data_end__ - __data_start__, __data_end__ - __data_start__);
+
+       printf("  %x   %u  __HeapLimit\n", __HeapLimit, __HeapLimit);
+       printf("  %x   %u  __StackLimit\n", __StackLimit, __StackLimit);
+       printf("  %x   %u  __StackTop\n", __StackTop, __StackTop);
+   }
 
     return mp_const_none;
 }

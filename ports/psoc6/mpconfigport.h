@@ -116,3 +116,7 @@ extern const struct _mp_obj_module_t mp_module_time;
 #define MICROPY_COMP_DOUBLE_TUPLE_ASSIGN (0)
 
 #define MICROPY_QSTR_BYTES_IN_HASH              (1)
+
+
+
+#define MICROPY_REPL_EVENT_DRIVEN (1)

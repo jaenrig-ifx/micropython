@@ -178,8 +178,8 @@ STATIC const mp_rom_map_elem_t machine_pin_locals_dict_table[] = {
 
 
     // class constants
-    { MP_ROM_QSTR(MP_QSTR_IN), MP_ROM_INT(CYHAL_GPIO_DIR_INPUT) },
-    { MP_ROM_QSTR(MP_QSTR_OUT), MP_ROM_INT(CYHAL_GPIO_DIR_OUTPUT) },
+    { MP_ROM_QSTR(MP_QSTR_IN),     MP_ROM_INT(CYHAL_GPIO_DIR_INPUT) },
+    { MP_ROM_QSTR(MP_QSTR_OUT),    MP_ROM_INT(CYHAL_GPIO_DIR_OUTPUT) },
 };
 
 STATIC MP_DEFINE_CONST_DICT(machine_pin_locals_dict, machine_pin_locals_dict_table);
