@@ -83,11 +83,11 @@ SRC_C = \
 
 SRC_C    += shared/libc/string0.c
 
-SRC_C    += $(SRC_MOD)
+SRC_C    += $(SRC_MOD) $(SRC_USERMOD) 
 SRC_CXX  += $(SRC_MOD_CXX)
 
 SRC_QSTR += shared/readline/readline.c shared/runtime/pyexec.c
-SRC_QSTR += $(SRC_MOD) $(SRC_MOD_CXX)
+SRC_QSTR += $(SRC_MOD) $(SRC_MOD_CXX) $(SRC_USERMOD) 
 SRC_QSTR += modules/machine/modmachine.c modules/machine/machine_pin.c
 
 
