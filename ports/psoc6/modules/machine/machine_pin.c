@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
+
 
 #include "py/runtime.h"
 #include "py/mphal.h"
@@ -12,7 +12,7 @@
 // #define GPIO_IRQ_ALL (0xf)
 
 // // Macros to access the state of the hardware.
-// #define GPIO_GET_FUNCSEL(id) ((iobank0_hw->io[(id)].ctrl & IO_BANK0_GPIO0_CTRL_FUNCSEL_BITS) >> IO_BANK0_GPIO0_CTRL_FUNCSEL_LSB)
+
 // #define GPIO_IS_OUT(id) (sio_hw->gpio_oe & (1 << (id)))
 // #define GPIO_IS_PULL_UP(id) (padsbank0_hw->io[(id)] & PADS_BANK0_GPIO0_PUE_BITS)
 // #define GPIO_IS_PULL_DOWN(id) (padsbank0_hw->io[(id)] & PADS_BANK0_GPIO0_PDE_BITS)
@@ -62,11 +62,39 @@ static const mp_arg_t allowed_args[] = {
 
 void machine_pin_init(void) {
     mp_printf(&mp_plat_print, "machine pin init\n");
+    //memset(MP_STATE_PORT(machine_pin_irq_obj), 0, sizeof(MP_STATE_PORT(machine_pin_irq_obj)));
+    //irq_add_shared_handler(IO_IRQ_BANK0, gpio_irq, PICO_SHARED_IRQ_HANDLER_DEFAULT_ORDER_PRIORITY);
+    //irq_set_enabled(IO_IRQ_BANK0, true);
 }
 
 
 static void machine_pin_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     mp_printf(&mp_plat_print, "machine pin print\n");
+    machine_pin_obj_t *self = self_in;
+
+    en_hsiom_sel_t pin_func = PIN_GET_HSIOM_FUNC(self->id);
+    qstr mode_qstr = -1; //TODO: compare with rp2, init value needed here due to "-werror=maybe-uninitialized"
+
+    if (pin_func == HSIOM_SEL_GPIO){
+        mp_printf(&mp_plat_print,"\n%d\n",GPIO_GET_CYPDL_DRIVE(self->id));
+        if (GPIO_IS_OPEN_DRAIN(self->id)){
+            mode_qstr = MP_QSTR_OPEN_DRAIN;
+        }
+        else if (GPIO_IS_OUT(self->id)){
+            mode_qstr = MP_QSTR_OUT;
+        }
+        else if (GPIO_IS_IN(self->id)){
+            mode_qstr = MP_QSTR_IN;
+        }
+        else{
+            mp_raise_ValueError(MP_ERROR_TEXT("mode not retrieved!")); //TODO: maybe can be removed after tests if not hit 
+        }
+    } 
+    else{
+        mode_qstr = MP_QSTR_ALT;
+    }
+
+    mp_printf(print, "Pin:%u, mode:%q", self->id, mode_qstr);        
 }
 
 void machine_pin_deinit(void) {
@@ -90,6 +118,7 @@ STATIC mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_
 
     cyhal_gpio_direction_t direction = 1; // initially set as output
     cyhal_gpio_drive_mode_t drive = 7; // initially set both pull up-down (works for both IN-OUT)
+    //Note: cyhal drive modes are in an enum here: cyhal_gpio.h; also described in the header
     // check for direction and set drive accordingly
     if (args[ARG_mode].u_obj != mp_const_none) {
         mp_int_t mode = mp_obj_get_int(args[ARG_mode].u_obj);
@@ -102,12 +131,18 @@ STATIC mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_
             if (args[ARG_pull].u_obj == mp_const_none) // if pull not provided, set pull as STRONG for output (recommended)
                 drive = CYHAL_GPIO_DRIVE_STRONG;
         } else if (mode == GPIO_MODE_OPEN_DRAIN) {
-            if(value == 1)
-                drive = CYHAL_GPIO_DRIVE_NONE; // Hi-Z as per MPY docs
-            else if (value == 0)
-                drive = CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW; // drive low as per MPY docs
-            else
-                mp_printf(&mp_plat_print, "Specify init value of pin for open-drain\n"); //never reached since init val assumed above, may be removed    
+            drive = CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW; //covers both the cases of open_drain -> strong 0 when value=0, highZ when value=1
+
+            //see constructor here: https://docs.micropython.org/en/latest/library/machine.Pin.html
+            //also drive modes explained here: https://community.infineon.com/t5/Knowledge-Base-Articles/Drive-Modes-in-PSoC-GPIO/ta-p/248470
+            
+            //Note: below code is redundant since definition of open drain is later understood.
+            // if(value == 1)
+            //     drive = CYHAL_GPIO_DRIVE_NONE; // Hi-Z as per MPY docs
+            // else if (value == 0)
+            //     drive = CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW; // drive low as per MPY docs
+            // else
+            //     mp_printf(&mp_plat_print, "Specify init value of pin for open-drain\n"); //never reached since init val assumed above, may be removed    
         } else {
             // Alternate function.
             mp_printf(&mp_plat_print, "Not implemented!!!\n");
@@ -116,7 +151,7 @@ STATIC mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_
 
     // check for drive strength
     if (args[ARG_drive].u_obj != mp_const_none) {
-        mp_printf(&mp_plat_print, "CY has only one drive strength for output mode.\n");
+        mp_printf(&mp_plat_print, "CY has only one drive strength for output mode.\n"); //see Cy_GPIO_GetDriveSel()
     }
 
     // check for pulls
@@ -132,6 +167,7 @@ STATIC mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_
     }
 
     // check for alt function
+    if(args[ARG_alt].u_obj != mp_const_none)
     if (args[ARG_alt].u_int != HSIOM_GPIO_FUNC) {
         mp_raise_ValueError(MP_ERROR_TEXT("Alternate functions are not implemented!!!"));
     }

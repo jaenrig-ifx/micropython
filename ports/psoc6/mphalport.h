@@ -24,8 +24,54 @@ static inline mp_uint_t mp_hal_get_cpu_freq_div(void) {
 
 #define CY_PROTO_062_4343_GPIOs 2
 
-// //GPIO array to map to CYHAL pins
-// cyhal_gpio_t CY_GPIO_array[CY_PROTO_062_4343_GPIOs] = {
+// //GPIO array to map to CYHAL pins //moved to machine pin file due to error of declared but never used.
+extern cyhal_gpio_t CY_GPIO_array[CY_PROTO_062_4343_GPIOs]; 
+//= {
 //     (P13_7), //GPIO 0 - LED
 //     (P0_4),  //GPIO 1 - BTN
 // };
+
+//function to get HSIOM config of a pin
+static inline en_hsiom_sel_t PIN_GET_HSIOM_FUNC(uint8_t index){
+    return Cy_GPIO_GetHSIOM(CYHAL_GET_PORTADDR(CY_GPIO_array[index]),CYHAL_GET_PIN(CY_GPIO_array[index]));
+}
+
+//function to get cypdl drive modes, correlated to cyhal drive modes in file: cyhal_gpio.c
+static inline uint32_t GPIO_GET_CYPDL_DRIVE(uint8_t index){
+    return Cy_GPIO_GetDrivemode(CYHAL_GET_PORTADDR(CY_GPIO_array[index]),CYHAL_GET_PIN(CY_GPIO_array[index]));
+}
+
+//function to check if pin is in mode Pin.OPEN_DRAIN. 
+//drive comparisons done with PDL drive modes since function is from PDL (not HAL)
+static inline bool GPIO_IS_OPEN_DRAIN(uint8_t index){
+    // if (GPIO_GET_CYPDL_DRIVE(index) == CY_GPIO_DM_HIGHZ && Cy_GPIO_Read(CYHAL_GET_PORTADDR(CY_GPIO_array[index]),CYHAL_GET_PIN(CY_GPIO_array[index])) == 1) //first condition of open- given in machine_pin init helper; compare to pdl drive modes (not hal drive modes)
+    //     return 1;
+    // else if (GPIO_GET_CYPDL_DRIVE(index) == CY_GPIO_DM_OD_DRIVESHIGH && Cy_GPIO_Read(CYHAL_GET_PORTADDR(CY_GPIO_array[index]),CYHAL_GET_PIN(CY_GPIO_array[index])) == 0) //second condition of open-drain
+    //     return 1;
+
+    //Note: definition of open_drain changed in constructor hence above code might not be correct
+
+    if(GPIO_GET_CYPDL_DRIVE(index) == CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW)
+        return 1;
+    else
+        return 0;
+}
+
+//function to check if pin is in mode Pin.OUT
+static inline bool GPIO_IS_OUT(uint8_t index){
+    if(GPIO_GET_CYPDL_DRIVE(index) == CY_GPIO_DM_STRONG_IN_OFF){ //pin cfgd as o/p drive so Input buffer is off.
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+//function to check if pin is in mode Pin.IN
+static inline bool GPIO_IS_IN(uint8_t index){
+    if(GPIO_GET_CYPDL_DRIVE(index) == CY_GPIO_DM_HIGHZ)
+        return 1;
+    else
+        return 0;
+}
+
