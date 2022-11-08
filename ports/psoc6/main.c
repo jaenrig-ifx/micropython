@@ -128,11 +128,11 @@ int main(int argc, char **argv) {
         int c = mp_hal_stdin_rx_chr();
 
         int ret = pyexec_event_repl_process_char(c);
-        printf("ret = %i\n", ret);
-        printf("c   = %i\n", c);
+        // printf("ret = %i\n", ret);
+        // printf("c   = %i\n", c);
 
         if( ret != 0 ) {
-            printf("EOF!!!   %i   %i\n", c, ret);
+            // printf("EOF!!!   %i   %i\n", c, ret);
             pyexec_event_repl_init();
         }
 
