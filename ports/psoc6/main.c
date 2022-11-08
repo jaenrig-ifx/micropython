@@ -127,9 +127,18 @@ int main(int argc, char **argv) {
     for (;;) {
         int c = mp_hal_stdin_rx_chr();
 
-        if (pyexec_event_repl_process_char(c)) {
-            break;
+        int ret = pyexec_event_repl_process_char(c);
+        printf("ret = %i\n", ret);
+        printf("c   = %i\n", c);
+
+        if( ret != 0 ) {
+            printf("EOF!!!   %i   %i\n", c, ret);
+            pyexec_event_repl_init();
         }
+
+        // if( (ret = pyexec_event_repl_process_char(c))) {
+        //     break;
+        // }
     }
 
     #else
