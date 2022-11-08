@@ -118,6 +118,16 @@ int main(int argc, char **argv) {
     mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_lib));
     readline_init0();
 
+    printf("running do_str ...\r\n");
+    do_str("print('hello world!', list(x+1 for x in range(10)), end='\\r\\n')", MP_PARSE_SINGLE_INPUT);
+
+    printf("\r\nrunning do_str ...\r\n");
+    do_str("for i in range(10):\r\n  print(i)", MP_PARSE_FILE_INPUT);
+
+    printf("\r\nrunning pyexec_frozen_module on frozentest.py ...\r\n");
+    // no directory prefix "freeze/" !
+    pyexec_frozen_module("frozentest.py");
+
     #if MICROPY_ENABLE_COMPILER
 
     #if MICROPY_REPL_EVENT_DRIVEN
@@ -142,15 +152,6 @@ int main(int argc, char **argv) {
     }
 
     #else
-
-    printf("running do_str ...\r\n");
-    do_str("print('hello world!', list(x+1 for x in range(10)), end='\\r\\n')", MP_PARSE_SINGLE_INPUT);
-
-    printf("\r\nrunning do_str ...\r\n");
-    do_str("for i in range(10):\r\n  print(i)", MP_PARSE_FILE_INPUT);
-
-    printf("\r\nrunning pyexec_frozen_module on frozentest.py ...\r\n");
-    pyexec_frozen_module("frozentest.py");
 
     printf("\r\nrunning pyexec_friendly_repl ...\r\n");
     pyexec_friendly_repl();

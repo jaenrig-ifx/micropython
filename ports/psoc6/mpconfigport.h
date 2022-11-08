@@ -120,3 +120,11 @@ extern const struct _mp_obj_module_t mp_module_time;
 
 
 #define MICROPY_REPL_EVENT_DRIVEN (1)
+
+
+#ifndef MICROPY_BOARD_ENTER_BOOTLOADER
+#define MICROPY_BOARD_ENTER_BOOTLOADER(nargs, args)
+#endif
+
+
+#define MICROPY_DEBUG_NLR (1)

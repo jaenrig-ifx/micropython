@@ -72,13 +72,13 @@ SRC_C = \
 	uart_core.c \
 	\
 	modules/machine/modmachine.c \
-	modules/machine/machine_pin.c \
+	modules/machine/pin.c \
 	\
 	shared/runtime/pyexec.c \
 	shared/readline/readline.c \
 	shared/runtime/stdout_helpers.c \
 	\
-	$(BUILD)/_frozen_mpy.c \
+	$(BUILD)/_frozentest_mpy.c \
 
 
 SRC_C    += shared/libc/string0.c
@@ -88,7 +88,7 @@ SRC_CXX  += $(SRC_MOD_CXX)
 
 SRC_QSTR += shared/readline/readline.c shared/runtime/pyexec.c
 SRC_QSTR += $(SRC_MOD) $(SRC_MOD_CXX) $(SRC_USERMOD) 
-SRC_QSTR += modules/machine/modmachine.c modules/machine/machine_pin.c
+SRC_QSTR += modules/machine/modmachine.c modules/machine/pin.c
 
 
 OBJ += $(PY_CORE_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o))
@@ -98,7 +98,11 @@ OBJ += $(addprefix $(BUILD)/, $(SRC_CXX:.cpp=.o))
 all: $(MPY_MAIN_BUILD_DIR)/firmware.hex
 
 
-$(BUILD)/_frozen_mpy.c: frozentest.mpy $(BUILD)/genhdr/qstrdefs.generated.h
+freeze/frozentest.mpy :
+	env PATH="../../mpy-cross/build:${PATH}" ../../tools/mpy_cross_all.py freeze
+
+
+$(BUILD)/_frozentest_mpy.c: freeze/frozentest.mpy $(BUILD)/genhdr/qstrdefs.generated.h
 	$(info )
 	$(info Freezing bytecode)
 	$(Q)$(TOP)/tools/mpy-tool.py -f -q $(BUILD)/genhdr/qstrdefs.preprocessed.h -mlongint-impl=none $< > $@
