@@ -12,6 +12,11 @@ The following port is using Infineon ModusToolbox™ to resolve the specific PSo
 
     $ export PATH=/home/{user}/ModusToolbox/tools_{version}/gcc/bin:$PATH
 
+3. Build mpy-cross to automatically freeze code in "freeze" subdirectory
+
+    cd <MICROPYTHON_INSTALL_DIR>/mpy-cross
+    make
+
 ## Building and running Linux version
 
 As we are working on the ports/psoc6 branch (for now), first checkout that branch after cloning this repo:
