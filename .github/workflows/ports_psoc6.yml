@@ -1,0 +1,22 @@
+name: psoc6 port
+
+on:
+  push:
+  pull_request:
+    paths:
+      - '.github/workflows/ports_psoc6.yml'
+      - 'tools/**'
+      - 'py/**'
+      - 'extmod/**'
+      - 'lib/**'
+      - 'ports/psoc6/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install packages
+      run: source tools/ci.sh && ci_psoc6_setup
+    - name: Build
+      run: source tools/ci.sh && ci_psoc6_build
