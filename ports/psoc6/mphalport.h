@@ -57,7 +57,7 @@ static inline bool GPIO_IS_OPEN_DRAIN(uint8_t index){
         return 0;
 }
 
-//function to check if pin is in mode Pin.OUT
+//function to check if pin is in mode Pin.OUT; TODO: can be also implemented by checking input buffer on/off 
 static inline bool GPIO_IS_OUT(uint8_t index){
     if(GPIO_GET_CYPDL_DRIVE(index) == CY_GPIO_DM_STRONG_IN_OFF){ //pin cfgd as o/p drive so Input buffer is off.
         return 1;
@@ -67,7 +67,7 @@ static inline bool GPIO_IS_OUT(uint8_t index){
     }
 }
 
-//function to check if pin is in mode Pin.IN
+//function to check if pin is in mode Pin.IN; TODO: can be also implemented by checking input buffer on/off 
 static inline bool GPIO_IS_IN(uint8_t index){
     if(GPIO_GET_CYPDL_DRIVE(index) == CY_GPIO_DM_HIGHZ)
         return 1;
@@ -75,3 +75,27 @@ static inline bool GPIO_IS_IN(uint8_t index){
         return 0;
 }
 
+
+//function to check if pin has pull Pin.PULL_UP
+static inline bool GPIO_IS_PULL_UP(uint8_t index){
+    if(GPIO_GET_CYPDL_DRIVE(index) == CY_GPIO_DM_PULLUP_IN_OFF || GPIO_GET_CYPDL_DRIVE(index) == CY_GPIO_DM_PULLUP)
+        return 1;
+    else
+        return 0;
+}
+
+//function to check if pin has pull Pin.PULL_DOWN
+static inline bool GPIO_IS_PULL_DOWN(uint8_t index){
+    if(GPIO_GET_CYPDL_DRIVE(index) == CY_GPIO_DM_PULLDOWN_IN_OFF || GPIO_GET_CYPDL_DRIVE(index) == CY_GPIO_DM_PULLDOWN)
+        return 1;
+    else
+        return 0;
+}
+
+//function to check Pin.value
+static inline uint8_t GPIO_GET_VALUE(uint8_t index){
+    if(GPIO_IS_OUT(index)) //if Pin.Mode is Pin.OUT, read output driver
+        return Cy_GPIO_ReadOut(CYHAL_GET_PORTADDR(CY_GPIO_array[index]),CYHAL_GET_PIN(CY_GPIO_array[index]));
+    else //if Pin.Mode is Pin.IN, read pin. 
+        return Cy_GPIO_Read(CYHAL_GET_PORTADDR(CY_GPIO_array[index]),CYHAL_GET_PIN(CY_GPIO_array[index]));
+}

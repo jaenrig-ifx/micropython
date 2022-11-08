@@ -44,7 +44,7 @@ enum {GPIO_MODE_IN, GPIO_MODE_OUT, GPIO_MODE_OPEN_DRAIN, GPIO_MODE_ALT, GPIO_MOD
 enum {GPIO_DRIVE_CAP_0, GPIO_DRIVE_CAP_1, GPIO_DRIVE_CAP_2, GPIO_DRIVE_CAP_3};
 
 //enum to hold pulls
-enum {GPIO_PULL_UP=1, GPIO_PULL_DOWN};
+enum {GPIO_PULL_UP, GPIO_PULL_DOWN};
 
 //enum for alt functions
 enum {HSIOM_GPIO_FUNC}; // see file gpio_psoc6_02_124_bga.h
@@ -73,10 +73,11 @@ static void machine_pin_print(const mp_print_t *print, mp_obj_t self_in, mp_prin
     machine_pin_obj_t *self = self_in;
 
     en_hsiom_sel_t pin_func = PIN_GET_HSIOM_FUNC(self->id);
-    qstr mode_qstr = -1; //TODO: compare with rp2, init value needed here due to "-werror=maybe-uninitialized"
+    qstr mode_qstr = MP_QSTR_None; //TODO: compare with rp2, init value needed here due to "-werror=maybe-uninitialized"
+    qstr pull_qstr = MP_QSTR_None;
+    uint8_t pin_value = -1;
 
     if (pin_func == HSIOM_SEL_GPIO){
-        mp_printf(&mp_plat_print,"\n%d\n",GPIO_GET_CYPDL_DRIVE(self->id));
         if (GPIO_IS_OPEN_DRAIN(self->id)){
             mode_qstr = MP_QSTR_OPEN_DRAIN;
         }
@@ -86,15 +87,31 @@ static void machine_pin_print(const mp_print_t *print, mp_obj_t self_in, mp_prin
         else if (GPIO_IS_IN(self->id)){
             mode_qstr = MP_QSTR_IN;
         }
-        else{
-            mp_raise_ValueError(MP_ERROR_TEXT("mode not retrieved!")); //TODO: maybe can be removed after tests if not hit 
+        else{ //only pull up and pull down are prescribed in MPY docs
+            if (GPIO_IS_PULL_UP(self->id)){
+                pull_qstr = MP_QSTR_PULL_UP;
+                if (GPIO_GET_CYPDL_DRIVE(self->id) < 8) //drive enum is less than 8 when input buffer is off (or pin is cfgd as output)
+                    mode_qstr = MP_QSTR_OUT;
+                else
+                    mode_qstr = MP_QSTR_IN;
+            }
+            else if (GPIO_IS_PULL_DOWN(self->id)){
+                pull_qstr = MP_QSTR_PULL_DOWN;
+                if (GPIO_GET_CYPDL_DRIVE(self->id) < 8)
+                    mode_qstr = MP_QSTR_OUT;
+                else
+                    mode_qstr = MP_QSTR_IN;
+            }
+            else
+                mp_raise_ValueError(MP_ERROR_TEXT("mode,pull not retrieved!")); 
         }
+        pin_value = GPIO_GET_VALUE(self->id);    
     } 
     else{
-        mode_qstr = MP_QSTR_ALT;
+        mode_qstr = MP_QSTR_ALT; 
     }
 
-    mp_printf(print, "Pin:%u, mode:%q", self->id, mode_qstr);        
+    mp_printf(print, "Pin:%u, Mode=%q, Pull=%q, Value=%u", self->id, mode_qstr, pull_qstr, pin_value);        
 }
 
 void machine_pin_deinit(void) {
@@ -112,7 +129,7 @@ STATIC mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_
     // check for initial value of pin
     bool value;
     if (args[ARG_value].u_obj != mp_const_none)
-        value = !mp_obj_is_true(args[ARG_value].u_obj); //pins are active low
+        value = mp_obj_is_true(args[ARG_value].u_obj); //pins are active low
     else
         value = 1; // initially hold pin high (LED inactive)
 
@@ -135,6 +152,7 @@ STATIC mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_
 
             //see constructor here: https://docs.micropython.org/en/latest/library/machine.Pin.html
             //also drive modes explained here: https://community.infineon.com/t5/Knowledge-Base-Articles/Drive-Modes-in-PSoC-GPIO/ta-p/248470
+            //see app note: https://www.infineon.com/dgdl/Infineon-AN2094_PSoC_1_Getting_Started_With_GPIO-ApplicationNotes-v12_00-EN.pdf?fileId=8ac78c8c7cdc391c017d072966174e13&utm_source=cypress&utm_medium=referral&utm_campaign=202110_globe_en_all_integration-application_note
             
             //Note: below code is redundant since definition of open drain is later understood.
             // if(value == 1)
