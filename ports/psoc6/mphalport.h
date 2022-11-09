@@ -129,3 +129,8 @@ static inline void GPIO_CLR_VALUE(uint8_t index){
     return Cy_GPIO_Clr(CYHAL_GET_PORTADDR(CY_GPIO_array[index]),CYHAL_GET_PIN(CY_GPIO_array[index]));
 }
 
+//function to toggle Pin.value; toggle the output buffer which drives the output driver
+static inline void GPIO_TOGGLE_VALUE(uint8_t index){
+    return Cy_GPIO_Inv(CYHAL_GET_PORTADDR(CY_GPIO_array[index]),CYHAL_GET_PIN(CY_GPIO_array[index]));
+}
+

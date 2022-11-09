@@ -291,11 +291,24 @@ STATIC mp_obj_t machine_pin_value(size_t n_args, const mp_obj_t *args) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_pin_value_obj, 1, 2, machine_pin_value);
 
+// pin.toggle()
+STATIC mp_obj_t machine_pin_toggle(mp_obj_t self_in) {
+    machine_pin_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    if (GPIO_IS_IN(self->id) || GPIO_IS_OUT(self->id) || GPIO_IS_OPEN_DRAIN(self->id)){ //toggle the output buffer of output driver with given value;
+        GPIO_TOGGLE_VALUE(self->id); //for output it takes effect instantly; for input pins, the effect will show when
+                                     //pin is set as input next. For open drain, behavior shifts between 0 and HiZ.   
+    }
+    return mp_const_none;
+    
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_pin_toggle_obj, machine_pin_toggle);
+
 
 STATIC const mp_rom_map_elem_t machine_pin_locals_dict_table[] = {
     // instance methods
     { MP_ROM_QSTR(MP_QSTR_init),  MP_ROM_PTR(&machine_pin_obj_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_value), MP_ROM_PTR(&machine_pin_value_obj) },
+    { MP_ROM_QSTR(MP_QSTR_toggle), MP_ROM_PTR(&machine_pin_toggle_obj) },
 
     // class constants 
     //pin.Mode
