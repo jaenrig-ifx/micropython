@@ -291,7 +291,7 @@ STATIC mp_obj_t machine_pin_value(size_t n_args, const mp_obj_t *args) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_pin_value_obj, 1, 2, machine_pin_value);
 
-// pin.toggle()
+// Pin.toggle()
 STATIC mp_obj_t machine_pin_toggle(mp_obj_t self_in) {
     machine_pin_obj_t *self = MP_OBJ_TO_PTR(self_in);
     if (GPIO_IS_IN(self->id) || GPIO_IS_OUT(self->id) || GPIO_IS_OPEN_DRAIN(self->id)){ //toggle the output buffer of output driver with given value;
@@ -303,12 +303,60 @@ STATIC mp_obj_t machine_pin_toggle(mp_obj_t self_in) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_pin_toggle_obj, machine_pin_toggle);
 
+// Pin.high()
+STATIC mp_obj_t machine_pin_high(mp_obj_t self_in) {
+    machine_pin_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    if (GPIO_IS_IN(self->id) || GPIO_IS_OUT(self->id) || GPIO_IS_OPEN_DRAIN(self->id)){ //toggle the output buffer of output driver with given value;
+        GPIO_SET_VALUE(self->id); //for output it takes effect instantly; for input pins, the effect will show when
+                                     //pin is set as input next. For open drain, behavior shifts between 0 and HiZ.   
+    }            
+    return mp_const_none;
+    
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_pin_high_obj, machine_pin_high);
+
+// Pin.low()
+STATIC mp_obj_t machine_pin_low(mp_obj_t self_in) {
+    machine_pin_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    if (GPIO_IS_IN(self->id) || GPIO_IS_OUT(self->id) || GPIO_IS_OPEN_DRAIN(self->id)){ //toggle the output buffer of output driver with given value;
+        GPIO_CLR_VALUE(self->id); //for output it takes effect instantly; for input pins, the effect will show when
+                                     //pin is set as input next. For open drain, behavior shifts between 0 and HiZ.   
+    }            
+    return mp_const_none;
+    
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_pin_low_obj, machine_pin_low);
+
+// // Pin.Mode()
+// STATIC mp_obj_t machine_pin_mode(mp_obj_t self_in, mp_uint_t n_args, mp_uint_t n_kw, const mp_obj_t *args) {
+//     mp_printf(&mp_plat_print,"machine_pin_mode: Not implemented!");
+//     mp_arg_check_num(n_args, n_kw, 0, 1, false);
+//     //machine_pin_obj_t *self = self_in;
+
+//     // if (n_args == 0) {
+//     //     //get mode
+//     // }
+//     // else {
+//     //    //set mode
+//     // }
+
+//     return mp_const_none;
+    
+// }
+
+// STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_pin_mode_obj,1,2, machine_pin_mode);
+
 
 STATIC const mp_rom_map_elem_t machine_pin_locals_dict_table[] = {
     // instance methods
     { MP_ROM_QSTR(MP_QSTR_init),  MP_ROM_PTR(&machine_pin_obj_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_value), MP_ROM_PTR(&machine_pin_value_obj) },
     { MP_ROM_QSTR(MP_QSTR_toggle), MP_ROM_PTR(&machine_pin_toggle_obj) },
+    { MP_ROM_QSTR(MP_QSTR_low), MP_ROM_PTR(&machine_pin_low_obj) },
+    { MP_ROM_QSTR(MP_QSTR_high), MP_ROM_PTR(&machine_pin_high_obj) },
+    { MP_ROM_QSTR(MP_QSTR_off), MP_ROM_PTR(&machine_pin_low_obj) },
+    { MP_ROM_QSTR(MP_QSTR_on), MP_ROM_PTR(&machine_pin_high_obj) },
+    //{ MP_ROM_QSTR(MP_QSTR_mode), MP_ROM_PTR(&machine_pin_mode_obj) }, //TODO: got unknown error! 
 
     // class constants 
     //pin.Mode
