@@ -65,9 +65,11 @@ void machine_pin_init(void) {
     //memset(MP_STATE_PORT(machine_pin_irq_obj), 0, sizeof(MP_STATE_PORT(machine_pin_irq_obj)));
     //irq_add_shared_handler(IO_IRQ_BANK0, gpio_irq, PICO_SHARED_IRQ_HANDLER_DEFAULT_ORDER_PRIORITY);
     //irq_set_enabled(IO_IRQ_BANK0, true);
+
+    //TODO: maybe the cybsp_init() can be called here
 }
 
-
+//print method of Pin class
 static void machine_pin_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     mp_printf(&mp_plat_print, "machine pin print\n");
     machine_pin_obj_t *self = self_in;
@@ -103,7 +105,7 @@ static void machine_pin_print(const mp_print_t *print, mp_obj_t self_in, mp_prin
                     mode_qstr = MP_QSTR_IN;
             }
             else
-                mp_raise_ValueError(MP_ERROR_TEXT("mode,pull not retrieved!")); 
+                mp_printf(print,"no params set for given pin object"); 
         }
         pin_value = GPIO_GET_VALUE(self->id);    
     } 
@@ -177,9 +179,9 @@ STATIC mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_
     if (args[ARG_pull].u_obj != mp_const_none) {
         pull = mp_obj_get_int(args[ARG_pull].u_obj);
         if (pull == GPIO_PULL_UP)
-            drive = CYHAL_GPIO_DRIVE_PULLUP;
+            drive = CYHAL_GPIO_DRIVE_PULLUP; //TODO: should we also force the value to 1 in case of pull up
         else if (pull == GPIO_PULL_DOWN)
-            drive = CYHAL_GPIO_DRIVE_PULLDOWN;
+            drive = CYHAL_GPIO_DRIVE_PULLDOWN; //TODO: should we also force the value to 0 in case of pull down
         else
             mp_raise_ValueError(MP_ERROR_TEXT("invalid value of pull"));
     }
@@ -250,6 +252,26 @@ mp_obj_t mp_pin_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, 
 
 STATIC mp_obj_t machine_pin_call(mp_obj_t self_in, mp_uint_t n_args, mp_uint_t n_kw, const mp_obj_t *args) {
     mp_printf(&mp_plat_print, "machine pin call\n");
+    mp_arg_check_num(n_args, n_kw, 0, 1, false);
+    machine_pin_obj_t *self = self_in;
+
+    //Note: see https://docs.micropython.org/en/latest/library/machine.Pin.html#machine.Pin.value
+    if (n_args == 0) {
+        // get pin value if pin is in input mode
+        return GPIO_GET_VALUE_CALL(self->id);    
+    }
+    else {
+        // set pin
+        bool value = mp_obj_is_true(args[0]);
+        if (GPIO_IS_IN(self->id) || GPIO_IS_OUT(self->id) || GPIO_IS_OPEN_DRAIN(self->id)){ //set the output buffer of output driver with given value; 
+            if (value)                                //if Pin.Mode is Pin.IN, value will reflect when pin is next set as output.     
+                GPIO_SET_VALUE(self->id);
+            else
+                GPIO_CLR_VALUE(self->id);
+        }
+    } //given how the PSoC architecture is, if the "drive mode" is set correctly, the same set/clr functions can be used for all the "modes".
+    //refer pg 245 of PSoC6 Arch TRM: https://www.infineon.com/dgdl/Infineon-PSoC_6_MCU_PSoC_62_Architecture_Technical_Reference_Manual-AdditionalTechnicalInformation-v08_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0f94758401d1&utm_source=cypress&utm_medium=referral&utm_campaign=202110_globe_en_all_integration-files
+
     return mp_const_none;
  }
 
@@ -263,10 +285,17 @@ STATIC mp_obj_t machine_pin_obj_init(size_t n_args, const mp_obj_t *args, mp_map
 }
 MP_DEFINE_CONST_FUN_OBJ_KW(machine_pin_obj_init_obj, 1, machine_pin_obj_init);
 
+// pin.value([value])
+STATIC mp_obj_t machine_pin_value(size_t n_args, const mp_obj_t *args) {
+    return machine_pin_call(args[0], n_args - 1, 0, args + 1);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_pin_value_obj, 1, 2, machine_pin_value);
+
 
 STATIC const mp_rom_map_elem_t machine_pin_locals_dict_table[] = {
     // instance methods
-    { MP_ROM_QSTR(MP_QSTR_init),    MP_ROM_PTR(&machine_pin_obj_init_obj) },
+    { MP_ROM_QSTR(MP_QSTR_init),  MP_ROM_PTR(&machine_pin_obj_init_obj) },
+    { MP_ROM_QSTR(MP_QSTR_value), MP_ROM_PTR(&machine_pin_value_obj) },
 
     // class constants 
     //pin.Mode

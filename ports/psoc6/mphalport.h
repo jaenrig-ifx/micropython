@@ -4,10 +4,14 @@ static inline mp_uint_t mp_hal_ticks_ms(void) {
 static inline void mp_hal_set_interrupt_char(char c) {
 }
 
+//cy includes
 #include "cy_sysclk.h"
 #include "cyhal.h"
 #include "cybsp.h"
 #include "cy_pdl.h"
+
+//some mpy includes for mp_obj types
+#include "py/runtime.h"
 
 //PSoC6 HAL functions
 
@@ -99,3 +103,29 @@ static inline uint8_t GPIO_GET_VALUE(uint8_t index){
     else //if Pin.Mode is Pin.IN, read pin. 
         return Cy_GPIO_Read(CYHAL_GET_PORTADDR(CY_GPIO_array[index]),CYHAL_GET_PIN(CY_GPIO_array[index]));
 }
+
+//function to call Pin.value only for pins with mode Pin.IN; used for __call__ function
+//uses mp_const_none type for None/undefined return
+static inline mp_obj_t GPIO_GET_VALUE_CALL(uint8_t index){
+    if(GPIO_IS_IN(index)) //if Pin.Mode is Pin.IN, return current pin input value
+        return MP_OBJ_NEW_SMALL_INT(Cy_GPIO_Read(CYHAL_GET_PORTADDR(CY_GPIO_array[index]),CYHAL_GET_PIN(CY_GPIO_array[index])));
+    else if(GPIO_IS_OUT(index)) //if Pin.Mode is Pin.OUT, then return is undefined 
+        return mp_const_none; //undefined
+    else{ //Pin.Mode is Pin.OPEN_DRAIN
+            if (Cy_GPIO_ReadOut(CYHAL_GET_PORTADDR(CY_GPIO_array[index]),CYHAL_GET_PIN(CY_GPIO_array[index])) == 0) //if 0 is driven in open_drain, then undefined
+                return mp_const_none;
+            else
+                return MP_OBJ_NEW_SMALL_INT(Cy_GPIO_Read(CYHAL_GET_PORTADDR(CY_GPIO_array[index]),CYHAL_GET_PIN(CY_GPIO_array[index])));
+        }
+}
+
+//function to set Pin.value to 1; sets the output buffer which drives the output driver
+static inline void GPIO_SET_VALUE(uint8_t index){
+    return Cy_GPIO_Set(CYHAL_GET_PORTADDR(CY_GPIO_array[index]),CYHAL_GET_PIN(CY_GPIO_array[index]));
+}
+
+//function to set Pin.value to 0; clear the output buffer which drives the output driver
+static inline void GPIO_CLR_VALUE(uint8_t index){
+    return Cy_GPIO_Clr(CYHAL_GET_PORTADDR(CY_GPIO_array[index]),CYHAL_GET_PIN(CY_GPIO_array[index]));
+}
+
