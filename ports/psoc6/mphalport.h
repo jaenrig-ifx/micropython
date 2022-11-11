@@ -134,3 +134,9 @@ static inline void GPIO_TOGGLE_VALUE(uint8_t index){
     return Cy_GPIO_Inv(CYHAL_GET_PORTADDR(CY_GPIO_array[index]),CYHAL_GET_PIN(CY_GPIO_array[index]));
 }
 
+//function to return 64-bit silicon ID of given PSoC microcontroller
+// A combined 64-bit unique ID. [63:57] - DIE_YEAR [56:56] - DIE_MINOR [55:48] - DIE_SORT [47:40] - DIE_Y [39:32] - DIE_X [31:24] - DIE_WAFER [23:16] - DIE_LOT[2] [15: 8] - DIE_LOT[1] [ 7: 0] - DIE_LOT[0]
+static inline uint64_t CYPDL_GET_UNIQUE_ID(void){
+    return Cy_SysLib_GetUniqueId(); 
+}
+

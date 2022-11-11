@@ -62,8 +62,8 @@ MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_info_obj, 0, 1, machine_info);
 //machine.freq()
 STATIC mp_obj_t machine_freq(size_t n_args, const mp_obj_t *args) {
     if (n_args == 0) {
-        mp_printf(&mp_plat_print, "System core freq (CM4) in Hz:\n");
-        return MP_OBJ_NEW_SMALL_INT(mp_hal_get_cpu_freq());
+        mp_printf(&mp_plat_print, "System core freq (CM4): %d Hz\n", mp_hal_get_cpu_freq());
+        return mp_const_none;
     } else {
         mp_printf(&mp_plat_print, "Not implemented!!!\n");
         return mp_const_none;
@@ -71,11 +71,28 @@ STATIC mp_obj_t machine_freq(size_t n_args, const mp_obj_t *args) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_freq_obj, 0, 1, machine_freq);
 
+//machine.unique_id()
+//TODO: gibberish output! also tried invoking PDL function directly from main.c -> same outcome.
+//type conversion works. long long uint to str 
+STATIC mp_obj_t machine_unique_id(void) {
+    uint64_t id = CYPDL_GET_UNIQUE_ID();
+    char id_str[65];
+    sprintf(id_str,"%llu",id);
+    return mp_obj_new_str(id_str, 64);
+}
+MP_DEFINE_CONST_FUN_OBJ_0(machine_unique_id_obj, machine_unique_id);
+
 
 STATIC const mp_rom_map_elem_t machine_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__),            MP_ROM_QSTR(MP_QSTR_machine) },
     { MP_ROM_QSTR(MP_QSTR_info),                MP_ROM_PTR(&machine_info_obj) },
     { MP_ROM_QSTR(MP_QSTR_freq),                MP_ROM_PTR(&machine_freq_obj) },
+    { MP_ROM_QSTR(MP_QSTR_unique_id),           MP_ROM_PTR(&machine_unique_id_obj) },
+
+    //TODO: dynamic memory allocation functions/objects. Not yet implemented
+    // { MP_ROM_QSTR(MP_QSTR_mem8),                MP_ROM_PTR(&machine_mem8_obj) },
+    // { MP_ROM_QSTR(MP_QSTR_mem16),               MP_ROM_PTR(&machine_mem16_obj) },
+    // { MP_ROM_QSTR(MP_QSTR_mem32),               MP_ROM_PTR(&machine_mem32_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_Pin),                 MP_ROM_PTR(&machine_pin_type) }
 };
