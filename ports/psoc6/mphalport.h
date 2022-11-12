@@ -140,3 +140,10 @@ static inline uint64_t CYPDL_GET_UNIQUE_ID(void){
     return Cy_SysLib_GetUniqueId(); 
 }
 
+//using watchdog timer to count to minimum value (1ms) to trigger reset
+//thread-safe way as other methods might interfere with pending interrupts, threads etc.
+static inline void CYHAL_RESET(void){
+    cyhal_wdt_t wdt_obj;
+    cyhal_wdt_init(&wdt_obj, 1); //min 1ms count time
+    cyhal_wdt_start(&wdt_obj);
+}

@@ -72,7 +72,6 @@ STATIC mp_obj_t machine_freq(size_t n_args, const mp_obj_t *args) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_freq_obj, 0, 1, machine_freq);
 
 //machine.unique_id()
-
 STATIC mp_obj_t machine_unique_id(void) {
     uint64_t id = CYPDL_GET_UNIQUE_ID();
     byte *id_addr = (byte *)&id;
@@ -82,12 +81,28 @@ STATIC mp_obj_t machine_unique_id(void) {
 }
 MP_DEFINE_CONST_FUN_OBJ_0(machine_unique_id_obj, machine_unique_id);
 
+//machine.reset()
+STATIC mp_obj_t machine_reset(void) {
+    CYHAL_RESET();
+    return mp_const_none;    
+}
+MP_DEFINE_CONST_FUN_OBJ_0(machine_reset_obj, machine_reset);
+
+//machine.soft_reset()
+STATIC mp_obj_t machine_soft_reset(void) {
+    pyexec_system_exit = PYEXEC_FORCED_EXIT;
+    mp_raise_type(&mp_type_SystemExit);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_soft_reset_obj, machine_soft_reset);
+
 
 STATIC const mp_rom_map_elem_t machine_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__),            MP_ROM_QSTR(MP_QSTR_machine) },
     { MP_ROM_QSTR(MP_QSTR_info),                MP_ROM_PTR(&machine_info_obj) },
     { MP_ROM_QSTR(MP_QSTR_freq),                MP_ROM_PTR(&machine_freq_obj) },
     { MP_ROM_QSTR(MP_QSTR_unique_id),           MP_ROM_PTR(&machine_unique_id_obj) },
+    { MP_ROM_QSTR(MP_QSTR_reset),               MP_ROM_PTR(&machine_reset_obj) },
+    { MP_ROM_QSTR(MP_QSTR_soft_reset),          MP_ROM_PTR(&machine_soft_reset_obj) },
 
     //TODO: dynamic memory allocation functions/objects. Not yet implemented
     // { MP_ROM_QSTR(MP_QSTR_mem8),                MP_ROM_PTR(&machine_mem8_obj) },
