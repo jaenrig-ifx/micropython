@@ -72,13 +72,13 @@ STATIC mp_obj_t machine_freq(size_t n_args, const mp_obj_t *args) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_freq_obj, 0, 1, machine_freq);
 
 //machine.unique_id()
-//TODO: gibberish output! also tried invoking PDL function directly from main.c -> same outcome.
-//type conversion works. long long uint to str 
+
 STATIC mp_obj_t machine_unique_id(void) {
     uint64_t id = CYPDL_GET_UNIQUE_ID();
-    char id_str[65];
-    sprintf(id_str,"%llu",id);
-    return mp_obj_new_str(id_str, 64);
+    byte *id_addr = (byte *)&id;
+    mp_printf(&mp_plat_print,"ID_formatted:%02x%02x%02x%02x:%02x%02x%02x%02x\n", id_addr[0], id_addr[1], id_addr[2], id_addr[3], id_addr[4], id_addr[5], id_addr[6], id_addr[7]);
+    mp_printf(&mp_plat_print,"RAW_ID_data:");
+    return mp_obj_new_bytes(id_addr,8); 
 }
 MP_DEFINE_CONST_FUN_OBJ_0(machine_unique_id_obj, machine_unique_id);
 
