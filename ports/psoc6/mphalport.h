@@ -147,3 +147,9 @@ static inline void CYHAL_RESET(void){
     cyhal_wdt_init(&wdt_obj, 1); //min 1ms count time
     cyhal_wdt_start(&wdt_obj);
 }
+
+//get reset cause of the last system reset
+//macros defined here: cy_syslib.h
+static inline uint32_t CYPDL_RESET_CAUSE(void){
+    return Cy_SysLib_GetResetReason();
+}

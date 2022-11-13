@@ -19,6 +19,8 @@
 
 #if MICROPY_PY_MACHINE
 
+enum {MACHINE_PWRON_RESET, MACHINE_HARD_RESET, MACHINE_WDT_RESET, MACHINE_DEEPSLEEP_RESET, MACHINE_SOFT_RESET};
+
 void machine_init(void) {
     mp_printf(&mp_plat_print, "machine init\n");
 }
@@ -95,14 +97,56 @@ STATIC mp_obj_t machine_soft_reset(void) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_soft_reset_obj, machine_soft_reset);
 
+//machine.reset_cause()
+//Note: accurate returns only after one forced hard reset post hex upload.
+STATIC mp_obj_t machine_reset_cause(void) {
+        qstr mp_reset_qstr = MP_QSTR_None;
+        uint8_t reset_cause_const = -1;
+        uint32_t reset_cause = CYPDL_RESET_CAUSE();
+        
+        if(reset_cause == 0UL){
+            mp_reset_qstr = MP_QSTR_HARD_RESET;
+            reset_cause_const = MACHINE_HARD_RESET;
+        }
+        else if(reset_cause == CY_SYSLIB_RESET_HWWDT || reset_cause == CY_SYSLIB_RESET_SWWDT0 || reset_cause == CY_SYSLIB_RESET_SWWDT1 || reset_cause == CY_SYSLIB_RESET_SWWDT2 || reset_cause == CY_SYSLIB_RESET_SWWDT3 ){
+            mp_reset_qstr = MP_QSTR_WDT_RESET;
+            reset_cause_const = MACHINE_WDT_RESET;
+        }
+        else if(reset_cause == CY_SYSLIB_RESET_DPSLP_FAULT){
+            mp_reset_qstr = MP_QSTR_DEEPSLEEP_RESET;
+            reset_cause_const = MACHINE_DEEPSLEEP_RESET;
+        }
+        else if(reset_cause == CY_SYSLIB_RESET_SOFT){
+            mp_reset_qstr = MP_QSTR_SOFT_RESET;
+            reset_cause_const = MACHINE_SOFT_RESET;
+        }
+        else{
+            mp_reset_qstr = MP_QSTR_PWRON_RESET;
+            reset_cause_const = MACHINE_PWRON_RESET;
+        }
+
+        mp_printf(&mp_plat_print, "Reset cause: %q; ",mp_reset_qstr);
+    return MP_OBJ_NEW_SMALL_INT(reset_cause_const);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_reset_cause_obj, machine_reset_cause);
+
 
 STATIC const mp_rom_map_elem_t machine_module_globals_table[] = {
+    //instance functions
     { MP_ROM_QSTR(MP_QSTR___name__),            MP_ROM_QSTR(MP_QSTR_machine) },
     { MP_ROM_QSTR(MP_QSTR_info),                MP_ROM_PTR(&machine_info_obj) },
     { MP_ROM_QSTR(MP_QSTR_freq),                MP_ROM_PTR(&machine_freq_obj) },
     { MP_ROM_QSTR(MP_QSTR_unique_id),           MP_ROM_PTR(&machine_unique_id_obj) },
     { MP_ROM_QSTR(MP_QSTR_reset),               MP_ROM_PTR(&machine_reset_obj) },
     { MP_ROM_QSTR(MP_QSTR_soft_reset),          MP_ROM_PTR(&machine_soft_reset_obj) },
+    { MP_ROM_QSTR(MP_QSTR_reset_cause),         MP_ROM_PTR(&machine_reset_cause_obj) },
+
+    //class constants
+    { MP_ROM_QSTR(MP_QSTR_PWRON_RESET),         MP_ROM_INT(MACHINE_PWRON_RESET) },
+    { MP_ROM_QSTR(MP_QSTR_HARD_RESET),          MP_ROM_INT(MACHINE_HARD_RESET) },
+    { MP_ROM_QSTR(MP_QSTR_WDT_RESET),           MP_ROM_INT(MACHINE_WDT_RESET) },
+    { MP_ROM_QSTR(MP_QSTR_DEEPSLEEP_RESET),     MP_ROM_INT(MACHINE_DEEPSLEEP_RESET) },
+    { MP_ROM_QSTR(MP_QSTR_SOFT_RESET),          MP_ROM_INT(MACHINE_SOFT_RESET) },
 
     //TODO: dynamic memory allocation functions/objects. Not yet implemented
     // { MP_ROM_QSTR(MP_QSTR_mem8),                MP_ROM_PTR(&machine_mem8_obj) },
