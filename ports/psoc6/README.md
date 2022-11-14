@@ -22,13 +22,13 @@ Then initialize the ModusToolbox™ environment:
 
     $ make mpy_mtb_init
 
-Build the firmare:
+Build the firmware:
 
     $ make
 
 To build and program the device:
 
-    $ make myp_program
+    $ make mpy_program
 
 ### Working from WSL
 
@@ -36,4 +36,4 @@ If you are working from WSL and you cannot access the USB resources of your mach
 
 # Run micropython
 
-Use any serial terminal (putty, minicom..) and stablish a session with your device with 115200 bauds and 8-N-1 configuration. 
+Use any serial terminal (putty, minicom..) and establish a session with your device with 115200 bauds and 8-N-1 configuration. 

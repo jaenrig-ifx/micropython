@@ -90,17 +90,20 @@ int main(int argc, char **argv) {
 
 
     /* \x1b[2J\x1b[;H - ANSI ESC sequence for clear screen */
-    printf("\x1b[2J\x1b[;H");
+    // printf("\x1b[2J\x1b[;H");
 
-    printf("****************** "
-           "HAL: Hello World! Example "
-           "****************** \r\n\n");
-    printf("Hello World!!!\r\n\n");
+    // printf("****************** "
+    //        "HAL: Hello World! Example "
+    //        "****************** \r\n\n");
+    // printf("Hello World!!!\r\n\n");
 
     setvbuf( stdin,  NULL, _IONBF, 0 );
     setvbuf( stdout, NULL, _IONBF, 0 );
 
     int stack_dummy;
+    
+soft_reset:
+
     stack_top = (char *)&stack_dummy;
 
     #if MICROPY_ENABLE_GC
@@ -115,39 +118,49 @@ int main(int argc, char **argv) {
 
     #if MICROPY_ENABLE_COMPILER
 
-    #if MICROPY_REPL_EVENT_DRIVEN
+    // #if MICROPY_REPL_EVENT_DRIVEN
 
-    pyexec_event_repl_init();
+    // pyexec_event_repl_init();
 
     for (;;) {
-        int c = mp_hal_stdin_rx_chr();
+        // int c = mp_hal_stdin_rx_chr();
 
-        if (pyexec_event_repl_process_char(c)) {
-            break;
+        // if (pyexec_event_repl_process_char(c)) {
+        //     break;
+        // }
+
+        // if( ret != 0 ) {
+        //     // printf("EOF!!!   %i   %i\n", c, ret);
+        //     pyexec_event_repl_init();
+        // }
+        if (pyexec_mode_kind == PYEXEC_MODE_RAW_REPL) {
+            if (pyexec_raw_repl() != 0) {
+                break;
+            }
+        } else {
+            if (pyexec_friendly_repl() != 0) {
+                break;
+            }
         }
     }
 
-    #else
+    // #else
 
-    printf("running do_str ...\r\n");
-    do_str("print('hello world!', list(x+1 for x in range(10)), end='\\r\\n')", MP_PARSE_SINGLE_INPUT);
+    // printf("\r\nrunning pyexec_friendly_repl ...\r\n");
+    // pyexec_friendly_repl();
 
-    printf("\r\nrunning do_str ...\r\n");
-    do_str("for i in range(10):\r\n  print(i)", MP_PARSE_FILE_INPUT);
-
-    printf("\r\nrunning pyexec_frozen_module on frozentest.py ...\r\n");
-    pyexec_frozen_module("frozentest.py");
-
-    printf("\r\nrunning pyexec_friendly_repl ...\r\n");
-    pyexec_friendly_repl();
-
-    #endif
+    // #endif
 
     #else
 
     #endif
+
+    printf("MPY: soft reboot\n");
 
     mp_deinit();
+
+    goto soft_reset;
+
     return 0;
 }
 
