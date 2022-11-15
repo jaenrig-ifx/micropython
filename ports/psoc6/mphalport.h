@@ -4,6 +4,8 @@ static inline mp_uint_t mp_hal_ticks_ms(void) {
 static inline void mp_hal_set_interrupt_char(char c) {
 }
 
+#include <stdio.h>
+#include <stdlib.h>
 //cy includes
 #include "cy_sysclk.h"
 #include "cyhal.h"
@@ -153,3 +155,42 @@ static inline void CYHAL_RESET(void){
 static inline uint32_t CYPDL_RESET_CAUSE(void){
     return Cy_SysLib_GetResetReason();
 }
+
+//global var to store current irq state/hash
+STATIC uint8_t irq_key;
+
+//helper function to generate random alpha-numeric hash
+static inline uint8_t mp_rand_hash(uint8_t length) {
+    uint8_t hash_sum=0;
+    char charset[] = {'0','1','2','3','4','5','6','7','8','9'}; //hash can be made stronger but
+                                                                // uint8_t can only hold <=255    
+
+    while (length-- > 0) {
+        uint8_t index = rand() % sizeof(charset);
+        hash_sum = hash_sum + (int)charset[index];   
+    }
+    return hash_sum;    
+}
+
+//function to disable global IRQs
+//returns alpha-numeric hash to enable IRQs later
+//see: https://docs.zephyrproject.org/apidoc/latest/group__isr__apis.html#ga19fdde73c3b02fcca6cf1d1e67631228 
+static inline uint8_t CY_DISABLE_GLOBAL_IRQ(void){
+   uint8_t state = mp_rand_hash(10); //10 chars long key gen;
+    __disable_irq();
+    irq_key = state;
+    return state;
+}
+
+//function to enable global IRQs
+//uses passed alpha-numeric key to verify and enable IRQs 
+static inline bool CY_ENABLE_GLOBAL_IRQ(uint8_t state){
+    if (state == irq_key){
+        __enable_irq();
+        return 1;
+    }
+    else
+        return 0;
+}
+
+
