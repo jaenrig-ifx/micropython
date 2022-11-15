@@ -240,7 +240,7 @@ mp_obj_t mp_pin_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, 
    
     // go into param arg parsing if args apart from "id" are provided (for ex. pin.Mode, pin.PULL etc)
     if (n_args > 1 || n_kw > 0) {
-        mp_printf(&mp_plat_print, "goes inside if block\n"); //TODO: remove this later, only for DEBUG
+        mp_printf(&mp_plat_print, "init helper function called\n"); //TODO: remove this later, only for DEBUG
         // pin mode given, so configure this GPIO
         mp_map_t kw_args;
         mp_map_init_fixed_table(&kw_args, n_kw, args + n_args);
