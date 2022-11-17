@@ -73,6 +73,7 @@ SRC_C = \
 	\
 	modules/machine/modmachine.c \
 	modules/machine/machine_pin.c \
+	modules/machine/pins.c \
 	\
 	shared/runtime/pyexec.c \
 	shared/readline/readline.c \

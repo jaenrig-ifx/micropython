@@ -1,21 +1,16 @@
 #ifndef MICROPY_INCLUDED_PSOC6_PIN_H
 #define MICROPY_INCLUDED_PSOC6_PIN_H
+
 #include "cybsp.h"
 #include "cyhal.h"
 
-#define DEFAULT_LED_PIN 13
+#define GPIO_STATE_ON                   (0U)
+#define GPIO_STATE_OFF                  (1U)
 
-void gpio_init();
-void gpio_configure();
+cy_rslt_t gpio_init(cyhal_gpio_t pin, cyhal_gpio_direction_t direction, cyhal_gpio_drive_mode_t drive_mode, bool init_val);
+void gpio_toggle_onBoardLed();
+void gpio_toggle(cyhal_gpio_t pin);
 
-void gpio_set_pin_input();
-void gpio_set_pin_output();
-
-void gpio_write();
-bool gpio_read();
-
-void gpio_toggle_led();
-
-//void pin_enable_event();
+/* !Placeholder : Add Other GPIO functions here  */
 
 #endif // MICROPY_INCLUDED_PSOC6_PIN_H
