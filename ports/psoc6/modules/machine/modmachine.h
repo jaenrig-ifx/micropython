@@ -15,7 +15,7 @@ void machine_pin_deinit(void);
 // void machine_deinit(void);
 
 
-//MP_DECLARE_CONST_FUN_OBJ_VAR_BETWEEN(machine_info_obj);
+// MP_DECLARE_CONST_FUN_OBJ_VAR_BETWEEN(machine_info_obj);
 
 
 #endif // MICROPY_INCLUDED_PSOC6_MODMACHINE_H
