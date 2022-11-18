@@ -412,9 +412,10 @@ def run_tests(pyb, tests, args, result_dir, num_threads=1):
         # run-tests.py script itself so use base_path.
 
         # Check if micropython.native is supported, and skip such tests if it's not
-        output = run_feature_check(pyb, args, base_path, "native_check.py")
-        if output != b"native\n":
-            skip_native = True
+        # output = run_feature_check(pyb, args, base_path, "native_check.py")
+        # if output != b"native\n":
+        #     skip_native = True
+        skip_native = False
 
         # Check if arbitrary-precision integers are supported, and skip such tests if it's not
         output = run_feature_check(pyb, args, base_path, "int_big.py")
