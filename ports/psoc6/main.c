@@ -86,15 +86,6 @@ int main(int argc, char **argv) {
         CY_ASSERT(0);
     }
 
-
-    /* \x1b[2J\x1b[;H - ANSI ESC sequence for clear screen */
-    // printf("\x1b[2J\x1b[;H");
-
-    // printf("****************** "
-    //        "HAL: Hello World! Example "
-    //        "****************** \r\n\n");
-    // printf("Hello World!!!\r\n\n");
-
     setvbuf(stdin,  NULL, _IONBF, 0);
     setvbuf(stdout, NULL, _IONBF, 0);
 
@@ -116,21 +107,7 @@ soft_reset:
 
     #if MICROPY_ENABLE_COMPILER
 
-    // #if MICROPY_REPL_EVENT_DRIVEN
-
-    // pyexec_event_repl_init();
-
     for (;;) {
-        // int c = mp_hal_stdin_rx_chr();
-
-        // if (pyexec_event_repl_process_char(c)) {
-        //     break;
-        // }
-
-        // if( ret != 0 ) {
-        //     // printf("EOF!!!   %i   %i\n", c, ret);
-        //     pyexec_event_repl_init();
-        // }
         if (pyexec_mode_kind == PYEXEC_MODE_RAW_REPL) {
             if (pyexec_raw_repl() != 0) {
                 break;
@@ -141,13 +118,6 @@ soft_reset:
             }
         }
     }
-
-    // #else
-
-    // printf("\r\nrunning pyexec_friendly_repl ...\r\n");
-    // pyexec_friendly_repl();
-
-    // #endif
 
     #else
 
