@@ -54,27 +54,25 @@ extern "C" {
 #endif
 
 #if !defined(CYBSP_CUSTOM_SYSCLK_PM_CALLBACK)
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 // cybsp_register_sysclk_pm_callback
 //
 // Registers a power management callback that prepares the clock system for entering deep sleep mode
 // and restore the clocks upon wakeup from deep sleep.
 // NOTE: This is called automatically as part of \ref cybsp_init
-//--------------------------------------------------------------------------------------------------
-static cy_rslt_t cybsp_register_sysclk_pm_callback(void)
-{
-    cy_rslt_t                             result                         = CY_RSLT_SUCCESS;
+// --------------------------------------------------------------------------------------------------
+static cy_rslt_t cybsp_register_sysclk_pm_callback(void) {
+    cy_rslt_t result = CY_RSLT_SUCCESS;
     static cy_stc_syspm_callback_params_t cybsp_sysclk_pm_callback_param = { NULL, NULL };
-    static cy_stc_syspm_callback_t        cybsp_sysclk_pm_callback       =
+    static cy_stc_syspm_callback_t cybsp_sysclk_pm_callback =
     {
-        .callback       = &Cy_SysClk_DeepSleepCallback,
-        .type           = CY_SYSPM_DEEPSLEEP,
+        .callback = &Cy_SysClk_DeepSleepCallback,
+        .type = CY_SYSPM_DEEPSLEEP,
         .callbackParams = &cybsp_sysclk_pm_callback_param,
-        .order          = CYBSP_SYSCLK_PM_CALLBACK_ORDER
+        .order = CYBSP_SYSCLK_PM_CALLBACK_ORDER
     };
 
-    if (!Cy_SysPm_RegisterCallback(&cybsp_sysclk_pm_callback))
-    {
+    if (!Cy_SysPm_RegisterCallback(&cybsp_sysclk_pm_callback)) {
         result = CYBSP_RSLT_ERR_SYSCLK_PM_CALLBACK;
     }
     return result;
@@ -84,24 +82,21 @@ static cy_rslt_t cybsp_register_sysclk_pm_callback(void)
 #endif // if !defined(CYBSP_CUSTOM_SYSCLK_PM_CALLBACK)
 
 
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 // cybsp_init
-//--------------------------------------------------------------------------------------------------
-cy_rslt_t cybsp_init(void)
-{
+// --------------------------------------------------------------------------------------------------
+cy_rslt_t cybsp_init(void) {
     // Setup hardware manager to track resource usage then initialize all system (clock/power) board
     // configuration
     #if defined(CY_USING_HAL)
     cy_rslt_t result = cyhal_hwmgr_init();
 
-    if (CY_RSLT_SUCCESS == result)
-    {
+    if (CY_RSLT_SUCCESS == result) {
         result = cyhal_syspm_init();
     }
 
     #ifdef CY_CFG_PWR_VDDA_MV
-    if (CY_RSLT_SUCCESS == result)
-    {
+    if (CY_RSLT_SUCCESS == result) {
         cyhal_syspm_set_supply_voltage(CYHAL_VOLTAGE_SUPPLY_VDDA, CY_CFG_PWR_VDDA_MV);
     }
     #endif
@@ -123,8 +118,7 @@ cy_rslt_t cybsp_init(void)
     // Do any additional configuration reservations that are needed on all cores.
     cycfg_config_reservations();
 
-    if (CY_RSLT_SUCCESS == result)
-    {
+    if (CY_RSLT_SUCCESS == result) {
         #if defined(CYBSP_CUSTOM_SYSCLK_PM_CALLBACK)
         result = cybsp_register_custom_sysclk_pm_callback();
         #else
@@ -139,8 +133,7 @@ cy_rslt_t cybsp_init(void)
     // specific peripheral instances are needed
     // NOTE: The full SDIO/WiFi interface still needs to be initialized via
     // cybsp_wifi_init_primary(). This is typically done when starting up WiFi.
-    if (CY_RSLT_SUCCESS == result)
-    {
+    if (CY_RSLT_SUCCESS == result) {
         result = SDIO_ReserveResources();
     }
     #endif // defined(CYBSP_WIFI_CAPABLE) && defined(CYHAL_UDB_SIO)
