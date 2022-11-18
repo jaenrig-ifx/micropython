@@ -28,16 +28,16 @@ void do_str(const char *src, mp_parse_input_kind_t input_kind) {
     nlr_buf_t nlr;
 
     if (nlr_push(&nlr) == 0) {
-        mp_lexer_t     *lex         = mp_lexer_new_from_str_len(MP_QSTR__lt_stdin_gt_, src, strlen(src), 0);
-        qstr            source_name = lex->source_name;
-        mp_parse_tree_t parse_tree  = mp_parse(lex, input_kind);
-        mp_obj_t        module_fun  = mp_compile(&parse_tree, source_name, true);
+        mp_lexer_t *lex = mp_lexer_new_from_str_len(MP_QSTR__lt_stdin_gt_, src, strlen(src), 0);
+        qstr source_name = lex->source_name;
+        mp_parse_tree_t parse_tree = mp_parse(lex, input_kind);
+        mp_obj_t module_fun = mp_compile(&parse_tree, source_name, true);
 
         mp_call_function_0(module_fun);
         nlr_pop();
     } else {
         // uncaught exception
-        mp_obj_print_exception(&mp_plat_print, (mp_obj_t) nlr.ret_val);
+        mp_obj_print_exception(&mp_plat_print, (mp_obj_t)nlr.ret_val);
     }
 }
 
@@ -48,7 +48,7 @@ void do_str(const char *src, mp_parse_input_kind_t input_kind) {
 
 static char *stack_top;
 // TODO: set to proper value for our MCU
-static char  heap[192 * 1024];
+static char heap[192 * 1024];
 
 #endif
 
@@ -56,7 +56,7 @@ static char  heap[192 * 1024];
 int main(int argc, char **argv) {
     cy_rslt_t result;
 
-#if defined (CY_DEVICE_SECURE)
+    #if defined(CY_DEVICE_SECURE)
 
     cyhal_wdt_t wdt_obj;
 
@@ -65,14 +65,13 @@ int main(int argc, char **argv) {
     CY_ASSERT(CY_RSLT_SUCCESS == result);
     cyhal_wdt_free(&wdt_obj);
 
-#endif /* #if defined (CY_DEVICE_SECURE) */
+    #endif /* #if defined (CY_DEVICE_SECURE) */
 
     /* Initialize the device and board peripherals */
     result = cybsp_init();
-    
+
     /* Board init failed. Stop program execution */
-    if (result != CY_RSLT_SUCCESS)
-    {
+    if (result != CY_RSLT_SUCCESS) {
         CY_ASSERT(0);
     }
 
@@ -83,8 +82,7 @@ int main(int argc, char **argv) {
     result = cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, CY_RETARGET_IO_BAUDRATE);
 
     /* retarget-io init failed. Stop program execution */
-    if (result != CY_RSLT_SUCCESS)
-    {
+    if (result != CY_RSLT_SUCCESS) {
         CY_ASSERT(0);
     }
 
@@ -97,11 +95,11 @@ int main(int argc, char **argv) {
     //        "****************** \r\n\n");
     // printf("Hello World!!!\r\n\n");
 
-    setvbuf( stdin,  NULL, _IONBF, 0 );
-    setvbuf( stdout, NULL, _IONBF, 0 );
+    setvbuf(stdin,  NULL, _IONBF, 0);
+    setvbuf(stdout, NULL, _IONBF, 0);
 
     int stack_dummy;
-    
+
 soft_reset:
 
     stack_top = (char *)&stack_dummy;

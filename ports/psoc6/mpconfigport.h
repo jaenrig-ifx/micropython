@@ -3,7 +3,7 @@
 // options to control how MicroPython is built
 
 // Use the minimal starting configuration (disables all optional features).
-//#define MICROPY_CONFIG_ROM_LEVEL (MICROPY_CONFIG_ROM_LEVEL_MINIMUM)
+// #define MICROPY_CONFIG_ROM_LEVEL (MICROPY_CONFIG_ROM_LEVEL_MINIMUM)
 #define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_CORE_FEATURES)
 
 // You can disable the built-in MicroPython compiler by setting the following
@@ -56,7 +56,7 @@ typedef long mp_off_t;
 
 #define MICROPY_USE_INTERNAL_PRINTF (0)
 
-//#define MICROPY_LONGINT_IMPL                    (MICROPY_LONGINT_IMPL_MPZ)
+// #define MICROPY_LONGINT_IMPL                    (MICROPY_LONGINT_IMPL_MPZ)
 #define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_FLOAT)
 
 // MicroPython emitters
@@ -97,7 +97,7 @@ extern const struct _mp_obj_module_t mp_module_time;
 
 #if MICROPY_PY_UTIME
 #define MICROPY_PY_UTIME_DEF \
-        { MP_ROM_QSTR(MP_QSTR_utime), MP_ROM_PTR(&mp_module_time) },
+    { MP_ROM_QSTR(MP_QSTR_utime), MP_ROM_PTR(&mp_module_time) },
 #else
 #define MICROPY_PY_UTIME_DEF
 #endif
@@ -110,7 +110,7 @@ extern const struct _mp_obj_module_t mp_module_time;
     { MP_ROM_QSTR(MP_QSTR_time), MP_ROM_PTR(&mp_module_time) }
 
 
-//#define MICROPY_MODULE_FROZEN_STR       (1)
+// #define MICROPY_MODULE_FROZEN_STR       (1)
 #define MICROPY_COMP_CONST_FOLDING      (0)
 #define MICROPY_COMP_CONST              (0)
 #define MICROPY_COMP_DOUBLE_TUPLE_ASSIGN (0)

@@ -38,8 +38,8 @@ void machine_deinit(void) {
 // machine.info([dump_alloc_table])
 // Print out lots of information about the board.
 STATIC mp_obj_t machine_info(size_t n_args, const mp_obj_t *args) {
-    (void) cyhal_gpio_init(CYBSP_USER_LED, CYHAL_GPIO_DIR_OUTPUT, 
-                             CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF);
+    (void)cyhal_gpio_init(CYBSP_USER_LED, CYHAL_GPIO_DIR_OUTPUT,
+        CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF);
     cyhal_gpio_toggle(CYBSP_USER_LED);
     mp_printf(&mp_plat_print, "info about machine\n");
 
@@ -62,7 +62,7 @@ STATIC mp_obj_t machine_info(size_t n_args, const mp_obj_t *args) {
 
     return mp_const_none;
 }
-//STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_info_obj, machine_info);
+// STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_info_obj, machine_info);
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_info_obj, 0, 1, machine_info);
 
 
