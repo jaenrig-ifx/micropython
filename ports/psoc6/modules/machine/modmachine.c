@@ -91,6 +91,7 @@ STATIC mp_obj_t machine_reset(void) {
 MP_DEFINE_CONST_FUN_OBJ_0(machine_reset_obj, machine_reset);
 
 //machine.soft_reset()
+//TODO: soft-reset must be handled in main.c and REPL has to deinit and reinit
 STATIC mp_obj_t machine_soft_reset(void) {
     pyexec_system_exit = PYEXEC_FORCED_EXIT;
     mp_raise_type(&mp_type_SystemExit);

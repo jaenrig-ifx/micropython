@@ -135,8 +135,8 @@ STATIC mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_
     else
         value = 1; // initially hold pin high (LED inactive)
 
-    cyhal_gpio_direction_t direction = 1; // initially set as output
-    cyhal_gpio_drive_mode_t drive = 7; // initially set both pull up-down (works for both IN-OUT)
+    cyhal_gpio_direction_t direction = CYHAL_GPIO_DIR_OUTPUT; // initially set as output
+    cyhal_gpio_drive_mode_t drive = CYHAL_GPIO_DRIVE_PULLUPDOWN; // initially set both pull up-down (safe for both IN-OUT)
     //Note: cyhal drive modes are in an enum here: cyhal_gpio.h; also described in the header
     // check for direction and set drive accordingly
     if (args[ARG_mode].u_obj != mp_const_none) {
@@ -171,7 +171,7 @@ STATIC mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_
 
     // check for drive strength
     if (args[ARG_drive].u_obj != mp_const_none) {
-        mp_printf(&mp_plat_print, "CY has only one drive strength for output mode.\n"); //see Cy_GPIO_GetDriveSel()
+        mp_printf(&mp_plat_print, "CYHAL has only one drive strength for output mode.\n"); //see Cy_GPIO_GetDriveSel() for PDL drive modes
     }
 
     // check for pulls
@@ -281,7 +281,7 @@ STATIC mp_obj_t machine_pin_obj_init(size_t n_args, const mp_obj_t *args, mp_map
     mp_printf(&mp_plat_print, "Pin class object instantiated\n"); //TODO: remove later
     //redirect args except self to the obj init helper function
     //args[0] here is self ptr
-    return machine_pin_obj_init_helper(args[0], n_args - 1, args + 1, kw_args);;
+    return machine_pin_obj_init_helper(args[0], n_args - 1, args + 1, kw_args);
 }
 MP_DEFINE_CONST_FUN_OBJ_KW(machine_pin_obj_init_obj, 1, machine_pin_obj_init);
 
