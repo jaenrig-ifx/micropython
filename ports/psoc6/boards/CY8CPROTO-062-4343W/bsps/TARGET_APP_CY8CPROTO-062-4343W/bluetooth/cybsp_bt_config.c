@@ -49,44 +49,44 @@
 
 const cybt_platform_config_t cybsp_bt_platform_cfg =
 {
-    .hci_config                             =
+    .hci_config =
     {
-        .hci_transport                      = CYBT_HCI_UART,
+        .hci_transport = CYBT_HCI_UART,
 
-        .hci                                =
+        .hci =
         {
-            .hci_uart                       =
+            .hci_uart =
             {
-                .uart_tx_pin                = CYBSP_BT_UART_TX,
-                .uart_rx_pin                = CYBSP_BT_UART_RX,
-                .uart_rts_pin               = CYBSP_BT_UART_RTS,
-                .uart_cts_pin               = CYBSP_BT_UART_CTS,
+                .uart_tx_pin = CYBSP_BT_UART_TX,
+                .uart_rx_pin = CYBSP_BT_UART_RX,
+                .uart_rts_pin = CYBSP_BT_UART_RTS,
+                .uart_cts_pin = CYBSP_BT_UART_CTS,
 
-                .baud_rate_for_fw_download  = CYBSP_BT_PLATFORM_CFG_BAUD_DOWNLOAD,
-                .baud_rate_for_feature      = CYBSP_BT_PLATFORM_CFG_BAUD_FEATURE,
+                .baud_rate_for_fw_download = CYBSP_BT_PLATFORM_CFG_BAUD_DOWNLOAD,
+                .baud_rate_for_feature = CYBSP_BT_PLATFORM_CFG_BAUD_FEATURE,
 
-                .data_bits                  = CYBSP_BT_PLATFORM_CFG_BITS_DATA,
-                .stop_bits                  = CYBSP_BT_PLATFORM_CFG_BITS_STOP,
-                .parity                     = CYHAL_UART_PARITY_NONE,
-                .flow_control               = true
+                .data_bits = CYBSP_BT_PLATFORM_CFG_BITS_DATA,
+                .stop_bits = CYBSP_BT_PLATFORM_CFG_BITS_STOP,
+                .parity = CYHAL_UART_PARITY_NONE,
+                .flow_control = true
             }
         }
     },
 
-    .controller_config                      =
+    .controller_config =
     {
-        .bt_power_pin                       = CYBSP_BT_POWER,
-        .sleep_mode                         =
+        .bt_power_pin = CYBSP_BT_POWER,
+        .sleep_mode =
         {
-            .sleep_mode_enabled             = CYCFG_BT_LP_ENABLED,
-            .device_wakeup_pin              = CYCFG_BT_DEV_WAKE_GPIO,
-            .host_wakeup_pin                = CYCFG_BT_HOST_WAKE_GPIO,
-            .device_wake_polarity           = CYCFG_BT_DEV_WAKE_POLARITY,
-            .host_wake_polarity             = CYCFG_BT_HOST_WAKE_IRQ_EVENT
+            .sleep_mode_enabled = CYCFG_BT_LP_ENABLED,
+            .device_wakeup_pin = CYCFG_BT_DEV_WAKE_GPIO,
+            .host_wakeup_pin = CYCFG_BT_HOST_WAKE_GPIO,
+            .device_wake_polarity = CYCFG_BT_DEV_WAKE_POLARITY,
+            .host_wake_polarity = CYCFG_BT_HOST_WAKE_IRQ_EVENT
         }
     },
 
-    .task_mem_pool_size                     = CYBSP_BT_PLATFORM_CFG_MEM_POOL_BYTES
+    .task_mem_pool_size = CYBSP_BT_PLATFORM_CFG_MEM_POOL_BYTES
 };
 
 #endif /* defined(COMPONENT_WICED_BLE) || defined(COMPONENT_WICED_DUALMODE) */

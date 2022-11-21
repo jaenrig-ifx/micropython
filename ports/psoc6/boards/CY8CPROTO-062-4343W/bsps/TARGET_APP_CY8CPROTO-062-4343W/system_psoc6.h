@@ -512,9 +512,9 @@ extern "C" {
 /*******************************************************************************
 * Global preprocessor symbols/macros ('define')
 *******************************************************************************/
-#if ((defined(__GNUC__)        &&  (__ARM_ARCH == 6) && (__ARM_ARCH_6M__ == 1)) || \
-     (defined (__ICCARM__)     &&  (__CORE__ == __ARM6M__))  || \
-     (defined(__ARMCC_VERSION) &&  (__TARGET_ARCH_THUMB == 3)))
+#if ((defined(__GNUC__) && (__ARM_ARCH == 6) && (__ARM_ARCH_6M__ == 1)) || \
+    (defined(__ICCARM__) && (__CORE__ == __ARM6M__)) || \
+    (defined(__ARMCC_VERSION) && (__TARGET_ARCH_THUMB == 3)))
     #define CY_SYSTEM_CPU_CM0P          1UL
 #else
     #define CY_SYSTEM_CPU_CM0P          0UL
@@ -551,7 +551,7 @@ extern "C" {
 * \brief Start address of the Cortex-M4 application ([address]UL)
 *        <i>(USER SETTING)</i>
 *******************************************************************************/
-#if !defined (CY_CORTEX_M4_APPL_ADDR)
+#if !defined(CY_CORTEX_M4_APPL_ADDR)
     #define CY_CORTEX_M4_APPL_ADDR          (CY_FLASH_BASE + 0x2000U)   /* <<< 8 kB of flash is reserved for the Cortex-M0+ application */
 #endif /* (CY_CORTEX_M4_APPL_ADDR) */
 
@@ -586,12 +586,12 @@ extern "C" {
 */
 
 #if (CY_SYSTEM_CPU_CM0P == 1UL) || defined(CY_DOXYGEN)
-    /** The Cortex-M0+ startup driver identifier */
+/** The Cortex-M0+ startup driver identifier */
     #define CY_STARTUP_M0P_ID               ((uint32_t)((uint32_t)((0x0EU) & 0x3FFFU) << 18U))
 #endif /* (CY_SYSTEM_CPU_CM0P == 1UL) */
 
 #if (CY_SYSTEM_CPU_CM0P != 1UL) || defined(CY_DOXYGEN)
-    /** The Cortex-M4 startup driver identifier */
+/** The Cortex-M4 startup driver identifier */
     #define CY_STARTUP_M4_ID        ((uint32_t)((uint32_t)((0x0FU) & 0x3FFFU) << 18U))
 #endif /* (CY_SYSTEM_CPU_CM0P != 1UL) */
 
@@ -600,9 +600,9 @@ extern "C" {
 
 /** \cond */
 #if defined(__ARMCC_VERSION)
-    extern void SystemInit(void) __attribute__((constructor));
+extern void SystemInit(void) __attribute__((constructor));
 #else
-    extern void SystemInit(void);
+extern void SystemInit(void);
 #endif /* (__ARMCC_VERSION) */
 
 extern void SystemCoreClockUpdate(void);
@@ -622,7 +622,7 @@ extern void     Cy_SysResetCM4(void);
 
 
 /** \cond */
-extern void     Default_Handler (void);
+extern void     Default_Handler(void);
 
 void Cy_SysIpcPipeIsrCm0(void);
 void Cy_SysIpcPipeIsrCm4(void);
@@ -631,7 +631,7 @@ extern void     Cy_SystemInit(void);
 extern void     Cy_SystemInitFpuEnable(void);
 
 extern uint32_t cy_delayFreqKhz;
-extern uint8_t  cy_delayFreqMhz;
+extern uint8_t cy_delayFreqMhz;
 /** \endcond */
 
 
@@ -678,14 +678,14 @@ extern uint8_t  cy_delayFreqMhz;
 /* System Pipe addresses */
 /* CyPipe defines */
 
-#define CY_SYS_CYPIPE_INTR_MASK   ( CY_SYS_CYPIPE_CHAN_MASK_EP0 | CY_SYS_CYPIPE_CHAN_MASK_EP1 )
+#define CY_SYS_CYPIPE_INTR_MASK   (CY_SYS_CYPIPE_CHAN_MASK_EP0 | CY_SYS_CYPIPE_CHAN_MASK_EP1)
 
-#define CY_SYS_CYPIPE_CONFIG_EP0  ( (CY_SYS_CYPIPE_INTR_MASK << CY_IPC_PIPE_CFG_IMASK_Pos) \
-                                   | (CY_IPC_INTR_CYPIPE_EP0 << CY_IPC_PIPE_CFG_INTR_Pos) \
-                                    | CY_IPC_CHAN_CYPIPE_EP0)
-#define CY_SYS_CYPIPE_CONFIG_EP1  ( (CY_SYS_CYPIPE_INTR_MASK << CY_IPC_PIPE_CFG_IMASK_Pos) \
-                                   | (CY_IPC_INTR_CYPIPE_EP1 << CY_IPC_PIPE_CFG_INTR_Pos) \
-                                    | CY_IPC_CHAN_CYPIPE_EP1)
+#define CY_SYS_CYPIPE_CONFIG_EP0  ((CY_SYS_CYPIPE_INTR_MASK << CY_IPC_PIPE_CFG_IMASK_Pos) \
+    | (CY_IPC_INTR_CYPIPE_EP0 << CY_IPC_PIPE_CFG_INTR_Pos) \
+    | CY_IPC_CHAN_CYPIPE_EP0)
+#define CY_SYS_CYPIPE_CONFIG_EP1  ((CY_SYS_CYPIPE_INTR_MASK << CY_IPC_PIPE_CFG_IMASK_Pos) \
+    | (CY_IPC_INTR_CYPIPE_EP1 << CY_IPC_PIPE_CFG_INTR_Pos) \
+    | CY_IPC_CHAN_CYPIPE_EP1)
 
 /******************************************************************************/
 
