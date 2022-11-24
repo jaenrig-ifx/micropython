@@ -23,6 +23,7 @@ CROSS_COMPILE ?= arm-none-eabi-
 
 # include py core make definitions
 include ../../py/mkenv.mk
+-include mpconfigport.mk
 include $(TOP)/py/py.mk
 
 
@@ -63,31 +64,52 @@ CXXFLAGS += $(CXXFLAGS_MOD)
 
 # Flags for user C modules
 CFLAGS  += $(CFLAGS_MOD)
+CFLAGS  += -DFFCONF_H=\"lib/oofatfs/ffconf.h\" -DLFS1_NO_MALLOC -DLFS1_NO_DEBUG -DLFS1_NO_WARN -DLFS1_NO_ERROR -DLFS1_NO_ASSERT -DLFS2_NO_MALLOC -DLFS2_NO_DEBUG -DLFS2_NO_WARN -DLFS2_NO_ERROR -DLFS2_NO_ASSERT
+
 LDFLAGS += $(LDFLAGS_MOD)
 
 LIBS =
 
+
+MPY_SRC_C += extmod/vfs_blockdev.c extmod/vfs.c \
+			 extmod/vfs_lfs.c \
+		 	 extmod/vfs_fat.c extmod/vfs_fat_diskio.c extmod/vfs_fat_file.c \
+		 	 extmod/moduos.c \
+		 	 \
+		 	 lib/littlefs/lfs1.c lib/littlefs/lfs1_util.c lib/littlefs/lfs2.c lib/littlefs/lfs2_util.c \
+		 	 lib/oofatfs/ff.c lib/oofatfs/ffunicode.c \
+		 	 \
+		 	 py/modcmath.c py/moduerrno.c py/repl.c \
+		 	 \
+		 	 shared/runtime/pyexec.c \
+		 	 shared/readline/readline.c \
+		 	 shared/runtime/stdout_helpers.c \
+		 	 shared/libc/string0.c \
+		 	 shared/timeutils/timeutils.c
+
+
+SRC_C_FROZEN = $(BUILD)/_frozentest_mpy.c
+
+
 SRC_C = \
  	main.c \
+	fatfs_port.c \
+	psoc6_flash.c \
 	uart_core.c \
 	\
 	modules/machine/modmachine.c \
 	modules/machine/pin.c \
 	\
-	shared/runtime/pyexec.c \
-	shared/readline/readline.c \
-	shared/runtime/stdout_helpers.c \
+	$(SRC_C_FROZEN) \
 	\
-	$(BUILD)/_frozentest_mpy.c \
+	$(MPY_SRC_C)
 
-
-SRC_C    += shared/libc/string0.c
 
 SRC_C    += $(SRC_MOD) $(SRC_USERMOD) 
 SRC_CXX  += $(SRC_MOD_CXX)
 
-SRC_QSTR += shared/readline/readline.c shared/runtime/pyexec.c
-SRC_QSTR += $(SRC_MOD) $(SRC_MOD_CXX) $(SRC_USERMOD) 
+
+SRC_QSTR += $(MPY_SRC_C) $(SRC_MOD) $(SRC_MOD_CXX) $(SRC_USERMOD) 
 SRC_QSTR += modules/machine/modmachine.c modules/machine/pin.c
 
 
@@ -98,20 +120,23 @@ OBJ += $(addprefix $(BUILD)/, $(SRC_CXX:.cpp=.o))
 all: $(MPY_MAIN_BUILD_DIR)/firmware.hex
 
 
-freeze/frozentest.mpy :
+freeze/frozentest.mpy: $(BUILD)/genhdr/qstrdefs.generated.h
 	env PATH="../../mpy-cross/build:${PATH}" ../../tools/mpy_cross_all.py freeze
 
 
-$(BUILD)/_frozentest_mpy.c: freeze/frozentest.mpy $(BUILD)/genhdr/qstrdefs.generated.h
+$(SRC_C_FROZEN): freeze/frozentest.mpy
 	$(info )
-	$(info Freezing bytecode)
+	$(info Freezing bytecode ...)
 	$(Q)$(TOP)/tools/mpy-tool.py -f -q $(BUILD)/genhdr/qstrdefs.preprocessed.h -mlongint-impl=none $< > $@
+	$(info Freezing bytecode done.)
+
 
 
 $(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ)
 	$(info )
 	$(info Linking $@ ...)
 	$(Q)$(LD) $(LDFLAGS) -o $@ $^ 
+	$(info Linking $@ done.)
 	$(Q)$(SIZE) $@
 
 

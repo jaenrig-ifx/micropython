@@ -5,6 +5,7 @@
 // Use the minimal starting configuration (disables all optional features).
 //#define MICROPY_CONFIG_ROM_LEVEL (MICROPY_CONFIG_ROM_LEVEL_MINIMUM)
 #define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_CORE_FEATURES)
+//#define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_EXTRA_FEATURES)
 
 // You can disable the built-in MicroPython compiler by setting the following
 // config option to 0.  If you do this then you won't get a REPL prompt, but you
@@ -31,6 +32,7 @@ typedef long mp_off_t;
 
 #define MICROPY_HW_BOARD_NAME "CY8CPROTO-062-4343W"
 #define MICROPY_HW_MCU_NAME   "PSoC62"
+#define MICROPY_PY_SYS_PLATFORM             "psoc6"
 
 #ifdef __linux__
 #define MICROPY_MIN_USE_STDOUT (1)
@@ -81,6 +83,11 @@ typedef long mp_off_t;
 #define MICROPY_PY_BUILTINS_SET         (1)
 #define MICROPY_PY_BUILTINS_HELP        (1)
 #define MICROPY_PY_SYS_MODULES          (1)
+#define MICROPY_PY_UOS                  (1)
+#define MICROPY_PY_UOS_INCLUDEFILE     "ports/psoc6/moduos.c"
+#define MICROPY_PY_UOS_UNAME                    (1)
+#define MICROPY_PY_UOS_URANDOM                  (1)
+//#define MICROPY_PY_UOS_GETENV_PUTENV_UNSETENV (1)
 #define MICROPY_PY_UTIME                (1)
 #define MICROPY_PY_UTIME_MP_HAL         (1)
 
@@ -88,6 +95,11 @@ typedef long mp_off_t;
 #define MICROPY_PY_MACHINE              (1)
 #define MICROPY_MODULE_WEAK_LINKS       (1)
 #define MICROPY_PY_STRUCT               (1)
+
+
+#ifndef MICROPY_USE_INTERNAL_ERRNO
+#define MICROPY_USE_INTERNAL_ERRNO              (1)
+#endif
 
 // #ifndef MICROPY_BOARD_ENTER_BOOTLOADER
 // #define MICROPY_BOARD_ENTER_BOOTLOADER(nargs, args)
@@ -111,15 +123,15 @@ extern const struct _mp_obj_module_t mp_module_time;
 
 
 //#define MICROPY_MODULE_FROZEN_STR       (1)
-#define MICROPY_COMP_CONST_FOLDING      (0)
-#define MICROPY_COMP_CONST              (0)
+#define MICROPY_COMP_CONST_FOLDING       (0)
+#define MICROPY_COMP_CONST               (0)
 #define MICROPY_COMP_DOUBLE_TUPLE_ASSIGN (0)
-
+#define MICROPY_COMP_MODULE_CONST (0)
 #define MICROPY_QSTR_BYTES_IN_HASH              (1)
 
 
 
-#define MICROPY_REPL_EVENT_DRIVEN (1)
+//#define MICROPY_REPL_EVENT_DRIVEN (0)
 
 
 #ifndef MICROPY_BOARD_ENTER_BOOTLOADER
@@ -127,4 +139,54 @@ extern const struct _mp_obj_module_t mp_module_time;
 #endif
 
 
-#define MICROPY_DEBUG_NLR (1)
+// #define MICROPY_DEBUG_NLR (1)
+
+#define MICROPY_ENABLE_FINALISER    (1)
+#define MICROPY_VFS                 (1)
+#define MICROPY_VFS_LFS2                        (1)
+#define MICROPY_VFS_FAT                         (1)
+
+
+//#define MICROPY_READER_VFS          (1)
+// #define MICROPY_HELPER_LEXER_UNIX   (1)
+//#define MICROPY_VFS_POSIX           (1)
+//#define MICROPY_READER_POSIX        (1)
+
+
+// fatfs configuration
+#define MICROPY_FATFS_ENABLE_LFN                (1)
+#define MICROPY_FATFS_LFN_CODE_PAGE             437 /* 1=SFN/ANSI 437=LFN/U.S.(OEM) */
+#define MICROPY_FATFS_RPATH                     (2)
+#if MICROPY_HW_USB_MSC
+#define MICROPY_FATFS_USE_LABEL                 (1)
+#define MICROPY_FATFS_MULTI_PARTITION           (1)
+// Set FatFS block size to flash sector size to avoid caching
+// the flash sector in memory to support smaller block sizes.
+#define MICROPY_FATFS_MAX_SS                    (FLASH_SECTOR_SIZE)
+// #define MICROPY_FATFS_MAX_SS           (4096)
+#endif
+
+// VFS stat functions should return time values relative to 1970/1/1
+// #define MICROPY_EPOCH_IS_1970       (1)
+
+// Assume that select() call, interrupted with a signal, and erroring
+// with EINTR, updates remaining timeout value.
+// #define MICROPY_SELECT_REMAINING_TIME (1)
+
+// #ifndef MICROPY_PY_SYS_PLATFORM
+// #if defined(__APPLE__) && defined(__MACH__)
+//     #define MICROPY_PY_SYS_PLATFORM  "darwin"
+// #else
+//     #define MICROPY_PY_SYS_PLATFORM  "linux"
+// #endif
+// #endif
+
+#ifndef MICROPY_PY_SYS_PATH_DEFAULT
+#define MICROPY_PY_SYS_PATH_DEFAULT ".frozen:~/.micropython/lib:/usr/lib/micropython"
+#endif
+
+
+//#define MICROPY_DEBUG_VERBOSE (1)
+
+// #define MICROPY_PY_SYS_STDIO_BUFFER (1)
+//#define MICROPY_PY_OS_DUPTERM (1)
