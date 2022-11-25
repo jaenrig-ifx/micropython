@@ -1,4 +1,4 @@
-.. _esp32_quickref:
+.. _psoc6_quickref:
 
 Quick reference for the PSoC6
 =============================
