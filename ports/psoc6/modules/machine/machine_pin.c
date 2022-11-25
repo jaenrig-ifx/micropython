@@ -16,38 +16,38 @@ static const mp_arg_t allowed_args[] = {
     {MP_QSTR_pull,  MP_ARG_OBJ,                     {.u_rom_obj = MP_ROM_NONE}},
     {MP_QSTR_value, MP_ARG_KW_ONLY | MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
     {MP_QSTR_drive, MP_ARG_KW_ONLY | MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
-    {MP_QSTR_alt,   MP_ARG_KW_ONLY | MP_ARG_INT,    {.u_int = HSIOM_GPIO_FUNC}},
+    {MP_QSTR_alt,   MP_ARG_KW_ONLY | MP_ARG_INT,    {.u_rom_obj = MP_ROM_NONE}},
 };
 
 // Mandatory MPY functions
 STATIC mp_obj_t machine_pin_call(mp_obj_t self_in, mp_uint_t n_args, mp_uint_t n_kw, const mp_obj_t *args) {
     mp_printf(&mp_plat_print, "machine pin call\n");
-    // Placeholder for full implementation in GPIO epic
-    /*mp_arg_check_num(n_args, n_kw, 0, 1, false);
-    machine_pin_obj_t *self = self_in;
-    //Note: see https://docs.micropython.org/en/latest/library/machine.Pin.html#machine.Pin.value
-    if (n_args == 0) {
-        // get pin value if pin is in input mode
-        return GPIO_GET_VALUE_CALL(self->id);    
-    }
-    else {
-        // set pin
-        bool value = mp_obj_is_true(args[0]);
-        if (GPIO_IS_IN(self->id) || GPIO_IS_OUT(self->id) || GPIO_IS_OPEN_DRAIN(self->id)){ //set the output buffer of output driver with given value; 
-            if (value)                                //if Pin.Mode is Pin.IN, value will reflect when pin is next set as output.     
-                GPIO_SET_VALUE(self->id);
-            else
-                GPIO_CLR_VALUE(self->id);
-        }
-    }*/ //given how the PSoC architecture is, if the "drive mode" is set correctly, the same set/clr functions can be used for all the "modes".
-    //refer pg 245 of PSoC6 Arch TRM: https://www.infineon.com/dgdl/Infineon-PSoC_6_MCU_PSoC_62_Architecture_Technical_Reference_Manual-AdditionalTechnicalInformation-v08_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0f94758401d1&utm_source=cypress&utm_medium=referral&utm_campaign=202110_globe_en_all_integration-files
+    // Placeholder for full implementation in GPIO epic
+    /*mp_arg_check_num(n_args, n_kw, 0, 1, false);
+    machine_pin_obj_t *self = self_in;
+    //Note: see https://docs.micropython.org/en/latest/library/machine.Pin.html#machine.Pin.value
+    if (n_args == 0) {
+        // get pin value if pin is in input mode
+        return GPIO_GET_VALUE_CALL(self->id);    
+    }
+    else {
+        // set pin
+        bool value = mp_obj_is_true(args[0]);
+        if (GPIO_IS_IN(self->id) || GPIO_IS_OUT(self->id) || GPIO_IS_OPEN_DRAIN(self->id)){ //set the output buffer of output driver with given value; 
+            if (value)                                //if Pin.Mode is Pin.IN, value will reflect when pin is next set as output.     
+                GPIO_SET_VALUE(self->id);
+            else
+                GPIO_CLR_VALUE(self->id);
+        }
+    }*/ //given how the PSoC architecture is, if the "drive mode" is set correctly, the same set/clr functions can be used for all the "modes".
+    //refer pg 245 of PSoC6 Arch TRM: https://www.infineon.com/dgdl/Infineon-PSoC_6_MCU_PSoC_62_Architecture_Technical_Reference_Manual-AdditionalTechnicalInformation-v08_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0f94758401d1&utm_source=cypress&utm_medium=referral&utm_campaign=202110_globe_en_all_integration-files
     return mp_const_none;
 }
 
 STATIC void machine_pin_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     mp_printf(&mp_plat_print, "machine pin print\n"); 
-    // Placeholder for full implementation in GPIO epic
-    /*machine_pin_obj_t *self = self_in;
+    // Placeholder for full implementation in GPIO epic
+    /*machine_pin_obj_t *self = self_in;
     en_hsiom_sel_t pin_func = PIN_GET_HSIOM_FUNC(self->id);
     qstr mode_qstr = MP_QSTR_None; //TODO: compare with rp2, init value needed here due to "-werror=maybe-uninitialized"
     qstr pull_qstr = MP_QSTR_None;
@@ -90,12 +90,11 @@ STATIC void machine_pin_print(const mp_print_t *print, mp_obj_t self_in, mp_prin
 
 mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
 {
-    // Parse args
+    // Parse args
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    /*
-    // check for initial value of pin
+    /*
+    // check for initial value of pin
     bool value;
     if (args[ARG_value].u_obj != mp_const_none)
         value = mp_obj_is_true(args[ARG_value].u_obj); //pins are active low
@@ -156,8 +155,8 @@ mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_t n_arg
     // TODO: check for ALT configs of pins. HSIOM configs
     // see line 569 onwards in gpio_psoc6_02_124_bga.h 
     */
-    mp_hal_pin_rslt_t result = mp_hal_pin_init(self->id,mp_obj_get_int(args[ARG_dir].u_obj),mp_obj_get_int(args[ARG_drive].u_obj),mp_obj_get_int(args[ARG_value].u_obj));
-    //!TODO: Add logger support to print returns/msgs/errors.
+    mp_hal_pin_rslt_t result = mp_hal_pin_init(self->id,mp_obj_get_int(args[ARG_mode].u_obj),mp_obj_get_int(args[ARG_drive].u_obj),mp_obj_get_int(args[ARG_value].u_obj));
+    //TODO: Add logger support to print returns/msgs/errors.
     if(result != CY_RSLT_SUCCESS)
     {
         mp_printf(&mp_plat_print, "Init Status returned = %d\n", result);
@@ -170,9 +169,11 @@ mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_t n_arg
 // Machine Pin methods - port-specific definitions
 // Pin Contructor
 mp_obj_t mp_pin_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
-    // Inspects the arguement list and checks number of arguements - Function signature from mpy side
-    // Signature: mp_arg_check_num(n_args, n_kw, self->n_args_min, self->n_args_max, self->is_kw);
-    mp_arg_check_num(n_args, n_kw, 4, 4, true);
+    // Inspects the arguement list and checks number of arguements - Function signature from mpy side
+    // Signature: mp_arg_check_num(n_args, n_kw, self->n_args_min, self->n_args_max, self->is_kw);
+    mp_arg_check_num(n_args, n_kw, 4, 5, true);
+
+    mp_printf(&mp_plat_print,"here");
 
     // get the wanted LED object
     int wanted_led = pin_find(args[0], (const machine_pin_obj_t *)machine_pin_obj, MP_ARRAY_SIZE(machine_pin_obj));
@@ -189,6 +190,7 @@ mp_obj_t mp_pin_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, 
     mp_map_init_fixed_table(&kw_args, n_kw, args + n_args); 
     machine_pin_obj_init_helper(self, n_args - 1, args + 1, &kw_args);
     return MP_OBJ_FROM_PTR(self);
+}
 
 //Pin.init(mode,pull,value=value,drive=drive,alt=alt)
 STATIC mp_obj_t machine_pin_init(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
@@ -250,17 +252,18 @@ STATIC mp_obj_t machine_pin_low(mp_obj_t self_in) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_pin_low_obj, machine_pin_low);
 */
 STATIC const mp_rom_map_elem_t machine_pin_locals_dict_table[] = {
-    // Instance methods
+    // Instance methods
     { MP_ROM_QSTR(MP_QSTR___name__),             MP_ROM_QSTR(MP_QSTR_umachine) },
     { MP_ROM_QSTR(MP_QSTR_init),                 MP_ROM_PTR(&machine_pin_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_toggle_onBoardLed),    MP_ROM_PTR(&machine_pin_toggle_onBoardLed_obj) },
     { MP_ROM_QSTR(MP_QSTR_toggle),               MP_ROM_PTR(&machine_pin_toggle_obj) },
+    { MP_ROM_QSTR(MP_QSTR_value),                MP_ROM_PTR(&machine_pin_value_obj) },
     // Pin mode constants
     { MP_ROM_QSTR(MP_QSTR_IN),                  MP_ROM_INT(CYHAL_GPIO_DIR_INPUT) }, 
     { MP_ROM_QSTR(MP_QSTR_OUT),                 MP_ROM_INT(CYHAL_GPIO_DIR_OUTPUT) },
     //{ MP_ROM_QSTR(MP_QSTR_BI_DIR),                 MP_ROM_INT(CYHAL_GPIO_DIR_BIDIRECTIONAL) },
-    { MP_ROM_QSTR(MP_QSTR_OPEN_DRAIN),          MP_ROM_INT(GPIO_MODE_OPEN_DRAIN) },
-    { MP_ROM_QSTR(MP_QSTR_ALT_OPEN_DRAIN),      MP_ROM_INT(GPIO_MODE_ALT_OPEN_DRAIN) },
+    { MP_ROM_QSTR(MP_QSTR_OPEN_DRAIN),          MP_ROM_INT(CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW) },
+    { MP_ROM_QSTR(MP_QSTR_ALT_OPEN_DRAIN),      MP_ROM_INT(CYHAL_GPIO_DRIVE_OPENDRAINDRIVESHIGH) },
     // Pin drive constants
     //!TODO: Remove the list when implementing GPIO
     { MP_ROM_QSTR(MP_QSTR_DRIVE_STRONG),        MP_ROM_INT(CYHAL_GPIO_DRIVE_STRONG) },
