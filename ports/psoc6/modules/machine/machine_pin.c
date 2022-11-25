@@ -12,11 +12,11 @@ const machine_pin_obj_t machine_pin_obj[] = {
 //enums and structs to handle ARGS in MPY
 enum {ARG_mode, ARG_pull, ARG_value, ARG_drive, ARG_alt};
 static const mp_arg_t allowed_args[] = {
-    {MP_QSTR_mode,  MP_ARG_OBJ,                     {.u_rom_obj = MP_ROM_NONE}},
-    {MP_QSTR_pull,  MP_ARG_OBJ,                     {.u_rom_obj = MP_ROM_NONE}},
-    {MP_QSTR_value, MP_ARG_KW_ONLY | MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
-    {MP_QSTR_drive, MP_ARG_KW_ONLY | MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
-    {MP_QSTR_alt,   MP_ARG_KW_ONLY | MP_ARG_INT,    {.u_rom_obj = MP_ROM_NONE}},
+    {MP_QSTR_mode,  MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
+    {MP_QSTR_pull,  MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
+    {MP_QSTR_value, MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
+    {MP_QSTR_drive, MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
+    {MP_QSTR_alt,   MP_ARG_INT,    {.u_rom_obj = MP_ROM_NONE}},
 };
 
 // Mandatory MPY functions
@@ -171,7 +171,7 @@ mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_t n_arg
 mp_obj_t mp_pin_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
     // Inspects the arguement list and checks number of arguements - Function signature from mpy side
     // Signature: mp_arg_check_num(n_args, n_kw, self->n_args_min, self->n_args_max, self->is_kw);
-    mp_arg_check_num(n_args, n_kw, 4, 5, true);
+    mp_arg_check_num(n_args, n_kw, 6, 6, true);
 
     mp_printf(&mp_plat_print,"here");
 
