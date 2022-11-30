@@ -55,7 +55,7 @@ STATIC mp_obj_t machine_info(size_t n_args, const mp_obj_t *args) {
 // STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_info_obj, machine_info);
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_info_obj, 0, 1, machine_info);
 
-//machine.freq()
+// machine.freq()
 STATIC mp_obj_t machine_freq(size_t n_args, const mp_obj_t *args) {
     if (n_args == 0) {
         mp_printf(&mp_plat_print, "System core freq (CM4): %d Hz\n", mp_hal_get_cpu_freq());
@@ -67,39 +67,39 @@ STATIC mp_obj_t machine_freq(size_t n_args, const mp_obj_t *args) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_freq_obj, 0, 1, machine_freq);
 
-//TODO: to be enabled as a part of Machine module 
+// TODO: to be enabled as a part of Machine module
 // //machine.unique_id()
 // STATIC mp_obj_t machine_unique_id(void) {
 //     uint64_t id = CYPDL_GET_UNIQUE_ID();
 //     byte *id_addr = (byte *)&id;
 //     mp_printf(&mp_plat_print,"ID_formatted:%02x%02x%02x%02x:%02x%02x%02x%02x\n", id_addr[0], id_addr[1], id_addr[2], id_addr[3], id_addr[4], id_addr[5], id_addr[6], id_addr[7]);
 //     mp_printf(&mp_plat_print,"RAW_ID_data:");
-//     return mp_obj_new_bytes(id_addr,8); 
+//     return mp_obj_new_bytes(id_addr,8);
 // }
 // MP_DEFINE_CONST_FUN_OBJ_0(machine_unique_id_obj, machine_unique_id);
 
-//machine.reset()
+// machine.reset()
 // STATIC mp_obj_t machine_reset(void) {
 //     CYHAL_RESET();
-//     return mp_const_none;    
+//     return mp_const_none;
 // }
 // MP_DEFINE_CONST_FUN_OBJ_0(machine_reset_obj, machine_reset);
 
-//machine.soft_reset()
-//TODO: soft-reset must be handled in main.c and REPL has to deinit and reinit
+// machine.soft_reset()
+// TODO: soft-reset must be handled in main.c and REPL has to deinit and reinit
 STATIC mp_obj_t machine_soft_reset(void) {
     pyexec_system_exit = PYEXEC_FORCED_EXIT;
     mp_raise_type(&mp_type_SystemExit);
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_soft_reset_obj, machine_soft_reset);
 
-//machine.reset_cause()
-//Note: accurate returns only after one forced hard reset post hex upload.
+// machine.reset_cause()
+// Note: accurate returns only after one forced hard reset post hex upload.
 // STATIC mp_obj_t machine_reset_cause(void) {
 //         qstr mp_reset_qstr = MP_QSTR_None;
 //         uint8_t reset_cause_const = -1;
 //         uint32_t reset_cause = CYPDL_RESET_CAUSE();
-        
+
 //         if(reset_cause == 0UL){
 //             mp_reset_qstr = MP_QSTR_HARD_RESET;
 //             reset_cause_const = MACHINE_HARD_RESET;
@@ -126,7 +126,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_soft_reset_obj, machine_soft_reset);
 // }
 // STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_reset_cause_obj, machine_reset_cause);
 
-//machine.disable_irq()
+// machine.disable_irq()
 // STATIC mp_obj_t machine_disable_irq(void) {
 //     uint32_t state = CY_DISABLE_GLOBAL_IRQ();
 //     mp_printf(&mp_plat_print,"IRQ State: ");
@@ -134,7 +134,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_soft_reset_obj, machine_soft_reset);
 // }
 // MP_DEFINE_CONST_FUN_OBJ_0(machine_disable_irq_obj, machine_disable_irq);
 
-//machine.enable_irq()
+// machine.enable_irq()
 // STATIC mp_obj_t machine_enable_irq(mp_obj_t state_in) {
 //     uint32_t state = mp_obj_get_int(state_in);
 //     bool result = CY_ENABLE_GLOBAL_IRQ(state);
@@ -151,14 +151,14 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_soft_reset_obj, machine_soft_reset);
 // of the MCU until an interrupt occurs, at which point execution continues.
 // see: https://www.infineon.com/dgdl/Infineon-AN219528_PSoC_6_MCU_low-power_modes_and_power_reduction_techniques-ApplicationNotes-v06_00-EN.pdf?fileId=8ac78c8c7cdc391c017d0d31efdc659f  pg.7
 STATIC mp_obj_t machine_idle(void) {
-    __WFI(); //standard ARM instruction
+    __WFI(); // standard ARM instruction
     return mp_const_none;
 }
 MP_DEFINE_CONST_FUN_OBJ_0(machine_idle_obj, machine_idle);
 
 
 STATIC const mp_rom_map_elem_t machine_module_globals_table[] = {
-    //instance functions
+    // instance functions
     { MP_ROM_QSTR(MP_QSTR___name__),            MP_ROM_QSTR(MP_QSTR_machine) },
     { MP_ROM_QSTR(MP_QSTR_info),                MP_ROM_PTR(&machine_info_obj) },
     { MP_ROM_QSTR(MP_QSTR_freq),                MP_ROM_PTR(&machine_freq_obj) },
@@ -172,16 +172,16 @@ STATIC const mp_rom_map_elem_t machine_module_globals_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR_idle),                MP_ROM_PTR(&machine_idle_obj) },
 
-    //{ MP_ROM_QSTR(MP_QSTR_bootloader),          MP_ROM_PTR(&machine_bootloader_obj) }, // Note: not implemented
+    // { MP_ROM_QSTR(MP_QSTR_bootloader),          MP_ROM_PTR(&machine_bootloader_obj) }, // Note: not implemented
 
-    //class constants
+    // class constants
     { MP_ROM_QSTR(MP_QSTR_PWRON_RESET),         MP_ROM_INT(MACHINE_PWRON_RESET) },
     { MP_ROM_QSTR(MP_QSTR_HARD_RESET),          MP_ROM_INT(MACHINE_HARD_RESET) },
     { MP_ROM_QSTR(MP_QSTR_WDT_RESET),           MP_ROM_INT(MACHINE_WDT_RESET) },
     { MP_ROM_QSTR(MP_QSTR_DEEPSLEEP_RESET),     MP_ROM_INT(MACHINE_DEEPSLEEP_RESET) },
     { MP_ROM_QSTR(MP_QSTR_SOFT_RESET),          MP_ROM_INT(MACHINE_SOFT_RESET) },
 
-    //TODO: dynamic memory allocation functions/objects. Not yet implemented
+    // TODO: dynamic memory allocation functions/objects. Not yet implemented
     // { MP_ROM_QSTR(MP_QSTR_mem8),                MP_ROM_PTR(&machine_mem8_obj) },
     // { MP_ROM_QSTR(MP_QSTR_mem16),               MP_ROM_PTR(&machine_mem16_obj) },
     // { MP_ROM_QSTR(MP_QSTR_mem32),               MP_ROM_PTR(&machine_mem32_obj) },
