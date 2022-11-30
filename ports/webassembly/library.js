@@ -33,16 +33,14 @@ mergeInto(LibraryManager.library, {
                 process.stdout.write(b);
             } else {
                 var c = String.fromCharCode(getValue(ptr + i, 'i8'));
-                var mp_js_stdout = document.getElementById('mp_js_stdout');
-                var print = new Event('print');
-                print.data = c;
-                mp_js_stdout.dispatchEvent(print);
+                var printEvent = new CustomEvent('micropython-print', { detail: c });
+                document.dispatchEvent(printEvent);
             }
         }
     },
 
     mp_js_ticks_ms: function() {
-        return (new Date()).getTime() - MP_JS_EPOCH;
+        return Date.now() - MP_JS_EPOCH;
     },
 
     mp_js_hook: function() {

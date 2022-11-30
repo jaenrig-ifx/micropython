@@ -14,7 +14,7 @@
 #include "cy_retarget_io.h"
 
 
-extern __attribute__((weak)) int _write(int fd, const char* ptr, int len);
+extern __attribute__((weak)) int _write(int fd, const char *ptr, int len);
 
 
 /*

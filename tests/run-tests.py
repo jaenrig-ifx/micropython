@@ -412,9 +412,10 @@ def run_tests(pyb, tests, args, result_dir, num_threads=1):
         # run-tests.py script itself so use base_path.
 
         # Check if micropython.native is supported, and skip such tests if it's not
-        output = run_feature_check(pyb, args, base_path, "native_check.py")
-        if output != b"native\n":
-            skip_native = True
+        # output = run_feature_check(pyb, args, base_path, "native_check.py")
+        # if output != b"native\n":
+        #     skip_native = True
+        skip_native = False
 
         # Check if arbitrary-precision integers are supported, and skip such tests if it's not
         output = run_feature_check(pyb, args, base_path, "int_big.py")
@@ -915,11 +916,19 @@ the last matching regex is used:
         "esp32",
         "minimal",
         "nrf",
+        "psoc6",
         "renesas-ra",
         "rp2",
     )
-    if args.target in LOCAL_TARGETS or args.list_tests:
+    if args.list_tests:
         pyb = None
+    elif args.target in LOCAL_TARGETS:
+        pyb = None
+        if not args.mpy_cross_flags:
+            if args.target == "unix":
+                args.mpy_cross_flags = "-march=host"
+            elif args.target == "qemu-arm":
+                args.mpy_cross_flags = "-march=armv7m"
     elif args.target in EXTERNAL_TARGETS:
         global pyboard
         sys.path.append(base_path("../tools"))

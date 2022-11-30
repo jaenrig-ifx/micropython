@@ -28,16 +28,16 @@ void do_str(const char *src, mp_parse_input_kind_t input_kind) {
     nlr_buf_t nlr;
 
     if (nlr_push(&nlr) == 0) {
-        mp_lexer_t     *lex         = mp_lexer_new_from_str_len(MP_QSTR__lt_stdin_gt_, src, strlen(src), 0);
-        qstr            source_name = lex->source_name;
-        mp_parse_tree_t parse_tree  = mp_parse(lex, input_kind);
-        mp_obj_t        module_fun  = mp_compile(&parse_tree, source_name, true);
+        mp_lexer_t *lex = mp_lexer_new_from_str_len(MP_QSTR__lt_stdin_gt_, src, strlen(src), 0);
+        qstr source_name = lex->source_name;
+        mp_parse_tree_t parse_tree = mp_parse(lex, input_kind);
+        mp_obj_t module_fun = mp_compile(&parse_tree, source_name, true);
 
         mp_call_function_0(module_fun);
         nlr_pop();
     } else {
         // uncaught exception
-        mp_obj_print_exception(&mp_plat_print, (mp_obj_t) nlr.ret_val);
+        mp_obj_print_exception(&mp_plat_print, (mp_obj_t)nlr.ret_val);
     }
 }
 
@@ -48,7 +48,7 @@ void do_str(const char *src, mp_parse_input_kind_t input_kind) {
 
 static char *stack_top;
 // TODO: set to proper value for our MCU
-static char  heap[192 * 1024];
+static char heap[192 * 1024];
 
 #endif
 
@@ -56,7 +56,7 @@ static char  heap[192 * 1024];
 int main(int argc, char **argv) {
     cy_rslt_t result;
 
-#if defined (CY_DEVICE_SECURE)
+    #if defined(CY_DEVICE_SECURE)
 
     cyhal_wdt_t wdt_obj;
 
@@ -65,14 +65,13 @@ int main(int argc, char **argv) {
     CY_ASSERT(CY_RSLT_SUCCESS == result);
     cyhal_wdt_free(&wdt_obj);
 
-#endif /* #if defined (CY_DEVICE_SECURE) */
+    #endif /* #if defined (CY_DEVICE_SECURE) */
 
     /* Initialize the device and board peripherals */
     result = cybsp_init();
-    
+
     /* Board init failed. Stop program execution */
-    if (result != CY_RSLT_SUCCESS)
-    {
+    if (result != CY_RSLT_SUCCESS) {
         CY_ASSERT(0);
     }
 
@@ -83,24 +82,17 @@ int main(int argc, char **argv) {
     result = cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, CY_RETARGET_IO_BAUDRATE);
 
     /* retarget-io init failed. Stop program execution */
-    if (result != CY_RSLT_SUCCESS)
-    {
+    if (result != CY_RSLT_SUCCESS) {
         CY_ASSERT(0);
     }
 
-
-    /* \x1b[2J\x1b[;H - ANSI ESC sequence for clear screen */
-    printf("\x1b[2J\x1b[;H");
-
-    printf("****************** "
-           "HAL: Hello World! Example "
-           "****************** \r\n\n");
-    printf("Hello World!!!\r\n\n");
-
-    setvbuf( stdin,  NULL, _IONBF, 0 );
-    setvbuf( stdout, NULL, _IONBF, 0 );
+    setvbuf(stdin,  NULL, _IONBF, 0);
+    setvbuf(stdout, NULL, _IONBF, 0);
 
     int stack_dummy;
+
+soft_reset:
+
     stack_top = (char *)&stack_dummy;
 
     #if MICROPY_ENABLE_GC
@@ -115,39 +107,28 @@ int main(int argc, char **argv) {
 
     #if MICROPY_ENABLE_COMPILER
 
-    #if MICROPY_REPL_EVENT_DRIVEN
-
-    pyexec_event_repl_init();
-
     for (;;) {
-        int c = mp_hal_stdin_rx_chr();
-
-        if (pyexec_event_repl_process_char(c)) {
-            break;
+        if (pyexec_mode_kind == PYEXEC_MODE_RAW_REPL) {
+            if (pyexec_raw_repl() != 0) {
+                break;
+            }
+        } else {
+            if (pyexec_friendly_repl() != 0) {
+                break;
+            }
         }
     }
 
     #else
 
-    printf("running do_str ...\r\n");
-    do_str("print('hello world!', list(x+1 for x in range(10)), end='\\r\\n')", MP_PARSE_SINGLE_INPUT);
-
-    printf("\r\nrunning do_str ...\r\n");
-    do_str("for i in range(10):\r\n  print(i)", MP_PARSE_FILE_INPUT);
-
-    printf("\r\nrunning pyexec_frozen_module on frozentest.py ...\r\n");
-    pyexec_frozen_module("frozentest.py");
-
-    printf("\r\nrunning pyexec_friendly_repl ...\r\n");
-    pyexec_friendly_repl();
-
     #endif
 
-    #else
-
-    #endif
+    printf("MPY: soft reboot\n");
 
     mp_deinit();
+
+    goto soft_reset;
+
     return 0;
 }
 

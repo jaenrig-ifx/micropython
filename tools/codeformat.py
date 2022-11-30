@@ -43,6 +43,7 @@ PATHS = [
     "shared/netutils/*.[ch]",
     "shared/timeutils/*.[ch]",
     "shared/runtime/*.[ch]",
+    "shared/tinyusb/*.[ch]",
     "mpy-cross/*.[ch]",
     "ports/**/*.[ch]",
     "py/*.[ch]",
@@ -70,6 +71,8 @@ EXCLUSIONS = [
     "ports/nrf/modules/ubluepy/*.[ch]",
     "ports/nrf/modules/uos/*.[ch]",
     "ports/nrf/modules/utime/*.[ch]",
+    # PSoC 3rd party
+    "ports/psoc6/boards/**/*.[ch]",
     # STM32 USB dev/host code is mostly 3rd party.
     "ports/stm32/usbdev/**/*.[ch]",
     "ports/stm32/usbhost/**/*.[ch]",

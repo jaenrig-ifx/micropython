@@ -63,7 +63,7 @@ extern "C" {
 cy_rslt_t cybsp_init(void);
 
 #if defined(CYBSP_CUSTOM_SYSCLK_PM_CALLBACK)
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 // cybsp_register_custom_sysclk_pm_callback
 //
 // Registers a power management callback that prepares the clock system for entering deep sleep mode
@@ -71,7 +71,7 @@ cy_rslt_t cybsp_init(void);
 // function and define `CYBSP_CUSTOM_SYSCLK_PM_CALLBACK` if it needs to replace the default SysClk
 // DeepSleep callback behavior with application specific logic.
 // NOTE: This is called automatically as part of \ref cybsp_init
-//--------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 cy_rslt_t cybsp_register_custom_sysclk_pm_callback(void);
 #endif // defined(CYBSP_CUSTOM_SYSCLK_PM_CALLBACK)
 

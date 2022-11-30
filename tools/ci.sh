@@ -237,7 +237,7 @@ function ci_powerpc_build {
 ########################################################################################
 # ports/psoc6
 
-MPY_MTB_CI_DOCKER_VERSION=0.1.0
+MPY_MTB_CI_DOCKER_VERSION=0.2.0
 
 function ci_psoc6_setup {
     docker pull ifxmakers/mpy-mtb-ci:${MPY_MTB_CI_DOCKER_VERSION}
@@ -249,8 +249,8 @@ function ci_psoc6_setup {
 }
 
 function ci_psoc6_build {
-    docker exec mtb-ci /bin/bash -c "source /home/mtb-export.sh && make mpy_mtb_init"
-    docker exec mtb-ci /bin/bash -c "source /home/mtb-export.sh && make"
+    docker exec mtb-ci make mpy_mtb_init
+    docker exec mtb-ci make
 }
 
 ########################################################################################
@@ -303,6 +303,10 @@ function ci_rp2_build {
     make ${MAKEOPTS} -C ports/rp2 USER_C_MODULES=../../examples/usercmodule/micropython.cmake
     make ${MAKEOPTS} -C ports/rp2 BOARD=W5100S_EVB_PICO submodules
     make ${MAKEOPTS} -C ports/rp2 BOARD=W5100S_EVB_PICO
+
+    # Test building ninaw10 driver and NIC interface.
+    make ${MAKEOPTS} -C ports/rp2 BOARD=ARDUINO_NANO_RP2040_CONNECT submodules
+    make ${MAKEOPTS} -C ports/rp2 BOARD=ARDUINO_NANO_RP2040_CONNECT
 }
 
 ########################################################################################
@@ -527,7 +531,6 @@ function ci_unix_32bit_setup {
     sudo pip3 install setuptools
     sudo pip3 install pyelftools
     gcc --version
-    python2 --version
     python3 --version
 }
 
@@ -706,7 +709,6 @@ function ci_zephyr_install {
 
 function ci_zephyr_build {
     docker exec zephyr-ci west build -p auto -b qemu_x86 -- -DCONF_FILE=prj_minimal.conf
-    docker exec zephyr-ci west build -p auto -b qemu_x86
     docker exec zephyr-ci west build -p auto -b frdm_k64f
     docker exec zephyr-ci west build -p auto -b mimxrt1050_evk
     docker exec zephyr-ci west build -p auto -b nucleo_wb55rg # for bluetooth
