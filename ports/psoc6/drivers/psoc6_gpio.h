@@ -7,8 +7,6 @@
 #define GPIO_STATE_ON                   (0U)
 #define GPIO_STATE_OFF                  (1U)
 
-#define GPIO_MODE_ALT                   (3U)
-
 cy_rslt_t gpio_init(cyhal_gpio_t pin, cyhal_gpio_direction_t direction, cyhal_gpio_drive_mode_t drive_mode, bool init_val);
 void gpio_toggle_onBoardLed();
 void gpio_toggle(cyhal_gpio_t pin);

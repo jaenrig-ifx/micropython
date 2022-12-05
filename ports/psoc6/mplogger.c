@@ -26,7 +26,7 @@
 
 
 // function to pipe debug messages to console in LOGGER DEBUG MODE
-void mplogger_print(char *message) {
+void mplogger_print(char *message, ...) {
     #if  MICROPY_LOGGER_DEBUG == 1
     mp_printf(&mp_plat_print, message);
     #endif

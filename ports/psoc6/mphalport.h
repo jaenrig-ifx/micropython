@@ -1,10 +1,13 @@
 #ifndef MICROPY_INCLUDED_PSOC6_MPHALPORT_H
 #define MICROPY_INCLUDED_PSOC6_MPHALPORT_H
 
+//mpy includes
 #include "py/mpconfig.h"
 #include "py/ringbuf.h"
 #include "py/obj.h"
 // #include "py/mphal.h"
+
+//cy includes
 #include "drivers/psoc6_gpio.h"
 #include "cy_sysclk.h"
 #include "cyhal.h"
@@ -15,6 +18,19 @@
 #define mp_hal_pin_dir_t cyhal_gpio_direction_t
 #define mp_hal_pin_drive_mode_t cyhal_gpio_drive_mode_t
 #define mp_hal_pin_rslt_t cy_rslt_t
+
+// enums to map MPY parameters to CYHAL params to avoid confusion 
+// enum to hold pin modes
+enum {GPIO_MODE_IN, GPIO_MODE_OUT, GPIO_MODE_OPEN_DRAIN, GPIO_MODE_ALT, GPIO_MODE_ALT_OPEN_DRAIN};
+
+// enum to hold pin drive strengths
+enum {GPIO_DRIVE_CAP_0, GPIO_DRIVE_CAP_1, GPIO_DRIVE_CAP_2, GPIO_DRIVE_CAP_3};
+
+// enum to hold pulls
+enum {GPIO_PULL_UP, GPIO_PULL_DOWN, GPIO_PULL_HOLD};
+
+// enum for alt functions
+enum {HSIOM_GPIO_FUNC}; // see file gpio_psoc6_02_124_bga.h
 
 extern int mp_interrupt_char;
 
