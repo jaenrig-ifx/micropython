@@ -53,51 +53,51 @@ STATIC mp_obj_t machine_pin_call(mp_obj_t self_in, mp_uint_t n_args, mp_uint_t n
 }
 
 STATIC void machine_pin_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
-    mp_printf(&mp_plat_print, "machine pin print\n");
-    // Placeholder for full implementation in GPIO epic
-    /*machine_pin_obj_t *self = self_in;
-    en_hsiom_sel_t pin_func = PIN_GET_HSIOM_FUNC(self->id);
-    qstr mode_qstr = MP_QSTR_None; //TODO: compare with rp2, init value needed here due to "-werror=maybe-uninitialized"
-    qstr pull_qstr = MP_QSTR_None;
-    uint8_t pin_value = -1;
-    if (pin_func == HSIOM_SEL_GPIO){
-        if (GPIO_IS_OPEN_DRAIN(self->id)){
-            mode_qstr = MP_QSTR_OPEN_DRAIN;
-        }
-        else if (GPIO_IS_OUT(self->id)){
-            mode_qstr = MP_QSTR_OUT;
-        }
-        else if (GPIO_IS_IN(self->id)){
-            mode_qstr = MP_QSTR_IN;
-        }
-        else{ //only pull up and pull down are prescribed in MPY docs
-            if (GPIO_IS_PULL_UP(self->id)){
-                pull_qstr = MP_QSTR_PULL_UP;
-                if (GPIO_GET_CYPDL_DRIVE(self->id) < 8) //drive enum is less than 8 when input buffer is off (or pin is cfgd as output)
-                    mode_qstr = MP_QSTR_OUT;
-                else
-                    mode_qstr = MP_QSTR_IN;
-            }
-            else if (GPIO_IS_PULL_DOWN(self->id)){
-                pull_qstr = MP_QSTR_PULL_DOWN;
-                if (GPIO_GET_CYPDL_DRIVE(self->id) < 8)
-                    mode_qstr = MP_QSTR_OUT;
-                else
-                    mode_qstr = MP_QSTR_IN;
-            }
-            else
-                mp_printf(print,"no params set for given pin object");
-        }
-        pin_value = GPIO_GET_VALUE(self->id);    
-    }
-    else{
-        mode_qstr = MP_QSTR_ALT;
-    }
-    mp_printf(print, "Pin:%u, Mode=%q, Pull=%q, Value=%u", self->id, mode_qstr, pull_qstr, pin_value); */
+    mplogger_print("machine pin print\n");
+    
+    machine_pin_obj_t *self = self_in;
+    en_hsiom_sel_t pin_func = PIN_GET_HSIOM_FUNC(self->id);
+    qstr mode_qstr = MP_QSTR_None; // TODO: compare with rp2, init value needed here due to "-werror=maybe-uninitialized"
+    qstr pull_qstr = MP_QSTR_None;
+    uint8_t pin_value = -1;
+
+    if (pin_func == HSIOM_SEL_GPIO) {
+        if (GPIO_IS_OPEN_DRAIN(self->id)) {
+            mode_qstr = MP_QSTR_OPEN_DRAIN;
+        } else if (GPIO_IS_OUT(self->id)) {
+            mode_qstr = MP_QSTR_OUT;
+        } else if (GPIO_IS_IN(self->id)) {
+            mode_qstr = MP_QSTR_IN;
+        } else { // only pull up and pull down are prescribed in MPY docs
+            if (GPIO_IS_PULL_UP(self->id)) {
+                pull_qstr = MP_QSTR_PULL_UP;
+                if (GPIO_GET_CYPDL_DRIVE(self->id) < 8) { // drive enum is less than 8 when input buffer is off (or pin is cfgd as output)
+                    mode_qstr = MP_QSTR_OUT;
+                } else {
+                    mode_qstr = MP_QSTR_IN;
+                }
+            } else if (GPIO_IS_PULL_DOWN(self->id)) {
+                pull_qstr = MP_QSTR_PULL_DOWN;
+                if (GPIO_GET_CYPDL_DRIVE(self->id) < 8) {
+                    mode_qstr = MP_QSTR_OUT;
+                } else {
+                    mode_qstr = MP_QSTR_IN;
+                }
+            } else {
+                mp_printf(print, "no params set for given pin object");
+            }
+        }
+        pin_value = GPIO_GET_VALUE(self->id);
+    } else {
+        mode_qstr = MP_QSTR_ALT;
+    }
+
+    mp_printf(print, "Pin:%u or %s, Mode=%q, Pull=%q, Value=%u", self->id, self->name, mode_qstr, pull_qstr, pin_value);
 }
 
 // helper function to parse given initial params and invoke HAL-level GPIO functions
 mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    mplogger_print("init helper function called\n");
     // Parse args
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
@@ -209,7 +209,6 @@ mp_obj_t mp_pin_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, 
 
     // go into param arg parsing if args apart from "id" are provided (for ex. pin.Mode, pin.PULL etc)
     if (n_args > 1 || n_kw > 0) {
-        mplogger_print("init helper function called\n");
         // pin mode given, so configure this GPIO
         mp_map_t kw_args;
         mp_map_init_fixed_table(&kw_args, n_kw, args + n_args);
@@ -218,72 +217,97 @@ mp_obj_t mp_pin_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, 
     return MP_OBJ_FROM_PTR(self);
 }
 
-// Pin.init(mode,pull,value=value,drive=drive,alt=alt)
-STATIC mp_obj_t machine_pin_init(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
-    return machine_pin_obj_init_helper(args[0], n_args - 1, args + 1, kw_args);
-}
-MP_DEFINE_CONST_FUN_OBJ_KW(machine_pin_init_obj, 1, machine_pin_init);
 // pin.value([value])
 STATIC mp_obj_t machine_pin_value(size_t n_args, const mp_obj_t *args) {
     return machine_pin_call(args[0], n_args - 1, 0, args + 1);
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_pin_value_obj, 1, 2, machine_pin_value);
 
-// Toggle on board led
-STATIC mp_obj_t machine_pin_toggle(mp_obj_t pin) {
-    machine_pin_obj_t *self = MP_OBJ_TO_PTR(pin);
-    mp_hal_pin_toggle(self->id);
+// instantiates obj of Pin class
+// Pin.init(mode,pull,value=value,drive=drive,alt=alt)
+STATIC mp_obj_t machine_pin_obj_init(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
+    mplogger_print("Pin class object instantiated\n"); // TODO: remove later
+    // redirect args except self to the obj init helper function
+    // args[0] here is self ptr
+    return machine_pin_obj_init_helper(args[0], n_args - 1, args + 1, kw_args);
+}
+MP_DEFINE_CONST_FUN_OBJ_KW(machine_pin_obj_init_obj, 1, machine_pin_obj_init);
+
+
+// Pin.toggle()
+STATIC mp_obj_t machine_pin_toggle(mp_obj_t self_in) {
+    machine_pin_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    if (GPIO_IS_IN(self->id) || GPIO_IS_OUT(self->id) || GPIO_IS_OPEN_DRAIN(self->id)) { // toggle the output buffer of output driver with given value;
+        GPIO_TOGGLE_VALUE(self->id); // for output it takes effect instantly; for input pins, the effect will show when
+                                     // pin is set as input next. For open drain, behavior shifts between 0 and HiZ.
+    }
     return mp_const_none;
+
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_pin_toggle_obj, machine_pin_toggle);
 
-// Moni's branch
-// Pin.toggle()
-/*STATIC mp_obj_t machine_pin_toggle(mp_obj_t self_in) {
-    machine_pin_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    if (GPIO_IS_IN(self->id) || GPIO_IS_OUT(self->id) || GPIO_IS_OPEN_DRAIN(self->id)){ //toggle the output buffer of output driver with given value;
-        GPIO_TOGGLE_VALUE(self->id); //for output it takes effect instantly; for input pins, the effect will show when
-                                     //pin is set as input next. For open drain, behavior shifts between 0 and HiZ.  
-    }
-    return mp_const_none;
-   
-}
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_pin_toggle_obj, machine_pin_toggle);
 // Pin.high()
 STATIC mp_obj_t machine_pin_high(mp_obj_t self_in) {
-    machine_pin_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    if (GPIO_IS_IN(self->id) || GPIO_IS_OUT(self->id) || GPIO_IS_OPEN_DRAIN(self->id)){ //toggle the output buffer of output driver with given value;
-        GPIO_SET_VALUE(self->id); //for output it takes effect instantly; for input pins, the effect will show when
-                                     //pin is set as input next. For open drain, behavior shifts between 0 and HiZ.  
-    }            
-    return mp_const_none;
-   
+    machine_pin_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    if (GPIO_IS_IN(self->id) || GPIO_IS_OUT(self->id) || GPIO_IS_OPEN_DRAIN(self->id)) { // toggle the output buffer of output driver with given value;
+        GPIO_SET_VALUE(self->id); // for output it takes effect instantly; for input pins, the effect will show when
+                                  // pin is set as input next. For open drain, behavior shifts between 0 and HiZ.
+    }
+    return mp_const_none;
+
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_pin_high_obj, machine_pin_high);
+
 // Pin.low()
 STATIC mp_obj_t machine_pin_low(mp_obj_t self_in) {
-    machine_pin_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    if (GPIO_IS_IN(self->id) || GPIO_IS_OUT(self->id) || GPIO_IS_OPEN_DRAIN(self->id)){ //toggle the output buffer of output driver with given value;
-        GPIO_CLR_VALUE(self->id); //for output it takes effect instantly; for input pins, the effect will show when
-                                     //pin is set as input next. For open drain, behavior shifts between 0 and HiZ.  
-    }            
-    return mp_const_none;
-   
+    machine_pin_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    if (GPIO_IS_IN(self->id) || GPIO_IS_OUT(self->id) || GPIO_IS_OPEN_DRAIN(self->id)) { // toggle the output buffer of output driver with given value;
+        GPIO_CLR_VALUE(self->id); // for output it takes effect instantly; for input pins, the effect will show when
+                                  // pin is set as input next. For open drain, behavior shifts between 0 and HiZ.
+    }
+    return mp_const_none;
+
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_pin_low_obj, machine_pin_low);
-*/
+
+// // Pin.Mode()
+// STATIC mp_obj_t machine_pin_mode(mp_obj_t self_in, mp_uint_t n_args, mp_uint_t n_kw, const mp_obj_t *args) {
+//     mp_printf(&mp_plat_print,"machine_pin_mode: Not implemented!");
+//     mp_arg_check_num(n_args, n_kw, 0, 1, false);
+//     //machine_pin_obj_t *self = self_in;
+
+//     // if (n_args == 0) {
+//     //     //get mode
+//     // }
+//     // else {
+//     //    //set mode
+//     // }
+
+//     return mp_const_none;
+
+// }
+
+// STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_pin_mode_obj,1,2, machine_pin_mode);
+
+
 STATIC const mp_rom_map_elem_t machine_pin_locals_dict_table[] = {
     // Instance methods
     { MP_ROM_QSTR(MP_QSTR___name__),                MP_ROM_QSTR(MP_QSTR_umachine) },
-    { MP_ROM_QSTR(MP_QSTR_init),                    MP_ROM_PTR(&machine_pin_init_obj) },
+    { MP_ROM_QSTR(MP_QSTR_init),                    MP_ROM_PTR(&machine_pin_obj_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_toggle),                  MP_ROM_PTR(&machine_pin_toggle_obj) },
     { MP_ROM_QSTR(MP_QSTR_value),                   MP_ROM_PTR(&machine_pin_value_obj) },
+    { MP_ROM_QSTR(MP_QSTR_low),                     MP_ROM_PTR(&machine_pin_low_obj) },
+    { MP_ROM_QSTR(MP_QSTR_high),                    MP_ROM_PTR(&machine_pin_high_obj) },
+    { MP_ROM_QSTR(MP_QSTR_off),                     MP_ROM_PTR(&machine_pin_high_obj) },
+    { MP_ROM_QSTR(MP_QSTR_on),                      MP_ROM_PTR(&machine_pin_low_obj) },
+    // { MP_ROM_QSTR(MP_QSTR_mode),                 MP_ROM_PTR(&machine_pin_mode_obj) }, //TODO: got unknown error!
     // Pin mode constants
     { MP_ROM_QSTR(MP_QSTR_IN),                      MP_ROM_INT(GPIO_MODE_IN) },
     { MP_ROM_QSTR(MP_QSTR_OUT),                     MP_ROM_INT(GPIO_MODE_OUT) },
     { MP_ROM_QSTR(MP_QSTR_OPEN_DRAIN),              MP_ROM_INT(GPIO_MODE_OPEN_DRAIN) },
     // Pin drive constants
     //TODO: add/uncomment below if/when CYPDL drive modes implemented
+    //Note: not in MPY guidelines
     { MP_ROM_QSTR(MP_QSTR_DRIVE_STRONG),            MP_ROM_INT(CYHAL_GPIO_DRIVE_STRONG) },
     /*
     { MP_ROM_QSTR(MP_QSTR_DRIVE_0),                 MP_ROM_INT(GPIO_DRIVE_CAP_0) },
