@@ -10,6 +10,8 @@
 cy_rslt_t gpio_init(cyhal_gpio_t pin, cyhal_gpio_direction_t direction, cyhal_gpio_drive_mode_t drive_mode, bool init_val);
 void gpio_toggle_onBoardLed();
 void gpio_toggle(cyhal_gpio_t pin);
+//int  gpio_get_mode(uint32_t pin);
+//uint32_t gpio_get_cypdl_drive(uint32_t pin);
 
 /* !Placeholder : Add Other GPIO functions here  */
 

@@ -28,26 +28,27 @@ static const mp_arg_t allowed_args[] = {
 
 // Mandatory MPY functions
 STATIC mp_obj_t machine_pin_call(mp_obj_t self_in, mp_uint_t n_args, mp_uint_t n_kw, const mp_obj_t *args) {
-    mp_printf(&mp_plat_print, "machine pin call\n");
-    // Placeholder for full implementation in GPIO epic
-    /*mp_arg_check_num(n_args, n_kw, 0, 1, false);
+    mplogger_print("machine pin call\n");
+    mp_arg_check_num(n_args, n_kw, 0, 1, false);
     machine_pin_obj_t *self = self_in;
-    //Note: see https://docs.micropython.org/en/latest/library/machine.Pin.html#machine.Pin.value
+
+    // Note: see https://docs.micropython.org/en/latest/library/machine.Pin.html#machine.Pin.value
     if (n_args == 0) {
-        // get pin value if pin is in input mode
-        return GPIO_GET_VALUE_CALL(self->id);    
-    }
-    else {
-        // set pin
-        bool value = mp_obj_is_true(args[0]);
-        if (GPIO_IS_IN(self->id) || GPIO_IS_OUT(self->id) || GPIO_IS_OPEN_DRAIN(self->id)){ //set the output buffer of output driver with given value;
-            if (value)                                //if Pin.Mode is Pin.IN, value will reflect when pin is next set as output.    
-                GPIO_SET_VALUE(self->id);
-            else
-                GPIO_CLR_VALUE(self->id);
-        }
-    }*/// given how the PSoC architecture is, if the "drive mode" is set correctly, the same set/clr functions can be used for all the "modes".
-    // refer pg 245 of PSoC6 Arch TRM: https://www.infineon.com/dgdl/Infineon-PSoC_6_MCU_PSoC_62_Architecture_Technical_Reference_Manual-AdditionalTechnicalInformation-v08_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0f94758401d1&utm_source=cypress&utm_medium=referral&utm_campaign=202110_globe_en_all_integration-files
+        // get pin value if pin is in input mode, returns NONE if pin is in output mode
+        return GPIO_GET_VALUE_CALL(self->id);
+    } else {
+        // set pin
+        bool value = mp_obj_is_true(args[0]);
+        if (GPIO_IS_IN(self->id) || GPIO_IS_OUT(self->id) || GPIO_IS_OPEN_DRAIN(self->id)) { // set the output buffer of output driver with given value;
+            if (value) {                              // if Pin.Mode is Pin.IN, value will reflect when pin is next set as output.
+                GPIO_SET_VALUE(self->id);
+            } else {
+                GPIO_CLR_VALUE(self->id);
+            }
+        }
+    } // given how the PSoC architecture is, if the "drive mode" is set correctly, the same set/clr functions can be used for all the "modes".
+      // refer pg 245 of PSoC6 Arch TRM: https://www.infineon.com/dgdl/Infineon-PSoC_6_MCU_PSoC_62_Architecture_Technical_Reference_Manual-AdditionalTechnicalInformation-v08_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0f94758401d1&utm_source=cypress&utm_medium=referral&utm_campaign=202110_globe_en_all_integration-files
+
     return mp_const_none;
 }
 
