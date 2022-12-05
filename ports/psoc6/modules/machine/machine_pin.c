@@ -1,22 +1,28 @@
+//mpy includes
 #include "py/runtime.h"
 #include "py/mphal.h"
+//std includes
 #include <stdio.h>
 #include <string.h>
+//port-specific includes
 #include "pins.h"
 #include "mphalport.h"
 #include "modmachine.h"
+
+//TODO: instantiation can be moved to pins.c since this can be board-specific later
 // Pin objects
 const machine_pin_obj_t machine_pin_obj[] = {
     {{&machine_pin_type}, PIN_P13_7, "P13_7"},
+    {{&machine_pin_type}, PIN_P0_4,  "P0_4"}
 };
 // enums and structs to handle ARGS in MPY
 enum {ARG_mode, ARG_pull, ARG_value, ARG_drive, ARG_alt};
 static const mp_arg_t allowed_args[] = {
-    {MP_QSTR_mode,  MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
-    {MP_QSTR_pull,  MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
-    {MP_QSTR_value, MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
-    {MP_QSTR_drive, MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
-    {MP_QSTR_alt,   MP_ARG_INT,    {.u_rom_obj = MP_ROM_NONE}},
+    {MP_QSTR_mode,  MP_ARG_OBJ,                     {.u_rom_obj = MP_ROM_NONE}},
+    {MP_QSTR_pull,  MP_ARG_OBJ,                     {.u_rom_obj = MP_ROM_NONE}},
+    {MP_QSTR_value, MP_ARG_KW_ONLY | MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
+    {MP_QSTR_drive, MP_ARG_KW_ONLY | MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
+    {MP_QSTR_alt,   MP_ARG_KW_ONLY | MP_ARG_INT,    {.u_int  = HSIOM_SEL_GPIO}}, // default value of HSIOM set to GPIO mode of pin. 
 };
 
 // Mandatory MPY functions
