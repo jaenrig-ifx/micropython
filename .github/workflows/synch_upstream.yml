@@ -44,6 +44,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: ports/psoc6
+        token: ${{ secrets.GH_ACT_SYNCH_UPSTREAM }}
 
     - name: Sync upstream changes
       id: sync
