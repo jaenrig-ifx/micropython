@@ -35,6 +35,9 @@ uint8_t system_rand_hash(uint8_t length) {
     return hash_sum;
 }
 
+// global var to store current irq state/hash
+static uint8_t system_irq_key;
+
 // function to disable global IRQs
 // returns alpha-numeric hash to enable IRQs later
 // see: https://docs.zephyrproject.org/apidoc/latest/group__isr__apis.html#ga19fdde73c3b02fcca6cf1d1e67631228
