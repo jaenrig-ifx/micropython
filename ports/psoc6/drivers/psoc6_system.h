@@ -34,9 +34,6 @@ void system_reset(void);
 // macros defined here: cy_syslib.h
 uint32_t system_reset_cause(void);
 
-// global var to store current irq state/hash
-extern uint8_t system_irq_key;
-
 // helper function to generate random alpha-numeric hash
 uint8_t system_rand_hash(uint8_t length);
 
@@ -47,8 +44,5 @@ uint8_t system_disable_global_irq(void);
 // function to enable global IRQs
 // uses passed alpha-numeric key to verify and enable IRQs
 bool system_enable_global_irq(uint8_t state);
-
-
-
 
 #endif // MICROPY_INCLUDED_PSOC6_PIN_H
