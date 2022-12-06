@@ -80,11 +80,13 @@ SRC_C = \
 	shared/readline/readline.c \
 	shared/runtime/stdout_helpers.c \
 	\
-	drivers/*.c \
+	drivers/psoc6_system.c  \
+	drivers/psoc6_gpio.c \
 	\
 	mphalport.c \
-	$(BUILD)/_frozen_mpy.c \
+	$(BUILD)/_frozen_mpy.c
 
+# the order of driver sources matter	
 
 SRC_C    += shared/libc/string0.c
 

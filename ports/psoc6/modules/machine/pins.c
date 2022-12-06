@@ -1,5 +1,3 @@
-
-#include "modmachine.h"
 #include "pins.h"
 
 // Function definitions

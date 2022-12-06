@@ -1,3 +1,11 @@
+//std includes
+#include <stdio.h>
+#include <stdlib.h>
+
+//port-specific includes
+#include "modmachine.h"
+
+
 /* Include Pin definitions to make it visible at py side*/
 #define PIN_P13_7 CYHAL_GET_GPIO(CYHAL_PORT_13, 7)
 #define PIN_P0_4  CYHAL_GET_GPIO(CYHAL_PORT_0, 4)

@@ -28,25 +28,4 @@ static inline void mp_hal_set_interrupt_char(char c) {
 
 void mp_hal_set_interrupt_char(int c);
 
-
-// Private methods (?)
-// API to return clock freq; Fast CLK (CM4) is the main sys clk
-static inline mp_uint_t mp_hal_get_cpu_freq(void) {
-//    return Cy_SysClk_ClkPathMuxGetFrequency(Cy_SysClk_ClkPathGetSource(0UL));
-    return Cy_SysClk_ClkFastGetFrequency();
-}
-
-// API to return clock freq divider for Fast CLK (CM4)
-static inline mp_uint_t mp_hal_get_cpu_freq_div(void) {
-    return Cy_SysClk_ClkFastGetDivider();
-}
-
-// //function to return Pin.Mode
-// static inline int mp_hal_get_pin_mode(uint32_t pin){
-//     return gpio_get_mode(uint32_t pin);
-// }
-
-//PSoC6 HAL functions
-
-
 #endif // MICROPY_INCLUDED_PSOC6_MPHALPORT_H

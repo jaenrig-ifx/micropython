@@ -5,11 +5,11 @@
 #include <stdio.h>
 #include <string.h>
 //port-specific includes
+#include "drivers/psoc6_gpio.h"
 #include "pins.h"
-#include "mphalport.h"
 #include "modmachine.h"
 #include "mplogger.h"
-#include "drivers/psoc6_gpio.h"
+
 
 // enums to map MPY parameters to CYHAL params to avoid confusion
 // these are used as returns from functions and comparisions to MP_QSTRs in mapping functions 
