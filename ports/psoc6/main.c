@@ -21,6 +21,8 @@
 #include "cyhal.h"
 #include "cy_retarget_io.h"
 
+// port-specific includes
+#include "mplogger.h"
 
 #if MICROPY_ENABLE_COMPILER
 
@@ -104,6 +106,9 @@ soft_reset:
     mp_init();
     mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_lib));
     readline_init0();
+
+    // indicate in REPL console when debug mode is selected
+    mplogger_print("\n...LOGGER DEBUG MODE...\n\n");
 
     #if MICROPY_ENABLE_COMPILER
 

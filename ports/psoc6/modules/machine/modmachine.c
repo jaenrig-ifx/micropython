@@ -1,12 +1,3 @@
-// Standard includes
-#include <stdio.h>
-
-// MPY interpreter related includes
-#include "py/gc.h"
-#include "py/runtime.h"
-#include "py/mphal.h"
-#include "shared/runtime/pyexec.h"
-
 // MPY structure includes
 #include "modmachine.h"
 
@@ -58,7 +49,7 @@ MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_info_obj, 0, 1, machine_info);
 // machine.freq()
 STATIC mp_obj_t machine_freq(size_t n_args, const mp_obj_t *args) {
     if (n_args == 0) {
-        mp_printf(&mp_plat_print, "System core freq (CM4): %d Hz\n", mp_hal_get_cpu_freq());
+        mp_printf(&mp_plat_print, "System core freq (CM4): %d Hz\n", system_get_cpu_freq());
         return mp_const_none;
     } else {
         mp_printf(&mp_plat_print, "Not implemented!!!\n");
