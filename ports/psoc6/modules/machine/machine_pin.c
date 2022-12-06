@@ -45,13 +45,14 @@ static const mp_arg_t allowed_args[] = {
 // Pin.__call__
 STATIC mp_obj_t machine_pin_call(mp_obj_t self_in, mp_uint_t n_args, mp_uint_t n_kw, const mp_obj_t *args) {
     mplogger_print("machine pin call\n");
+
     mp_arg_check_num(n_args, n_kw, 0, 1, false);
     machine_pin_obj_t *self = self_in;
 
     // Note: see https://docs.micropython.org/en/latest/library/machine.Pin.html#machine.Pin.value
     if (n_args == 0) {
         // get pin value if pin is in input mode, returns NONE (undefined) if pin is in output mode
-        int8_t call_value = GPIO_GET_VALUE_CALL(self->pin_addr); 
+        int8_t call_value = gpio_get_value_call(self->pin_addr); 
         if(call_value != -1)
             return MP_OBJ_NEW_SMALL_INT(call_value); //if pin is input, return value
         else
@@ -59,11 +60,11 @@ STATIC mp_obj_t machine_pin_call(mp_obj_t self_in, mp_uint_t n_args, mp_uint_t n
     } else {
         // set pin
         bool value = mp_obj_is_true(args[0]);
-        if (GPIO_IS_IN(self->pin_addr) || GPIO_IS_OUT(self->pin_addr) || GPIO_IS_OPEN_DRAIN(self->pin_addr)) { // set the output buffer of output driver with given value;
+        if (gpio_is_in(self->pin_addr) || gpio_is_out(self->pin_addr) || gpio_is_open_drain(self->pin_addr)) { // set the output buffer of output driver with given value;
             if (value) {                              // if Pin.Mode is Pin.IN, value will reflect when pin is next set as output.
-                GPIO_SET_VALUE(self->pin_addr);
+                gpio_set_value(self->pin_addr);
             } else {
-                GPIO_CLR_VALUE(self->pin_addr);
+                gpio_clr_value(self->pin_addr);
             }
         }
     } // given how the PSoC architecture is, if the "drive mode" is set correctly, the same set/clr functions can be used for all the "modes".
@@ -77,38 +78,38 @@ STATIC void machine_pin_print(const mp_print_t *print, mp_obj_t self_in, mp_prin
     mplogger_print("machine pin print\n");
     
     machine_pin_obj_t *self = self_in;
-    en_hsiom_sel_t pin_func = PIN_GET_HSIOM_FUNC(self->pin_addr);
+    en_hsiom_sel_t pin_func = pin_get_hsiom_func(self->pin_addr);
     qstr mode_qstr = MP_QSTR_None; // TODO: compare with rp2, init value needed here due to "-werror=maybe-uninitialized"
     qstr pull_qstr = MP_QSTR_None;
     uint8_t pin_value = -1;
 
     if (pin_func == HSIOM_SEL_GPIO) {
-        if (GPIO_IS_OPEN_DRAIN(self->pin_addr)) {
+        if (gpio_is_open_drain(self->pin_addr)) {
             mode_qstr = MP_QSTR_OPEN_DRAIN;
-        } else if (GPIO_IS_OUT(self->pin_addr)) {
+        } else if (gpio_is_out(self->pin_addr)) {
             mode_qstr = MP_QSTR_OUT;
-        } else if (GPIO_IS_IN(self->pin_addr)) {
+        } else if (gpio_is_in(self->pin_addr)) {
             mode_qstr = MP_QSTR_IN;
         } else { // only pull up and pull down are prescribed in MPY docs
-            if (GPIO_IS_PULL_UP(self->pin_addr)) {
+            if (gpio_is_pull_up(self->pin_addr)) {
                 pull_qstr = MP_QSTR_PULL_UP;
-                if (GPIO_GET_CYPDL_DRIVE(self->pin_addr) < 8) { // drive enum is less than 8 when input buffer is off (or pin is cfgd as output)
+                if (gpio_get_cypdl_drive(self->pin_addr) < 8) { // drive enum is less than 8 when input buffer is off (or pin is cfgd as output)
                     mode_qstr = MP_QSTR_OUT;
                 } else {
                     mode_qstr = MP_QSTR_IN;
                 }
-            } else if (GPIO_IS_PULL_DOWN(self->pin_addr)) {
+            } else if (gpio_is_pull_down(self->pin_addr)) {
                 pull_qstr = MP_QSTR_PULL_DOWN;
-                if (GPIO_GET_CYPDL_DRIVE(self->pin_addr) < 8) {
+                if (gpio_get_cypdl_drive(self->pin_addr) < 8) {
                     mode_qstr = MP_QSTR_OUT;
                 } else {
                     mode_qstr = MP_QSTR_IN;
                 }
             } else {
-                mp_printf(print, "no params set for given pin object");
+                mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT("no params set for given pin object\n"));
             }
         }
-        pin_value = GPIO_GET_VALUE(self->pin_addr);
+        pin_value = gpio_get_value(self->pin_addr);
     } else {
         mode_qstr = MP_QSTR_ALT;
     }
@@ -259,9 +260,9 @@ MP_DEFINE_CONST_FUN_OBJ_KW(machine_pin_obj_init_obj, 1, machine_pin_obj_init);
 // Pin.toggle()
 STATIC mp_obj_t machine_pin_toggle(mp_obj_t self_in) {
     machine_pin_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    if (GPIO_IS_IN(self->pin_addr) || GPIO_IS_OUT(self->pin_addr) || GPIO_IS_OPEN_DRAIN(self->pin_addr)) { // toggle the output buffer of output driver with given value;
-        GPIO_TOGGLE_VALUE(self->pin_addr); // for output it takes effect instantly; for input pins, the effect will show when
-                                     // pin is set as input next. For open drain, behavior shifts between 0 and HiZ.
+    if (gpio_is_in(self->pin_addr) || gpio_is_out(self->pin_addr) || gpio_is_open_drain(self->pin_addr)) { // toggle the output buffer of output driver with given value;
+        gpio_toggle_value(self->pin_addr); // for output it takes effect instantly; for input pins, the effect will show when
+                                     // pin is set as input next. For open drain, behavior shifts between 0 and Hi-Z.
     }
     return mp_const_none;
 
@@ -271,8 +272,8 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_pin_toggle_obj, machine_pin_toggle);
 // Pin.high()
 STATIC mp_obj_t machine_pin_high(mp_obj_t self_in) {
     machine_pin_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    if (GPIO_IS_IN(self->pin_addr) || GPIO_IS_OUT(self->pin_addr) || GPIO_IS_OPEN_DRAIN(self->pin_addr)) { // toggle the output buffer of output driver with given value;
-        GPIO_SET_VALUE(self->pin_addr); // for output it takes effect instantly; for input pins, the effect will show when
+    if (gpio_is_in(self->pin_addr) || gpio_is_out(self->pin_addr) || gpio_is_open_drain(self->pin_addr)) { // toggle the output buffer of output driver with given value;
+        gpio_set_value(self->pin_addr); // for output it takes effect instantly; for input pins, the effect will show when
                                   // pin is set as input next. For open drain, behavior shifts between 0 and HiZ.
     }
     return mp_const_none;
@@ -283,8 +284,8 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_pin_high_obj, machine_pin_high);
 // Pin.low()
 STATIC mp_obj_t machine_pin_low(mp_obj_t self_in) {
     machine_pin_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    if (GPIO_IS_IN(self->pin_addr) || GPIO_IS_OUT(self->pin_addr) || GPIO_IS_OPEN_DRAIN(self->pin_addr)) { // toggle the output buffer of output driver with given value;
-        GPIO_CLR_VALUE(self->pin_addr); // for output it takes effect instantly; for input pins, the effect will show when
+    if (gpio_is_in(self->pin_addr) || gpio_is_out(self->pin_addr) || gpio_is_open_drain(self->pin_addr)) { // toggle the output buffer of output driver with given value;
+        gpio_clr_value(self->pin_addr); // for output it takes effect instantly; for input pins, the effect will show when
                                   // pin is set as input next. For open drain, behavior shifts between 0 and HiZ.
     }
     return mp_const_none;
