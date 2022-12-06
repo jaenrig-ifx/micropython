@@ -12,11 +12,34 @@ on:
       - 'ports/psoc6/**'
 
 jobs:
-  build:
+  server-build-check:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+      - name: Install packages
+        run: source tools/ci.sh && ci_psoc6_setup
+      - name: Build
+        run: source tools/ci.sh && ci_psoc6_build
+
+  build-deploy-test:
+    runs-on: self-hosted
+    needs: server-build-check
+    steps:
     - uses: actions/checkout@v2
+    - name: Setup
+      run : echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S chmod 666 /var/run/docker.sock
     - name: Install packages
-      run: source tools/ci.sh && ci_psoc6_setup
+      run: source tools/ci.sh && ci_psoc6_setup --dev-access
     - name: Build
-      run: source tools/ci.sh && ci_psoc6_build
+      run: source tools/ci.sh && ci_psoc6_build 
+    - name: Deploy
+      run: source tools/ci.sh && ci_psoc6_deploy
+    - name: Run tests
+      run : source tools/ci.sh && ci_psoc6_run_tests
+    - name: Cleanup 
+      if: success() || failure()
+      run: |
+        echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S rm -rf ${GITHUB_WORKSPACE}
+        mkdir ${GITHUB_WORKSPACE}
+        docker stop mtb-ci
+        docker system prune --all --force
