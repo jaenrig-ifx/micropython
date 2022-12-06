@@ -1,18 +1,18 @@
 #ifndef MICROPY_INCLUDED_PSOC6_MPHALPORT_H
 #define MICROPY_INCLUDED_PSOC6_MPHALPORT_H
 
-//mpy includes
+// mpy includes
 #include "py/mpconfig.h"
 #include "py/ringbuf.h"
 #include "py/obj.h"
 #include "py/runtime.h"
 // #include "py/mphal.h"
 
-//std includes
+// std includes
 #include <stdio.h>
 #include <stdlib.h>
 
-//cy includes
+// cy includes
 #include "cy_sysclk.h"
 #include "cyhal.h"
 #include "cybsp.h"

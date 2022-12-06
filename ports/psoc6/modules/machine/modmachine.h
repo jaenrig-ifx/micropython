@@ -11,7 +11,7 @@
 #include "shared/runtime/pyexec.h"
 #include "py/obj.h"
 
-//port-specific includes
+// port-specific includes
 #include "drivers/psoc6_system.h"
 
 extern const mp_obj_type_t machine_pin_type;
