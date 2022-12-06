@@ -13,8 +13,8 @@ int pin_find(mp_obj_t pin, const machine_pin_obj_t machine_pin_obj[], int table_
         size_t slen;
         const char *s = mp_obj_str_get_data(pin, &slen);
         for (wanted_pin = 0; wanted_pin < table_size; wanted_pin++) {
-            if (slen == strlen(machine_pin_obj[wanted_pin].name) &&
-                strncmp(s, machine_pin_obj[wanted_pin].name, slen) == 0) {
+            if (slen == strlen(machine_pin_obj[wanted_pin].pin_name) &&
+                strncmp(s, machine_pin_obj[wanted_pin].pin_name, slen) == 0) {
                 break;
             }
         }

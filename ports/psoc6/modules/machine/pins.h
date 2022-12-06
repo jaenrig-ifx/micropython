@@ -5,8 +5,8 @@
 // Add all machine pin objects - GPIO , I2C, ADC etc.
 typedef struct _machine_pin_obj_t {
     mp_obj_base_t base;
-    uint32_t id;
-    char *name;
+    uint32_t pin_addr;
+    char *pin_name;
 } machine_pin_obj_t;
 
 // Function Prototypes to support interaction between c<->py
