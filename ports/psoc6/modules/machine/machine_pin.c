@@ -209,6 +209,14 @@ STATIC mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_
 
 // Machine Pin methods - port-specific definitions
 // Pin constructor(id,mode,pull,value=value,drive=drive,alt=alt)
+
+/* Note: the constructor can accept just one param, namely the pin. 
+Howeever, without any other config, the rest of the member functions being called might 
+render unpredictable behavior. 
+
+Two possible solutions to this issue:
+1. Set a flag when params are set (obj_init_helper called) and member functions can check this flag and raise exception if its not set.
+2. Raise minimmum number of expected params in constructor to 2.  */
 mp_obj_t mp_pin_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
     mplogger_print("%q constructor invoked\n", MP_QSTR_Pin);
 

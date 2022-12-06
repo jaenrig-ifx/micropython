@@ -86,7 +86,8 @@ SRC_C = \
 	mphalport.c \
 	$(BUILD)/_frozen_mpy.c
 
-# the order of driver sources matter	
+# the order of driver sources matter above. 
+# TODO: investigate the circular includes and remove the redundant ones
 
 SRC_C    += shared/libc/string0.c
 
