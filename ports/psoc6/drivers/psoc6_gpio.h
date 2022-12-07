@@ -59,7 +59,7 @@ int8_t gpio_get_value_call(uint32_t pin);
 void gpio_set_value(uint32_t pin);
 
 // function to set Pin.value to 0; clear the output buffer which drives the output driver
-void gpio_clr_value(uint32_t pin);
+void gpio_clear_value(uint32_t pin);
 
 // function to toggle Pin.value; toggle the output buffer which drives the output driver
 void gpio_toggle_value(uint32_t pin);

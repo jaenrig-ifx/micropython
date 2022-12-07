@@ -38,7 +38,7 @@ INC += -I.
 INC += -I$(TOP)
 INC += -I$(BUILD)
 
-LD               = ~/ModusToolbox/tools_3.0/gcc/bin/arm-none-eabi-gcc
+LD               = arm-none-eabi-gcc
 CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingle-precision-constant -Wdouble-promotion -Wfloat-conversion -UMICROPY_USE_INTERNAL_PRINTF
 
 

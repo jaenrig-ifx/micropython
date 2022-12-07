@@ -42,7 +42,7 @@ mpy_mtb_init:
 
 
 # build MTB project
-mpy_mtb_build: mpy_mtb_init
+mpy_mtb_build:
 	$(info )
 	$(info Building $(BOARD) using MTB ...)
 	-$(Q) cd $(BOARD_DIR); $(MPY_REMOVE_MTB_BUILD_DIR) $(MAKE) build

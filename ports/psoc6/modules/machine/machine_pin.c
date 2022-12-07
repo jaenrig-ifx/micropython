@@ -65,7 +65,7 @@ STATIC mp_obj_t machine_pin_call(mp_obj_t self_in, mp_uint_t n_args, mp_uint_t n
             if (value) {                              // if Pin.Mode is Pin.IN, value will reflect when pin is next set as output.
                 gpio_set_value(self->pin_addr);
             } else {
-                gpio_clr_value(self->pin_addr);
+                gpio_clear_value(self->pin_addr);
             }
         }
     } // given how the PSoC architecture is, if the "drive mode" is set correctly, the same set/clr functions can be used for all the "modes".
@@ -210,8 +210,8 @@ STATIC mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_
 // Machine Pin methods - port-specific definitions
 // Pin constructor(id,mode,pull,value=value,drive=drive,alt=alt)
 
-/* Note: the constructor can accept just one param, namely the pin.
-Howeever, without any other config, the rest of the member functions being called might
+/* Note: The constructor is able accept a minimum of one param madatorily, namely the pin (eg. "P13_7").
+However, without any other config/params, the rest of the member functions being called might
 render unpredictable behavior.
 
 Two possible solutions to this issue:
@@ -294,32 +294,13 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_pin_high_obj, machine_pin_high);
 STATIC mp_obj_t machine_pin_low(mp_obj_t self_in) {
     machine_pin_obj_t *self = MP_OBJ_TO_PTR(self_in);
     if (gpio_is_in(self->pin_addr) || gpio_is_out(self->pin_addr) || gpio_is_open_drain(self->pin_addr)) { // toggle the output buffer of output driver with given value;
-        gpio_clr_value(self->pin_addr); // for output it takes effect instantly; for input pins, the effect will show when
+        gpio_clear_value(self->pin_addr); // for output it takes effect instantly; for input pins, the effect will show when
         // pin is set as input next. For open drain, behavior shifts between 0 and HiZ.
     }
     return mp_const_none;
 
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_pin_low_obj, machine_pin_low);
-
-// // Pin.Mode()
-// STATIC mp_obj_t machine_pin_mode(mp_obj_t self_in, mp_uint_t n_args, mp_uint_t n_kw, const mp_obj_t *args) {
-//     mp_printf(&mp_plat_print,"machine_pin_mode: Not implemented!");
-//     mp_arg_check_num(n_args, n_kw, 0, 1, false);
-//     //machine_pin_obj_t *self = self_in;
-
-//     // if (n_args == 0) {
-//     //     //get mode
-//     // }
-//     // else {
-//     //    //set mode
-//     // }
-
-//     return mp_const_none;
-
-// }
-
-// STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_pin_mode_obj,1,2, machine_pin_mode);
 
 
 STATIC const mp_rom_map_elem_t machine_pin_locals_dict_table[] = {

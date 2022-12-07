@@ -6,16 +6,6 @@ gpio_init_rslt gpio_init(cyhal_gpio_t pin, cyhal_gpio_direction_t direction, cyh
     return cyhal_gpio_init(pin, direction, drive_mode, init_val);
 }
 
-// function can be used in association with Pin.Mode() on MPY side
-// int gpio_get_mode(uint32_t pin){
-//     if(gpio_get_cypdl_drive(pin) == CY_GPIO_DM_HIGHZ)
-//         return GPIO_MODE_IN;
-//     else if (gpio_get_cypdl_drive(pin) == CY_GPIO_DM_STRONG_IN_OFF) //pin cfgd as o/p drive so Input buffer is off.
-//         return GPIO_MODE_OUT;
-//     else if (gpio_get_cypdl_drive(pin) == CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW)
-//         return GPIO_MODE_OPEN_DRAIN;
-// }
-
 // function to get HSIOM config of a pin
 en_hsiom_sel_t pin_get_hsiom_func(uint32_t pin) {
     return Cy_GPIO_GetHSIOM(CYHAL_GET_PORTADDR(pin), CYHAL_GET_PIN(pin));
@@ -104,7 +94,7 @@ void gpio_set_value(uint32_t pin) {
 }
 
 // function to set Pin.value to 0; clear the output buffer which drives the output driver
-void gpio_clr_value(uint32_t pin) {
+void gpio_clear_value(uint32_t pin) {
     return Cy_GPIO_Clr(CYHAL_GET_PORTADDR(pin), CYHAL_GET_PIN(pin));
 }
 
