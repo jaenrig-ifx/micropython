@@ -12,14 +12,15 @@ en_hsiom_sel_t pin_get_hsiom_func(uint32_t pin) {
 }
 
 // function to get cypdl drive modes, correlated to cyhal drive modes in file: cyhal_gpio.c
-uint32_t gpio_get_cypdl_drive(uint32_t pin) {
+// Note: drive modes are enumed in cy_gpio.h and are also distinguised for pins with input buffer on or off (configured as input or output respectively)
+uint32_t gpio_get_drive(uint32_t pin) {
     return Cy_GPIO_GetDrivemode(CYHAL_GET_PORTADDR(pin), CYHAL_GET_PIN(pin));
 }
 
 // function to check if pin is in mode Pin.OPEN_DRAIN.
 // drive comparisons done with PDL drive modes since function is from PDL (not HAL)
 bool gpio_is_open_drain(uint32_t pin) {
-    if (gpio_get_cypdl_drive(pin) == CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW) {
+    if (gpio_get_drive(pin) == CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW) {
         return 1;
     } else {
         return 0;
@@ -28,7 +29,7 @@ bool gpio_is_open_drain(uint32_t pin) {
 
 // function to check if pin is in mode Pin.OUT; TODO: can be also implemented by checking input buffer on/off
 bool gpio_is_out(uint32_t pin) {
-    if (gpio_get_cypdl_drive(pin) == CY_GPIO_DM_STRONG_IN_OFF) { // pin cfgd as o/p drive so Input buffer is off.
+    if (gpio_get_drive(pin) == CY_GPIO_DM_STRONG_IN_OFF) { // pin cfgd as o/p drive so Input buffer is off.
         return 1;
     } else {
         return 0;
@@ -37,7 +38,7 @@ bool gpio_is_out(uint32_t pin) {
 
 // function to check if pin is in mode Pin.IN; TODO: can be also implemented by checking input buffer on/off
 bool gpio_is_in(uint32_t pin) {
-    if (gpio_get_cypdl_drive(pin) == CY_GPIO_DM_HIGHZ) {
+    if (gpio_get_drive(pin) == CY_GPIO_DM_HIGHZ) {
         return 1;
     } else {
         return 0;
@@ -47,7 +48,7 @@ bool gpio_is_in(uint32_t pin) {
 
 // function to check if pin has pull Pin.PULL_UP
 bool gpio_is_pull_up(uint32_t pin) {
-    if (gpio_get_cypdl_drive(pin) == CY_GPIO_DM_PULLUP_IN_OFF || gpio_get_cypdl_drive(pin) == CY_GPIO_DM_PULLUP) {
+    if (gpio_get_drive(pin) == CY_GPIO_DM_PULLUP_IN_OFF || gpio_get_drive(pin) == CY_GPIO_DM_PULLUP) {
         return 1;
     } else {
         return 0;
@@ -56,7 +57,7 @@ bool gpio_is_pull_up(uint32_t pin) {
 
 // function to check if pin has pull Pin.PULL_DOWN
 bool gpio_is_pull_down(uint32_t pin) {
-    if (gpio_get_cypdl_drive(pin) == CY_GPIO_DM_PULLDOWN_IN_OFF || gpio_get_cypdl_drive(pin) == CY_GPIO_DM_PULLDOWN) {
+    if (gpio_get_drive(pin) == CY_GPIO_DM_PULLDOWN_IN_OFF || gpio_get_drive(pin) == CY_GPIO_DM_PULLDOWN) {
         return 1;
     } else {
         return 0;

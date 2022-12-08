@@ -94,14 +94,14 @@ STATIC void machine_pin_print(const mp_print_t *print, mp_obj_t self_in, mp_prin
         } else { // only pull up and pull down are prescribed in MPY docs
             if (gpio_is_pull_up(self->pin_addr)) {
                 pull_qstr = MP_QSTR_PULL_UP;
-                if (gpio_get_cypdl_drive(self->pin_addr) < 8) { // drive enum is less than 8 when input buffer is off (or pin is cfgd as output)
+                if (gpio_get_drive(self->pin_addr) < 8) { // drive enum is less than 8 when input buffer is off (or pin is cfgd as output)
                     mode_qstr = MP_QSTR_OUT;
                 } else {
                     mode_qstr = MP_QSTR_IN;
                 }
             } else if (gpio_is_pull_down(self->pin_addr)) {
                 pull_qstr = MP_QSTR_PULL_DOWN;
-                if (gpio_get_cypdl_drive(self->pin_addr) < 8) {
+                if (gpio_get_drive(self->pin_addr) < 8) {
                     mode_qstr = MP_QSTR_OUT;
                 } else {
                     mode_qstr = MP_QSTR_IN;
