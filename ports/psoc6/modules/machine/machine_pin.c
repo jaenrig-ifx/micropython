@@ -318,6 +318,7 @@ STATIC const mp_rom_map_elem_t machine_pin_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_IN),                      MP_ROM_INT(GPIO_MODE_IN) },
     { MP_ROM_QSTR(MP_QSTR_OUT),                     MP_ROM_INT(GPIO_MODE_OUT) },
     { MP_ROM_QSTR(MP_QSTR_OPEN_DRAIN),              MP_ROM_INT(GPIO_MODE_OPEN_DRAIN) },
+    // { MP_ROM_QSTR(MP_QSTR_ALT_OPEN_DRAIN),          MP_ROM_INT(GPIO_MODE_ALT_OPEN_DRAIN) },
     // Pin drive constants
     // TODO: add/uncomment below if/when CYPDL drive modes implemented
     /*
@@ -326,6 +327,9 @@ STATIC const mp_rom_map_elem_t machine_pin_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_DRIVE_2),                 MP_ROM_INT(GPIO_DRIVE_CAP_2) },
     { MP_ROM_QSTR(MP_QSTR_DRIVE_3),                 MP_ROM_INT(GPIO_DRIVE_CAP_3) },
     */
+    // pin.pull
+    { MP_ROM_QSTR(MP_QSTR_PULL_UP),                 MP_ROM_INT(GPIO_PULL_UP) },
+    { MP_ROM_QSTR(MP_QSTR_PULL_DOWN),               MP_ROM_INT(GPIO_PULL_DOWN) },
     // Pin initial value constants
     // Note: not in MPY guidelines but may needed later for board-specific active-low/active-high pins
     { MP_ROM_QSTR(MP_QSTR_STATE_HIGH),              MP_ROM_INT(GPIO_STATE_ON) },
