@@ -25,12 +25,6 @@ enum {GPIO_PULL_UP, GPIO_PULL_DOWN, GPIO_PULL_HOLD};
 // enum for alt functions
 enum {HSIOM_GPIO_FUNC}; // see file gpio_psoc6_02_124_bga.h
 
-// TODO: instantiation can be moved to pins.c since this can become board-specific later
-// Pin objects
-const machine_pin_obj_t machine_pin_obj[] = {
-    {{&machine_pin_type}, PIN_P13_7, "P13_7"},
-    {{&machine_pin_type}, PIN_P0_4,  "P0_4"}
-};
 // enums and structs to handle ARGS in MPY
 enum {ARG_mode, ARG_pull, ARG_value, ARG_drive, ARG_alt};
 static const mp_arg_t allowed_args[] = {
