@@ -1,13 +1,10 @@
 // mpy includes
 #include "py/runtime.h"
-#include "py/mphal.h"
-// std includes
-#include <stdio.h>
-#include <string.h>
+
 // port-specific includes
+#include "modmachine.h"
 #include "drivers/psoc6_gpio.h"
 #include "pins.h"
-#include "modmachine.h"
 #include "mplogger.h"
 
 

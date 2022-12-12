@@ -1,5 +1,14 @@
 /* CYHAL SYSTEM functions */
 
+// std includes
+#include <stdlib.h>
+
+// cy includes
+#include "cybsp.h"
+#include "cyhal.h"
+#include "cy_pdl.h"
+#include "cy_sysclk.h"
+
 #include "psoc6_system.h"
 
 // function to return 64-bit silicon ID of given PSoC microcontroller

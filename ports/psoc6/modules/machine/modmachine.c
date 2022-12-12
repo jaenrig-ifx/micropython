@@ -1,4 +1,28 @@
-// MPY structure includes
+// std includes
+#include <stdio.h>
+
+// mpy includes
+#include "py/obj.h"
+#include "py/gc.h"
+#include "py/runtime.h"
+#include "py/mphal.h"
+#include "shared/runtime/pyexec.h"
+#include "extmod/machine_bitstream.h"
+#include "extmod/machine_i2c.h"
+#include "extmod/machine_mem.h"
+#include "extmod/machine_pulse.h"
+#include "extmod/machine_pwm.h"
+#include "extmod/machine_signal.h"
+#include "extmod/machine_spi.h"
+
+// cy includes
+#include "cybsp.h"
+#include "cyhal.h"
+#include "cy_pdl.h"
+
+// port-specific includes
+#include "drivers/psoc6_system.h"
+
 #include "modmachine.h"
 
 #if MICROPY_PY_MACHINE

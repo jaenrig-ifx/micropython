@@ -1,18 +1,7 @@
 #ifndef MICROPY_INCLUDED_PSOC6_SYSTEM_H
 #define MICROPY_INCLUDED_PSOC6_SYSTEM_H
 
-// cy includes
-#include "cybsp.h"
-#include "cyhal.h"
-#include "cy_sysclk.h"
-#include "cy_pdl.h"
-
-// std includes
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-// defines how strong the hash is, how many chars long
+// defines how strong the hash for enable/disable interrupt is, how many chars long
 #define HASH_CHARS_NUM 10
 
 // function to return clock freq; Fast CLK (CM4) is the main sys clk

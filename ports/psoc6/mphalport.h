@@ -3,19 +3,6 @@
 
 // mpy includes
 #include "py/mpconfig.h"
-#include "py/ringbuf.h"
-#include "py/obj.h"
-#include "py/runtime.h"
-
-// std includes
-#include <stdio.h>
-#include <stdlib.h>
-
-// cy includes
-#include "cy_sysclk.h"
-#include "cyhal.h"
-#include "cybsp.h"
-#include "cy_pdl.h"
 
 extern int mp_interrupt_char;
 

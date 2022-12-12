@@ -7,10 +7,8 @@
 #include "cy_pdl.h"
 
 // std includes
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdint.h>
-#include <string.h>
+
 
 // Note: Used to define gpio value QSTRs
 // Note: not in MPY guidelines but may needed later for board-specific active-low/active-high pins

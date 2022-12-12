@@ -1,3 +1,6 @@
+// std includes
+#include <stdlib.h>
+
 #include "pins.h"
 
 // Function definitions
