@@ -27,4 +27,8 @@ extern const mp_obj_type_t machine_pin_type;
 since they are static. The static type in those functions come from MPY hence
 should stay that way.  */
 
+// functions to be called from other .c files. Hence they are not static. 
+void machine_init(void); 
+void machine_deinit(void); 
+
 #endif // MICROPY_INCLUDED_PSOC6_MODMACHINE_H
