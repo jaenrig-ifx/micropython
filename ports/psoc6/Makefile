@@ -70,7 +70,6 @@ LIBS =
 SRC_C = \
  	main.c \
 	uart_core.c \
-	mplogger.c \
 	\
 	modules/machine/modmachine.c \
 	modules/machine/machine_pin.c \
