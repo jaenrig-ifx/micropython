@@ -1,13 +1,16 @@
 #ifndef MICROPY_INCLUDED_PSOC6_MPHALPORT_H
 #define MICROPY_INCLUDED_PSOC6_MPHALPORT_H
 
+//std includes
+#include <stdbool.h>
+
 // mpy includes
 #include "py/mpconfig.h"
 
 extern int mp_interrupt_char;
 
 static inline mp_uint_t mp_hal_ticks_ms(void) {
-    return 0;
+    return false;
 }
 
 /*Note: Generally, the functions in the mp_* files are defined as static functions by the community,

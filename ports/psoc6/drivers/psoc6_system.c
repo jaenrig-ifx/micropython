@@ -2,6 +2,7 @@
 
 // std includes
 #include <stdlib.h>
+#include <stdbool.h>
 
 // cy includes
 #include "cybsp.h"
@@ -62,9 +63,9 @@ uint8_t system_disable_global_irq(void) {
 bool system_enable_global_irq(uint8_t state) {
     if (state == system_irq_key) {
         __enable_irq();
-        return 1;
+        return true;
     } else {
-        return 0;
+        return false;
     }
 }
 

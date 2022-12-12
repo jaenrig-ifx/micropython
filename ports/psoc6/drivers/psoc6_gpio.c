@@ -1,5 +1,8 @@
 /* CYHAL GPIO functions */
 
+//std includes
+#include <stdbool.h>
+
 #include "psoc6_gpio.h"
 
 gpio_init_rslt gpio_init(cyhal_gpio_t pin, cyhal_gpio_direction_t direction, cyhal_gpio_drive_mode_t drive_mode, bool init_val) {
@@ -21,27 +24,27 @@ uint32_t gpio_get_drive(uint32_t pin) {
 // drive comparisons done with PDL drive modes since function is from PDL (not HAL)
 bool gpio_is_open_drain(uint32_t pin) {
     if (gpio_get_drive(pin) == CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW) {
-        return 1;
+        return true;
     } else {
-        return 0;
+        return false;
     }
 }
 
 // function to check if pin is in mode Pin.OUT; TODO: can be also implemented by checking input buffer on/off
 bool gpio_is_out(uint32_t pin) {
     if (gpio_get_drive(pin) == CY_GPIO_DM_STRONG_IN_OFF) { // pin cfgd as o/p drive so Input buffer is off.
-        return 1;
+        return true;
     } else {
-        return 0;
+        return false;
     }
 }
 
 // function to check if pin is in mode Pin.IN; TODO: can be also implemented by checking input buffer on/off
 bool gpio_is_in(uint32_t pin) {
     if (gpio_get_drive(pin) == CY_GPIO_DM_HIGHZ) {
-        return 1;
+        return true;
     } else {
-        return 0;
+        return false;
     }
 }
 
@@ -49,18 +52,18 @@ bool gpio_is_in(uint32_t pin) {
 // function to check if pin has pull Pin.PULL_UP
 bool gpio_is_pull_up(uint32_t pin) {
     if (gpio_get_drive(pin) == CY_GPIO_DM_PULLUP_IN_OFF || gpio_get_drive(pin) == CY_GPIO_DM_PULLUP) {
-        return 1;
+        return true;
     } else {
-        return 0;
+        return false;
     }
 }
 
 // function to check if pin has pull Pin.PULL_DOWN
 bool gpio_is_pull_down(uint32_t pin) {
     if (gpio_get_drive(pin) == CY_GPIO_DM_PULLDOWN_IN_OFF || gpio_get_drive(pin) == CY_GPIO_DM_PULLDOWN) {
-        return 1;
+        return true;
     } else {
-        return 0;
+        return false;
     }
 }
 

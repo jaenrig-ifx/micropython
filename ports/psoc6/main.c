@@ -2,9 +2,7 @@
 // std includes
 #include <stdint.h>
 #include <stdio.h>
-#include <string.h>
-
-
+#include <stdbool.h>
 // micropython includes
 #include "py/builtin.h"
 #include "py/compile.h"
@@ -134,7 +132,7 @@ soft_reset:
 
     goto soft_reset;
 
-    return 0;
+    return false;
 }
 
 
