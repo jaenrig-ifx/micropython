@@ -25,7 +25,7 @@ int pin_find(mp_obj_t pin, const machine_pin_obj_t machine_pin_obj[], int table_
 
 // Pin object instantiations on the basis of selected board (chip package)
 // Generated manually w.r.t cyhal_gpio_psoc6_02_124_bga_t enum for the package present in the CYPROTO-062-4343 target
-// TODO: automate this generation using a python script, same as other ports. 
+// TODO: automate this generation using a python script, same as other ports.
 const machine_pin_obj_t machine_pin_obj[] = {
     {{&machine_pin_type}, PIN_P0_0, "P0_0"},
     {{&machine_pin_type}, PIN_P0_1, "P0_1"},

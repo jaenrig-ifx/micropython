@@ -1,6 +1,6 @@
 /* CYHAL GPIO functions */
 
-//std includes
+// std includes
 #include <stdbool.h>
 
 #include "psoc6_gpio.h"

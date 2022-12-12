@@ -1,7 +1,7 @@
 #ifndef MICROPY_INCLUDED_PSOC6_MPHALPORT_H
 #define MICROPY_INCLUDED_PSOC6_MPHALPORT_H
 
-//std includes
+// std includes
 #include <stdbool.h>
 
 // mpy includes
