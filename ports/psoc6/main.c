@@ -20,6 +20,10 @@
 #include "cy_retarget_io.h"
 
 
+// port-specific includes
+#include "mplogger.h"
+
+
 cyhal_rtc_t psoc6_rtc;
 
 
@@ -72,6 +76,17 @@ int main(int argc, char **argv) {
 
     cy_rslt_t result;
 
+#if defined(CY_DEVICE_SECURE)
+
+    cyhal_wdt_t wdt_obj;
+
+    /* Clear watchdog timer so that it doesn't trigger a reset */
+    result = cyhal_wdt_init(&wdt_obj, cyhal_wdt_get_max_timeout_ms());
+    CY_ASSERT(CY_RSLT_SUCCESS == result);
+    cyhal_wdt_free(&wdt_obj);
+
+#endif /* #if defined (CY_DEVICE_SECURE) */
+
 
     /* Initialize the device and board peripherals */
     result = cybsp_init();
@@ -122,6 +137,9 @@ soft_reset:
 
     readline_init0();
 
+    // indicate in REPL console when debug mode is selected
+    mplogger_print("\n...LOGGER DEBUG MODE...\n\n");
+
 //    pyexec_frozen_module("vfs_lfs2.py");
     // pyexec_frozen_module("vfs_fat.py");
 
@@ -168,12 +186,6 @@ soft_reset:
 
     return 0;
 }
-
-
-// // TODO: to be implemented
-// mp_lexer_t *mp_lexer_new_from_file(const char *filename) {
-//     mp_raise_OSError(MP_ENOENT);
-// }
 
 
 // TODO: to be implemented

@@ -22,6 +22,14 @@ extern __attribute__((weak)) int _write(int fd, const char* ptr, int len);
 
 
 
+/*
+Note: Generally, the functions in the mp_* files are defined as static functions by the community,
+probably to keep their scope limited to the file and prevent miscompilation for other ports. The below
+function is an example of that. However, since it is later defined in a mphalport.c file, it cannot be
+a static function. Hence it was later declared as a simple (non-static) function. The question would be
+whether to keep a mphalport.c file in the end (if these function implementations are pretty small). */
+
+
 // mp_uint_t begin_atomic_section();
 // void end_atomic_section(mp_uint_t state);
 

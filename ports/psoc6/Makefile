@@ -52,7 +52,8 @@ CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingl
 
 
 # used for HelloWorld MTB
-CFLAGS  = $(INC) -Wall -Werror -std=c99 $(CFLAGS_CORTEX_M4) $(COPT) -std=c11
+CFLAGS  = $(INC) -Wall -Werror $(CFLAGS_CORTEX_M4) $(COPT) -std=c11
+#CFLAGS  = $(INC) -Wall -Werror -std=c99 $(CFLAGS_CORTEX_M4) $(COPT)
 LDFLAGS = -Wl,--cref -Wl,--gc-sections
 
 
@@ -107,10 +108,14 @@ SRC_C = \
 	\
 	mphalport.c \
 	\
+    drivers/machine/psoc6_system.c  \
+    drivers/machine/psoc6_gpio.c \
+	\
 	modules/gc/modgc.c \
 	\
 	modules/machine/modmachine.c \
-	modules/machine/pin.c \
+	modules/machine/machine_pin.c \
+	modules/machine/pins.c \
 	modules/machine/rtc.c \
 	\
 	modules/psoc6/modpsoc6.c \
@@ -129,7 +134,7 @@ SRC_CXX  += $(SRC_MOD_CXX)
 
 
 SRC_QSTR += $(MPY_SRC_C) $(SRC_MOD) $(SRC_MOD_CXX) $(SRC_USERMOD) 
-SRC_QSTR += modules/machine/modmachine.c modules/machine/pin.c modules/machine/rtc.c \
+SRC_QSTR += modules/machine/modmachine.c modules/machine/machine_pin.c modules/machine/rtc.c \
             \
             modules/os/moduos.c \
 			\
@@ -140,6 +145,14 @@ SRC_QSTR += modules/machine/modmachine.c modules/machine/pin.c modules/machine/r
 
 OBJ += $(PY_CORE_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_CXX:.cpp=.o))
+
+# switch for debug mode, also added to mpconfigport.h
+# TODO: keep the more suitable one, delete the other
+MP_LOGGER_DEBUG ?= 0
+
+ifeq ($(MP_LOGGER_DEBUG), 1)
+  CFLAGS += -DMICROPY_LOGGER_DEBUG=1
+endif
 
 
 $(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ)

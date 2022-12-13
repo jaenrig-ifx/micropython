@@ -10,30 +10,25 @@ The following port is using Infineon ModusToolbox™ to resolve the specific PSo
 
 2. In order to use the same gcc for compiling both mpy sources and ModusToolbox™ add also the latest to the system PATH.
 
-    $ export PATH=/home/{user}/ModusToolbox/tools_{version}/gcc/bin:$PATH
-
-3. Build mpy-cross to automatically freeze code in "freeze" subdirectory
-
-    cd <MICROPYTHON_INSTALL_DIR>/mpy-cross
-    make
+    export PATH=/home/{user}/ModusToolbox/tools_{version}/gcc/bin:$PATH
 
 ## Building and running Linux version
 
 As we are working on the ports/psoc6 branch (for now), first checkout that branch after cloning this repo:
 
-    $ git checkout --track origin/ports/psoc6
+    git checkout --track origin/ports/psoc6
 
 Then initialize the ModusToolbox™ environment: 
 
-    $ make mpy_mtb_init
+    make mpy_mtb_init
 
-Build the firmare:
+Build the firmware:
 
-    $ make
+    make
 
 To build and program the device:
 
-    $ make myp_program
+    make mpy_program
 
 ### Working from WSL
 
@@ -41,4 +36,4 @@ If you are working from WSL and you cannot access the USB resources of your mach
 
 # Run micropython
 
-Use any serial terminal (putty, minicom..) and stablish a session with your device with 115200 bauds and 8-N-1 configuration. 
+Use any serial terminal (putty, minicom..) and establish a session with your device with 115200 bauds and 8-N-1 configuration. 
