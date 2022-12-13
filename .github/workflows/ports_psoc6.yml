@@ -12,11 +12,59 @@ on:
       - 'ports/psoc6/**'
 
 jobs:
-  build:
+  server-build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+      - name: Install packages
+        run: source tools/ci.sh && ci_psoc6_setup
+      - name: Build
+        run: source tools/ci.sh && ci_psoc6_build
+      - name: Gets commit SHA
+        id: commit_sha
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Save firmware bin
+        if: success()
+        uses: actions/upload-artifact@v3
+        with: 
+          name: micropython-psoc6-${{ steps.commit_sha.outputs.sha_short }}
+          path: ports/psoc6/build/firmware.hex
+
+  hil-build-deploy-test-release:
+    runs-on: self-hosted
+    needs: server-build
+    steps:
     - uses: actions/checkout@v2
+    - name: Setup
+      run: echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S chmod 666 /var/run/docker.sock
     - name: Install packages
-      run: source tools/ci.sh && ci_psoc6_setup
+      run: source tools/ci.sh && ci_psoc6_setup --dev-access
     - name: Build
-      run: source tools/ci.sh && ci_psoc6_build
+      run: source tools/ci.sh && ci_psoc6_build 
+    - name: Deploy
+      run: source tools/ci.sh && ci_psoc6_deploy
+    - name: Run tests
+      run: source tools/ci.sh && ci_psoc6_run_tests
+    - name: Prepare release assets
+      if: startsWith(github.ref, 'refs/tags/v') 
+      run: echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S cp ports/psoc6/build/firmware.hex ports/psoc6/build/micropython-psoc6-${{  github.ref_name  }}.hex
+    - name: Build release changelog
+      id: build_changelog
+      uses: mikepenz/release-changelog-builder-action@v3
+      if: startsWith(github.ref, 'refs/tags/v') 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/v')
+      with:
+        name: Micropython PSoC6 ${{  github.ref_name  }}
+        files: ports/psoc6/build/micropython-psoc6-${{  github.ref_name  }}.hex
+        body: ${{steps.build_changelog.outputs.changelog}}
+    - name: Cleanup 
+      if: success() || failure()
+      run: |
+        echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S rm -rf ${GITHUB_WORKSPACE}
+        mkdir ${GITHUB_WORKSPACE}
+        docker stop mtb-ci
+        docker system prune --all --force

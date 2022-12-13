@@ -19,6 +19,8 @@
 #include "cyhal.h"
 #include "cy_retarget_io.h"
 
+// port-specific includes
+#include "mplogger.h"
 
 // port-specific includes
 #include "mplogger.h"
@@ -31,7 +33,7 @@ cyhal_rtc_t psoc6_rtc;
 
 //static char *stack_top;
 // TODO: set to proper value for our MCU
-static char  heap[192 * 1024];
+static char heap[192 * 1024];
 
 #endif
 
@@ -85,15 +87,14 @@ int main(int argc, char **argv) {
     CY_ASSERT(CY_RSLT_SUCCESS == result);
     cyhal_wdt_free(&wdt_obj);
 
-#endif /* #if defined (CY_DEVICE_SECURE) */
+    #endif /* #if defined (CY_DEVICE_SECURE) */
 
 
     /* Initialize the device and board peripherals */
     result = cybsp_init();
-    
+
     /* Board init failed. Stop program execution */
-    if (result != CY_RSLT_SUCCESS)
-    {
+    if (result != CY_RSLT_SUCCESS) {
         CY_ASSERT(0);
     }
 
@@ -102,8 +103,7 @@ int main(int argc, char **argv) {
     result = cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, CY_RETARGET_IO_BAUDRATE);
 
     /* retarget-io init failed. Stop program execution */
-    if (result != CY_RSLT_SUCCESS)
-    {
+    if (result != CY_RSLT_SUCCESS) {
         CY_ASSERT(0);
     }
 

@@ -237,11 +237,18 @@ function ci_powerpc_build {
 ########################################################################################
 # ports/psoc6
 
-MPY_MTB_CI_DOCKER_VERSION=0.1.0
+MPY_MTB_CI_DOCKER_VERSION=0.3.0
 
 function ci_psoc6_setup {
+    # Access to serial device 
+    if [ "$1" = "--dev-access" ]; then
+        device_flag=--device=/dev/ttyACM0
+    else
+        device_flag=
+    fi
+
     docker pull ifxmakers/mpy-mtb-ci:${MPY_MTB_CI_DOCKER_VERSION}
-    docker run --name mtb-ci -d -it \
+    docker run --name mtb-ci --rm --privileged -d -it ${device_flag} \
       -v "$(pwd)":/micropython \
       -w /micropython/ports/psoc6 \
       ifxmakers/mpy-mtb-ci:${MPY_MTB_CI_DOCKER_VERSION}
@@ -249,8 +256,16 @@ function ci_psoc6_setup {
 }
 
 function ci_psoc6_build {
-    docker exec mtb-ci /bin/bash -c "source /home/mtb-export.sh && make mpy_mtb_init"
-    docker exec mtb-ci /bin/bash -c "source /home/mtb-export.sh && make"
+    docker exec mtb-ci make mpy_mtb_init
+    docker exec mtb-ci make
+}
+
+function ci_psoc6_deploy {
+    docker exec mtb-ci make mpy_program
+}
+
+function ci_psoc6_run_tests {
+    docker exec mtb-ci /bin/bash -c "cd ../../tests && ./run-tests.py --target psoc6 --device /dev/ttyACM0 basics/0prelim.py"
 }
 
 ########################################################################################
@@ -303,6 +318,10 @@ function ci_rp2_build {
     make ${MAKEOPTS} -C ports/rp2 USER_C_MODULES=../../examples/usercmodule/micropython.cmake
     make ${MAKEOPTS} -C ports/rp2 BOARD=W5100S_EVB_PICO submodules
     make ${MAKEOPTS} -C ports/rp2 BOARD=W5100S_EVB_PICO
+
+    # Test building ninaw10 driver and NIC interface.
+    make ${MAKEOPTS} -C ports/rp2 BOARD=ARDUINO_NANO_RP2040_CONNECT submodules
+    make ${MAKEOPTS} -C ports/rp2 BOARD=ARDUINO_NANO_RP2040_CONNECT
 }
 
 ########################################################################################
@@ -527,7 +546,6 @@ function ci_unix_32bit_setup {
     sudo pip3 install setuptools
     sudo pip3 install pyelftools
     gcc --version
-    python2 --version
     python3 --version
 }
 
@@ -706,7 +724,6 @@ function ci_zephyr_install {
 
 function ci_zephyr_build {
     docker exec zephyr-ci west build -p auto -b qemu_x86 -- -DCONF_FILE=prj_minimal.conf
-    docker exec zephyr-ci west build -p auto -b qemu_x86
     docker exec zephyr-ci west build -p auto -b frdm_k64f
     docker exec zephyr-ci west build -p auto -b mimxrt1050_evk
     docker exec zephyr-ci west build -p auto -b nucleo_wb55rg # for bluetooth

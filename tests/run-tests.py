@@ -412,9 +412,10 @@ def run_tests(pyb, tests, args, result_dir, num_threads=1):
         # run-tests.py script itself so use base_path.
 
         # Check if micropython.native is supported, and skip such tests if it's not
-        output = run_feature_check(pyb, args, base_path, "native_check.py")
-        if output != b"native\n":
-            skip_native = True
+        # output = run_feature_check(pyb, args, base_path, "native_check.py")
+        # if output != b"native\n":
+        #     skip_native = True
+        skip_native = False
 
         # Check if arbitrary-precision integers are supported, and skip such tests if it's not
         output = run_feature_check(pyb, args, base_path, "int_big.py")
@@ -701,14 +702,21 @@ def run_tests(pyb, tests, args, result_dir, num_threads=1):
             with open(test_file_expected, "rb") as f:
                 output_expected = f.read()
         else:
-            # run CPython to work out expected output
-            try:
-                output_expected = subprocess.check_output(CPYTHON3_CMD + [test_file])
-                if args.write_exp:
-                    with open(test_file_expected, "wb") as f:
-                        f.write(output_expected)
-            except subprocess.CalledProcessError:
-                output_expected = b"CPYTHON3 CRASH"
+            # Write expected output from target (instead of CPython)
+            if args.write_exp_on_target:
+                args.write_exp = True
+                output_expected = run_micropython(pyb, args, test_file)
+                with open(test_file_expected, "wb") as f:
+                    f.write(output_expected)
+            else:
+                # run CPython to work out expected output
+                try:
+                    output_expected = subprocess.check_output(CPYTHON3_CMD + [test_file])
+                    if args.write_exp:
+                        with open(test_file_expected, "wb") as f:
+                            f.write(output_expected)
+                except subprocess.CalledProcessError:
+                    output_expected = b"CPYTHON3 CRASH"
 
         # canonical form for all host platforms is to use \n for end-of-line
         output_expected = output_expected.replace(b"\r\n", b"\n")
@@ -853,6 +861,11 @@ the last matching regex is used:
         help="use CPython to generate .exp files to run tests w/o CPython",
     )
     cmd_parser.add_argument(
+        "--write-exp-on-target",
+        action="store_true",
+        help="dry run of the tests on target to generate .exp files",
+    )
+    cmd_parser.add_argument(
         "--list-tests", action="store_true", help="list tests instead of running them"
     )
     cmd_parser.add_argument(
@@ -915,11 +928,19 @@ the last matching regex is used:
         "esp32",
         "minimal",
         "nrf",
+        "psoc6",
         "renesas-ra",
         "rp2",
     )
-    if args.target in LOCAL_TARGETS or args.list_tests:
+    if args.list_tests:
         pyb = None
+    elif args.target in LOCAL_TARGETS:
+        pyb = None
+        if not args.mpy_cross_flags:
+            if args.target == "unix":
+                args.mpy_cross_flags = "-march=host"
+            elif args.target == "qemu-arm":
+                args.mpy_cross_flags = "-march=armv7m"
     elif args.target in EXTERNAL_TARGETS:
         global pyboard
         sys.path.append(base_path("../tools"))
