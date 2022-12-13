@@ -149,7 +149,8 @@ STATIC mp_obj_t psoc6_flash_make_new(const mp_obj_type_t *type, size_t n_args, s
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-printf("psoc6_flash_make_new FLASH_BASE %u / %x   FLASH_SIZE  %u / %x\n", FLASH_BASE, FLASH_BASE, FLASH_SIZE, FLASH_SIZE);
+
+// printf("psoc6_flash_make_new FLASH_BASE %u / %x   FLASH_SIZE  %u / %x\n", FLASH_BASE, FLASH_BASE, FLASH_SIZE, FLASH_SIZE);
 
     if (args[ARG_start].u_int == -1 && args[ARG_len].u_int == -1) {
 //         #ifndef NDEBUG
@@ -181,8 +182,8 @@ printf("psoc6_flash_make_new FLASH_BASE %u / %x   FLASH_SIZE  %u / %x\n", FLASH_
     self->flash_base = MICROPY_HW_FLASH_STORAGE_BASE + start;
     self->flash_size = len;
 
-printf("psoc6_flash_make_new FLASH_BASE %u / %x   FLASH_SIZE  %u / %x\n", FLASH_BASE, FLASH_BASE, FLASH_SIZE, FLASH_SIZE);
-printf("psoc6_flash_make_new making base %lu / %lx   size  %lu / %lx    start %u / %x\n", self->flash_base, self->flash_base, self->flash_size, self->flash_size, start, start);
+// printf("psoc6_flash_make_new FLASH_BASE %u / %x   FLASH_SIZE  %u / %x\n", FLASH_BASE, FLASH_BASE, FLASH_SIZE, FLASH_SIZE);
+// printf("psoc6_flash_make_new making base %lu / %lx   size  %lu / %lx    start %u / %x\n", self->flash_base, self->flash_base, self->flash_size, self->flash_size, start, start);
 
     return MP_OBJ_FROM_PTR(self);
 }
@@ -211,7 +212,8 @@ STATIC mp_obj_t psoc6_flash_writeblocks(size_t n_args, const mp_obj_t *args) {
     uint32_t offset = mp_obj_get_int(args[1]) * BLOCK_SIZE_BYTES;
     mp_buffer_info_t bufinfo;
     mp_get_buffer_raise(args[2], &bufinfo, MP_BUFFER_READ);
-    printf("psoc6_flash_writeblocks n_args : %u   args[1] : %x     offset : %lx    buffer.len : %x\n", n_args, mp_obj_get_int(args[1]), offset, bufinfo.len);
+    
+// printf("psoc6_flash_writeblocks n_args : %u   args[1] : %x     offset : %lx    buffer.len : %x\n", n_args, mp_obj_get_int(args[1]), offset, bufinfo.len);
 
     if (n_args == 3) {
         // Flash erase/program must run in an atomic section because the XIP bit gets disabled.
@@ -220,7 +222,7 @@ STATIC mp_obj_t psoc6_flash_writeblocks(size_t n_args, const mp_obj_t *args) {
         uint32_t numSectors = bufinfo.len / FLASH_SECTOR_SIZE;
 
         for(uint32_t i = 0; i <= numSectors; ++i) {
-            printf("psoc6_flash_writeblocks   erasing at %lx\n", self->flash_base + offset + i * FLASH_SECTOR_SIZE);
+            // printf("psoc6_flash_writeblocks   erasing at %lx\n", self->flash_base + offset + i * FLASH_SECTOR_SIZE);
             cyhal_flash_erase(&cyhal_flash_obj, self->flash_base + offset + i * FLASH_SECTOR_SIZE);
         }
 
@@ -242,7 +244,7 @@ STATIC mp_obj_t psoc6_flash_writeblocks(size_t n_args, const mp_obj_t *args) {
     uint32_t numPages = bufinfo.len / FLASH_SECTOR_SIZE; // TODO: should be page size
 
     for(uint32_t i = 0; i <= numPages; ++i) {
-        printf("psoc6_flash_writeblocks   program  at %lx\n", self->flash_base + offset + i * FLASH_SECTOR_SIZE);
+        // printf("psoc6_flash_writeblocks   program  at %lx\n", self->flash_base + offset + i * FLASH_SECTOR_SIZE);
         cyhal_flash_program(&cyhal_flash_obj, self->flash_base + offset + i * FLASH_SECTOR_SIZE, bufinfo.buf + i * FLASH_SECTOR_SIZE);
     }
 
@@ -276,7 +278,7 @@ STATIC mp_obj_t psoc6_flash_ioctl(mp_obj_t self_in, mp_obj_t cmd_in, mp_obj_t ar
             // Flash erase/program must run in an atomic section because the XIP bit gets disabled.
             mp_uint_t atomic_state = MICROPY_BEGIN_ATOMIC_SECTION();
 //            flash_range_erase(self->flash_base + offset, BLOCK_SIZE_BYTES);
- printf("psoc6_flash_ioctl   erasing at %lx\n", self->flash_base + offset);
+//  printf("psoc6_flash_ioctl   erasing at %lx\n", self->flash_base + offset);
 
             cyhal_flash_erase(&cyhal_flash_obj, self->flash_base + offset);
 //            Cy_Flash_EraseSector(self->flash_base + offset);

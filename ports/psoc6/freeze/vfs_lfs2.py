@@ -12,8 +12,8 @@ except:
     os.VfsLfs2.mkfs(bdev, progsize=256)
     vfs = os.VfsLfs2(bdev, progsize=256)
 
-os.mount(vfs, "/")
+os.mount(vfs, "/flash")
 
-print("LFS2 filesystem mounted\n")
+print("LFS2 filesystem mounted at /flash\n")
 
 del machine, os, psoc6, bdev, vfs

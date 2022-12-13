@@ -126,9 +126,9 @@ soft_reset:
     // pyexec_frozen_module("vfs_fat.py");
 
     #if MICROPY_VFS_FAT
-    pyexec_frozen_module("vfs_fat.py");
+    // pyexec_frozen_module("vfs_fat.py");
     // #else
-    // pyexec_frozen_module("vfs_lfs2.py");
+    pyexec_frozen_module("vfs_lfs2.py");
     #endif
 
     // Execute user scripts.
@@ -138,7 +138,6 @@ soft_reset:
         goto soft_reset;
     }
 
-printf("pyexec_mode_kind : %d   %d\n", pyexec_mode_kind, PYEXEC_MODE_FRIENDLY_REPL);
     if (pyexec_mode_kind == PYEXEC_MODE_FRIENDLY_REPL) {
         ret = pyexec_file_if_exists("flash/main.py");
 
