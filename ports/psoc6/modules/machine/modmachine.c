@@ -123,6 +123,7 @@ void machine_deinit(void) {
 
 extern unsigned int __bss_start__, __bss_end__, __data_start__, __data_end__, __HeapLimit, __StackLimit, __StackTop, __etext;
 // uint32_t 
+extern unsigned int __cy_memory_0_start, __cy_memory_0_length, __cy_memory_0_row_size;
 
 
 // machine.info([dump_alloc_table])
@@ -153,7 +154,7 @@ STATIC mp_obj_t machine_info(size_t n_args, const mp_obj_t *args) {
     // Linker info
     {
        printf("Linker :\n");
-       printf("  %x   %u  __etext\n", __etext, __etext);
+        printf("  %x   %u  __etext\n", __etext, __etext);
 
        printf("  %x   %u  __bss_start__\n", __bss_start__, __bss_start__);
        printf("  %x   %u  __bss_end__\n", __bss_end__, __bss_end__);
@@ -190,7 +191,10 @@ STATIC const mp_rom_map_elem_t machine_module_globals_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR_info),                MP_ROM_PTR(&machine_info_obj) },
 
-    { MP_ROM_QSTR(MP_QSTR_Pin),                 MP_ROM_PTR(&machine_pin_type) }
+    // { MP_ROM_QSTR(MP_QSTR_I2C),                 MP_ROM_PTR(&machine_i2c_type) },
+    // { MP_ROM_QSTR(MP_QSTR_SoftI2C),             MP_ROM_PTR(&mp_machine_soft_i2c_type) },
+    { MP_ROM_QSTR(MP_QSTR_Pin),                 MP_ROM_PTR(&machine_pin_type) },
+    { MP_ROM_QSTR(MP_QSTR_RTC),                 MP_ROM_PTR(&machine_rtc_type) }
 };
 STATIC MP_DEFINE_CONST_DICT(machine_module_globals, machine_module_globals_table);
 

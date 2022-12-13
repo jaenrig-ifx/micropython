@@ -3,7 +3,7 @@
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2013, 2014 Damien P. George
+ * Copyright (c) 2020-2021 Damien P. George
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +24,23 @@
  * THE SOFTWARE.
  */
 
-#include "lib/oofatfs/ff.h"
-//#include "hardware/rtc.h"
+#include "py/runtime.h"
 
-MP_WEAK DWORD get_fattime(void) {
-    // datetime_t t;
-//    rtc_get_datetime(&t);
-    // return ((t.year - 1980) << 25) | ((t.month) << 21) | ((t.day) << 16) | ((t.hour) << 11) | ((t.min) << 5) | (t.sec / 2);
-    return( 0 );
-}
+
+#include "modpsoc6.h"
+
+
+STATIC const mp_rom_map_elem_t psoc6_module_globals_table[] = {
+    { MP_ROM_QSTR(MP_QSTR___name__),            MP_ROM_QSTR(MP_QSTR_psoc6) },
+    { MP_ROM_QSTR(MP_QSTR_Flash),               MP_ROM_PTR(&psoc6_flash_type) },
+};
+STATIC MP_DEFINE_CONST_DICT(psoc6_module_globals, psoc6_module_globals_table);
+
+
+const mp_obj_module_t mp_module_psoc6 = {
+    .base = { &mp_type_module },
+    .globals = (mp_obj_dict_t *)&psoc6_module_globals,
+};
+
+
+MP_REGISTER_MODULE(MP_QSTR_psoc6, mp_module_psoc6);

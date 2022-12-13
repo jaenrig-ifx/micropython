@@ -18,6 +18,12 @@ QSTR_DEFS = qstrdefsport.h
 # MicroPython feature configurations
 MICROPY_ROM_TEXT_COMPRESSION ?= 1
 
+MICROPY_FROZEN_MANIFEST      = boards/manifest.py
+MICROPY_USER_FROZEN_MANIFEST = $(MICROPY_FROZEN_MANIFEST)
+
+MICROPY_QSTR_EXTRA_POOL = mp_qstr_frozen_const_pool
+
+
 CROSS_COMPILE ?= arm-none-eabi-
 
 
@@ -25,6 +31,8 @@ CROSS_COMPILE ?= arm-none-eabi-
 include ../../py/mkenv.mk
 -include mpconfigport.mk
 include $(TOP)/py/py.mk
+
+include $(BOARD_DIR)/mpconfigboard.mk
 
 
 # get path to this file
@@ -44,7 +52,7 @@ CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingl
 
 
 # used for HelloWorld MTB
-CFLAGS  = $(INC) -Wall -Werror -std=c99 $(CFLAGS_CORTEX_M4) $(COPT)
+CFLAGS  = $(INC) -Wall -Werror -std=c99 $(CFLAGS_CORTEX_M4) $(COPT) -std=c11
 LDFLAGS = -Wl,--cref -Wl,--gc-sections
 
 
@@ -71,7 +79,7 @@ LDFLAGS += $(LDFLAGS_MOD)
 LIBS =
 
 
-MPY_SRC_C += extmod/vfs_blockdev.c extmod/vfs.c \
+MPY_SRC_C += extmod/vfs_blockdev.c extmod/vfs_reader.c extmod/vfs.c \
 			 extmod/vfs_lfs.c \
 		 	 extmod/vfs_fat.c extmod/vfs_fat_diskio.c extmod/vfs_fat_file.c \
 		 	 extmod/moduos.c \
@@ -79,30 +87,37 @@ MPY_SRC_C += extmod/vfs_blockdev.c extmod/vfs.c \
 		 	 lib/littlefs/lfs1.c lib/littlefs/lfs1_util.c lib/littlefs/lfs2.c lib/littlefs/lfs2_util.c \
 		 	 lib/oofatfs/ff.c lib/oofatfs/ffunicode.c \
 		 	 \
-		 	 py/modcmath.c py/moduerrno.c py/repl.c \
+			 py/lexer.c \
+		 	 py/modcmath.c py/moduerrno.c py/repl.c py/frozenmod.c py/qstr.c \
 		 	 \
-		 	 shared/runtime/pyexec.c \
 		 	 shared/readline/readline.c \
+			 shared/runtime/interrupt_char.c \
+		 	 shared/runtime/pyexec.c \
 		 	 shared/runtime/stdout_helpers.c \
-		 	 shared/libc/string0.c \
 		 	 shared/timeutils/timeutils.c
 
-
-SRC_C_FROZEN = $(BUILD)/_frozentest_mpy.c
+#			py/modbuiltins.c py/modsys.c shared/runtime/sys_stdio_mphal.c py/mpprint.c
 
 
 SRC_C = \
  	main.c \
-	fatfs_port.c \
-	psoc6_flash.c \
-	uart_core.c \
+	\
+	mphalport.c \
+	\
+	modules/gc/modgc.c \
 	\
 	modules/machine/modmachine.c \
 	modules/machine/pin.c \
+	modules/machine/rtc.c \
 	\
-	$(SRC_C_FROZEN) \
+	modules/psoc6/modpsoc6.c \
+	modules/psoc6/psoc6_fatfs.c \
+	modules/psoc6/psoc6_flash.c \
 	\
-	$(MPY_SRC_C)
+	modules/time/modutime.c \
+	extmod/utime_mphal.c \
+	\
+	$(MPY_SRC_C) $(BUILD)/frozen_content.c
 
 
 SRC_C    += $(SRC_MOD) $(SRC_USERMOD) 
@@ -110,26 +125,21 @@ SRC_CXX  += $(SRC_MOD_CXX)
 
 
 SRC_QSTR += $(MPY_SRC_C) $(SRC_MOD) $(SRC_MOD_CXX) $(SRC_USERMOD) 
-SRC_QSTR += modules/machine/modmachine.c modules/machine/pin.c
+SRC_QSTR += modules/machine/modmachine.c modules/machine/pin.c modules/machine/rtc.c \
+            modules/os/moduos.c \
+            modules/psoc6/modpsoc6.c modules/psoc6/psoc6_fatfs.c modules/psoc6/psoc6_flash.c \
+			modules/time/modutime.c extmod/utime_mphal.c
 
 
 OBJ += $(PY_CORE_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_CXX:.cpp=.o))
 
-
-all: $(MPY_MAIN_BUILD_DIR)/firmware.hex
-
-
-freeze/frozentest.mpy: $(BUILD)/genhdr/qstrdefs.generated.h
-	env PATH="../../mpy-cross/build:${PATH}" ../../tools/mpy_cross_all.py freeze
-
-
-$(SRC_C_FROZEN): freeze/frozentest.mpy
-	$(info )
-	$(info Freezing bytecode ...)
-	$(Q)$(TOP)/tools/mpy-tool.py -f -q $(BUILD)/genhdr/qstrdefs.preprocessed.h -mlongint-impl=none $< > $@
-	$(info Freezing bytecode done.)
-
+#$(SRC_PY_FROZEN): $(BUILD)/genhdr/qstrdefs.generated.h
+#	$(info )
+#	$(info Compiling bytecode ...)
+#	env PATH="../../mpy-cross/build:${PATH}" ../../tools/mpy_cross_all.py freeze
+#	$(info Compiling bytecode done.)
+#	$(info )
 
 
 $(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ)
@@ -138,6 +148,7 @@ $(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ)
 	$(Q)$(LD) $(LDFLAGS) -o $@ $^ 
 	$(info Linking $@ done.)
 	$(Q)$(SIZE) $@
+	$(info )
 
 
 $(MPY_MAIN_BUILD_DIR)/firmware.hex: $(MPY_MAIN_BUILD_DIR)/firmware.elf
@@ -149,3 +160,6 @@ include $(BOARD_DIR)/makefile_mtb.mk
 
 # include py core make definitions
 include $(TOP)/py/mkrules.mk
+
+
+all: $(MPY_MAIN_BUILD_DIR)/firmware.hex

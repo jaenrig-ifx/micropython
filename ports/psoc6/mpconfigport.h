@@ -6,6 +6,7 @@
 //#define MICROPY_CONFIG_ROM_LEVEL (MICROPY_CONFIG_ROM_LEVEL_MINIMUM)
 #define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_CORE_FEATURES)
 //#define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_EXTRA_FEATURES)
+//#define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_EVERYTHING)
 
 // You can disable the built-in MicroPython compiler by setting the following
 // config option to 0.  If you do this then you won't get a REPL prompt, but you
@@ -58,7 +59,7 @@ typedef long mp_off_t;
 
 #define MICROPY_USE_INTERNAL_PRINTF (0)
 
-//#define MICROPY_LONGINT_IMPL                    (MICROPY_LONGINT_IMPL_MPZ)
+#define MICROPY_LONGINT_IMPL                    (MICROPY_LONGINT_IMPL_MPZ)
 #define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_FLOAT)
 
 // MicroPython emitters
@@ -71,7 +72,6 @@ typedef long mp_off_t;
 
 
 // // Optimisations
-// #define MICROPY_OPT_COMPUTED_GOTO               (1)
 #define MICROPY_ENABLE_SOURCE_LINE      (1)
 #define MICROPY_PY_ARRAY                (1)
 #define MICROPY_PY_BUILTINS_ENUMERATE   (1)
@@ -82,12 +82,16 @@ typedef long mp_off_t;
 #define MICROPY_PY_BUILTINS_REVERSED    (1)
 #define MICROPY_PY_BUILTINS_SET         (1)
 #define MICROPY_PY_BUILTINS_HELP        (1)
+#define MICROPY_PY_BUILTINS_HELP_MODULES (1)
 #define MICROPY_PY_SYS_MODULES          (1)
-#define MICROPY_PY_UOS                  (1)
-#define MICROPY_PY_UOS_INCLUDEFILE     "ports/psoc6/moduos.c"
-#define MICROPY_PY_UOS_UNAME                    (1)
-#define MICROPY_PY_UOS_URANDOM                  (1)
-//#define MICROPY_PY_UOS_GETENV_PUTENV_UNSETENV (1)
+
+#define MICROPY_PY_UOS                        (1)
+#define MICROPY_PY_UOS_INCLUDEFILE            "ports/psoc6/modules/os/moduos.c"
+#define MICROPY_PY_UOS_UNAME                  (1)
+#define MICROPY_PY_UOS_URANDOM                (0)
+#define MICROPY_PY_UOS_GETENV_PUTENV_UNSETENV (0)
+#define MICROPY_PY_UOS_SYSTEM                 (1)
+
 #define MICROPY_PY_UTIME                (1)
 #define MICROPY_PY_UTIME_MP_HAL         (1)
 
@@ -98,14 +102,8 @@ typedef long mp_off_t;
 
 
 #ifndef MICROPY_USE_INTERNAL_ERRNO
-#define MICROPY_USE_INTERNAL_ERRNO              (1)
+#define MICROPY_USE_INTERNAL_ERRNO              (0)
 #endif
-
-// #ifndef MICROPY_BOARD_ENTER_BOOTLOADER
-// #define MICROPY_BOARD_ENTER_BOOTLOADER(nargs, args)
-// #endif
-extern const struct _mp_obj_module_t mp_module_machine;
-extern const struct _mp_obj_module_t mp_module_time;
 
 #if MICROPY_PY_UTIME
 #define MICROPY_PY_UTIME_DEF \
@@ -122,7 +120,6 @@ extern const struct _mp_obj_module_t mp_module_time;
     { MP_ROM_QSTR(MP_QSTR_time), MP_ROM_PTR(&mp_module_time) }
 
 
-//#define MICROPY_MODULE_FROZEN_STR       (1)
 #define MICROPY_COMP_CONST_FOLDING       (0)
 #define MICROPY_COMP_CONST               (0)
 #define MICROPY_COMP_DOUBLE_TUPLE_ASSIGN (0)
@@ -130,63 +127,65 @@ extern const struct _mp_obj_module_t mp_module_time;
 #define MICROPY_QSTR_BYTES_IN_HASH              (1)
 
 
-
-//#define MICROPY_REPL_EVENT_DRIVEN (0)
-
-
 #ifndef MICROPY_BOARD_ENTER_BOOTLOADER
 #define MICROPY_BOARD_ENTER_BOOTLOADER(nargs, args)
 #endif
 
 
-// #define MICROPY_DEBUG_NLR (1)
-
 #define MICROPY_ENABLE_FINALISER    (1)
 #define MICROPY_VFS                 (1)
-#define MICROPY_VFS_LFS2                        (1)
-#define MICROPY_VFS_FAT                         (1)
-
-
-//#define MICROPY_READER_VFS          (1)
-// #define MICROPY_HELPER_LEXER_UNIX   (1)
-//#define MICROPY_VFS_POSIX           (1)
-//#define MICROPY_READER_POSIX        (1)
+#define MICROPY_VFS_LFS2            (1)
+#define MICROPY_VFS_FAT             (1)
+#define MICROPY_READER_VFS          (1)
+#define MICROPY_VFS_POSIX           (0)
+#define MICROPY_READER_POSIX        (0)
 
 
 // fatfs configuration
 #define MICROPY_FATFS_ENABLE_LFN                (1)
 #define MICROPY_FATFS_LFN_CODE_PAGE             437 /* 1=SFN/ANSI 437=LFN/U.S.(OEM) */
 #define MICROPY_FATFS_RPATH                     (2)
+
 #if MICROPY_HW_USB_MSC
 #define MICROPY_FATFS_USE_LABEL                 (1)
 #define MICROPY_FATFS_MULTI_PARTITION           (1)
 // Set FatFS block size to flash sector size to avoid caching
 // the flash sector in memory to support smaller block sizes.
-#define MICROPY_FATFS_MAX_SS                    (FLASH_SECTOR_SIZE)
+#define MICROPY_FATFS_MAX_SS                    (0x200)
+// #define MICROPY_FATFS_MAX_SS                    (FLASH_SECTOR_SIZE)
 // #define MICROPY_FATFS_MAX_SS           (4096)
 #endif
 
 // VFS stat functions should return time values relative to 1970/1/1
 // #define MICROPY_EPOCH_IS_1970       (1)
 
-// Assume that select() call, interrupted with a signal, and erroring
-// with EINTR, updates remaining timeout value.
-// #define MICROPY_SELECT_REMAINING_TIME (1)
-
-// #ifndef MICROPY_PY_SYS_PLATFORM
-// #if defined(__APPLE__) && defined(__MACH__)
-//     #define MICROPY_PY_SYS_PLATFORM  "darwin"
-// #else
-//     #define MICROPY_PY_SYS_PLATFORM  "linux"
-// #endif
-// #endif
 
 #ifndef MICROPY_PY_SYS_PATH_DEFAULT
 #define MICROPY_PY_SYS_PATH_DEFAULT ".frozen:~/.micropython/lib:/usr/lib/micropython"
 #endif
 
 
-//#define MICROPY_DEBUG_VERBOSE (1)
+#define MICROPY_PY_THREAD                       (0)
 
-// #define MICROPY_PY_SYS_STDIO_BUFFER (1)
-//#define MICROPY_PY_OS_DUPTERM (1)
+
+#define MP_SSIZE_MAX (0x7fffffff)
+
+#define MICROPY_PY_SYS (1)
+#define MICROPY_PY_SYS_STDIO_BUFFER (1)
+
+
+extern mp_uint_t begin_atomic_section();
+extern void end_atomic_section(mp_uint_t state);
+
+#define MICROPY_BEGIN_ATOMIC_SECTION()     begin_atomic_section()
+#define MICROPY_END_ATOMIC_SECTION(state)  end_atomic_section(state)
+
+#define MICROPY_PERSISTENT_CODE_SAVE (1)
+#define MICROPY_PY_SYS_SETTRACE (1)
+#define MICROPY_PY_SYS_EXC_INFO (1)
+#define MICROPY_KBD_EXCEPTION (1)
+#include "shared/runtime/interrupt_char.h"
+
+#define MICROPY_PY_UERRNO (1)
+
+#define MICROPY_REPL_INFO (1)
