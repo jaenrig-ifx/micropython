@@ -79,16 +79,19 @@ LDFLAGS += $(LDFLAGS_MOD)
 LIBS =
 
 
-MPY_SRC_C += extmod/vfs_blockdev.c extmod/vfs_reader.c extmod/vfs.c \
+MPY_SRC_C += extmod/moduos.c \
+			 \
+		 	 extmod/utime_mphal.c \
+             \
+			 extmod/vfs_blockdev.c extmod/vfs_reader.c extmod/vfs.c \
 			 extmod/vfs_lfs.c \
 		 	 extmod/vfs_fat.c extmod/vfs_fat_diskio.c extmod/vfs_fat_file.c \
-		 	 extmod/moduos.c \
 		 	 \
 		 	 lib/littlefs/lfs1.c lib/littlefs/lfs1_util.c lib/littlefs/lfs2.c lib/littlefs/lfs2_util.c \
 		 	 lib/oofatfs/ff.c lib/oofatfs/ffunicode.c \
 		 	 \
-			 py/lexer.c \
-		 	 py/modcmath.c py/moduerrno.c py/repl.c py/frozenmod.c py/qstr.c \
+			 py/frozenmod.c py/lexer.c \
+		 	 py/modcmath.c py/moduerrno.c py/qstr.c py/repl.c \
 		 	 \
 		 	 shared/readline/readline.c \
 			 shared/runtime/interrupt_char.c \
@@ -115,9 +118,10 @@ SRC_C = \
 	modules/psoc6/psoc6_flash.c \
 	\
 	modules/time/modutime.c \
-	extmod/utime_mphal.c \
 	\
-	$(MPY_SRC_C) $(BUILD)/frozen_content.c
+	$(MPY_SRC_C) \
+	\
+	$(BUILD)/frozen_content.c
 
 
 SRC_C    += $(SRC_MOD) $(SRC_USERMOD) 
@@ -126,20 +130,16 @@ SRC_CXX  += $(SRC_MOD_CXX)
 
 SRC_QSTR += $(MPY_SRC_C) $(SRC_MOD) $(SRC_MOD_CXX) $(SRC_USERMOD) 
 SRC_QSTR += modules/machine/modmachine.c modules/machine/pin.c modules/machine/rtc.c \
+            \
             modules/os/moduos.c \
+			\
             modules/psoc6/modpsoc6.c modules/psoc6/psoc6_fatfs.c modules/psoc6/psoc6_flash.c \
+			\
 			modules/time/modutime.c extmod/utime_mphal.c
 
 
 OBJ += $(PY_CORE_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_CXX:.cpp=.o))
-
-#$(SRC_PY_FROZEN): $(BUILD)/genhdr/qstrdefs.generated.h
-#	$(info )
-#	$(info Compiling bytecode ...)
-#	env PATH="../../mpy-cross/build:${PATH}" ../../tools/mpy_cross_all.py freeze
-#	$(info Compiling bytecode done.)
-#	$(info )
 
 
 $(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ)
