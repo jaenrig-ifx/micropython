@@ -73,13 +73,20 @@ SRC_C = \
 	\
 	modules/machine/modmachine.c \
 	modules/machine/machine_pin.c \
+	modules/machine/pins.c \
 	\
 	shared/runtime/pyexec.c \
 	shared/readline/readline.c \
 	shared/runtime/stdout_helpers.c \
 	\
-	$(BUILD)/_frozen_mpy.c \
+	drivers/psoc6_system.c  \
+	drivers/psoc6_gpio.c \
+	\
+	mphalport.c \
+	$(BUILD)/_frozen_mpy.c
 
+# the order of driver sources matter above. 
+# TODO: investigate the circular includes and remove the redundant ones
 
 SRC_C    += shared/libc/string0.c
 
@@ -94,6 +101,13 @@ SRC_QSTR += modules/machine/modmachine.c modules/machine/machine_pin.c
 OBJ += $(PY_CORE_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_CXX:.cpp=.o))
 
+# switch for debug mode, also added to mpconfigport.h
+# TODO: keep the more suitable one, delete the other
+MP_LOGGER_DEBUG ?= 0
+
+ifeq ($(MP_LOGGER_DEBUG), 1)
+  CFLAGS += -DMICROPY_LOGGER_DEBUG=1
+endif
 
 all: $(MPY_MAIN_BUILD_DIR)/firmware.hex
 
