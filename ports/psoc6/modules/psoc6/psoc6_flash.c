@@ -44,7 +44,7 @@
 
 #define FLASH_BASE        (0x10100000)
 #define FLASH_SIZE        (0x00200000 - (FLASH_BASE - FLASH_BASE_TRUE))
-//#define FLASH_SIZE        (MICROPY_HW_FLASH_STORAGE_BYTES)
+// #define FLASH_SIZE        (MICROPY_HW_FLASH_STORAGE_BYTES)
 
 #define FLASH_SECTOR_SIZE (0x200)
 #define BLOCK_SIZE_BYTES  (FLASH_SECTOR_SIZE)
@@ -88,53 +88,53 @@ cyhal_flash_t cyhal_flash_obj;
 //     BINARY_INFO_BLOCK_DEV_FLAG_PT_UNKNOWN));
 
 
-    // cyhal_flash_t      cyhal_flash_obj;
-    // cyhal_flash_info_t flash_info;
-    // // uint32_t           flash_start_address;
-    // // uint32_t           flash_size;
-    // // uint32_t           flash_sector_size;
-    // // uint32_t           flash_page_size;
-    // // uint8_t            flash_erase_value;
- 
-    // // Initialize flash object
-    // cyhal_flash_init(&cyhal_flash_obj);
- 
-    // // Get flash characteristics
-    // cyhal_flash_get_info(&cyhal_flash_obj, &flash_info);
- 
-    // // Wait for 100ms for the flash write to complete
-    // uint32_t timeout = 100;
- 
-    // // Wait for the command to finish execution
-    // while ((true != cyhal_flash_is_operation_complete(&cyhal_flash_obj)) && (0 < timeout))
-    // {
-    //     timeout--;
-    //     cyhal_system_delay_ms(1); // delay one millisecond each iteration
-    // }
- 
-    // const cyhal_flash_block_info_t* block_info = 0;
+// cyhal_flash_t      cyhal_flash_obj;
+// cyhal_flash_info_t flash_info;
+// // uint32_t           flash_start_address;
+// // uint32_t           flash_size;
+// // uint32_t           flash_sector_size;
+// // uint32_t           flash_page_size;
+// // uint8_t            flash_erase_value;
 
-    // if (0 != timeout)
-    // {
-    //     for (int index = 0; index < flash_info.block_count; index++)
-    //     {
-    //         block_info = flash_info.blocks;
-    //         block_info         += index;
-    //         // flash_start_address = block_info->start_address;
-    //         // flash_size          = block_info->size;
-    //         // flash_sector_size   = block_info->sector_size;
-    //         // flash_page_size     = block_info->page_size;
-    //         // flash_erase_value   = block_info->erase_value;
+// // Initialize flash object
+// cyhal_flash_init(&cyhal_flash_obj);
+
+// // Get flash characteristics
+// cyhal_flash_get_info(&cyhal_flash_obj, &flash_info);
+
+// // Wait for 100ms for the flash write to complete
+// uint32_t timeout = 100;
+
+// // Wait for the command to finish execution
+// while ((true != cyhal_flash_is_operation_complete(&cyhal_flash_obj)) && (0 < timeout))
+// {
+//     timeout--;
+//     cyhal_system_delay_ms(1); // delay one millisecond each iteration
+// }
+
+// const cyhal_flash_block_info_t* block_info = 0;
+
+// if (0 != timeout)
+// {
+//     for (int index = 0; index < flash_info.block_count; index++)
+//     {
+//         block_info = flash_info.blocks;
+//         block_info         += index;
+//         // flash_start_address = block_info->start_address;
+//         // flash_size          = block_info->size;
+//         // flash_sector_size   = block_info->sector_size;
+//         // flash_page_size     = block_info->page_size;
+//         // flash_erase_value   = block_info->erase_value;
 
 
-    //         printf("block_info->start_address : %lx\n", block_info->start_address);
-    //         printf("block_info->size : %lx\n", block_info->size);
-    //         printf("block_info->sector_size : %lx\n", block_info->sector_size);
-    //         printf("block_info->page_size : %lx\n", block_info->page_size);
-    //         printf("block_info->erase_value : %x\n\n\n", block_info->erase_value);
-    //     }
-    // }
- 
+//         printf("block_info->start_address : %lx\n", block_info->start_address);
+//         printf("block_info->size : %lx\n", block_info->size);
+//         printf("block_info->sector_size : %lx\n", block_info->sector_size);
+//         printf("block_info->page_size : %lx\n", block_info->page_size);
+//         printf("block_info->erase_value : %x\n\n\n", block_info->erase_value);
+//     }
+// }
+
 
 
 STATIC mp_obj_t psoc6_flash_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
@@ -200,19 +200,19 @@ STATIC mp_obj_t psoc6_flash_readblocks(size_t n_args, const mp_obj_t *args) {
 
     cyhal_flash_read(&cyhal_flash_obj, self->flash_base + offset, bufinfo.buf, bufinfo.len);
 //    memcpy(bufinfo.buf, (void *)(self->flash_base + offset), bufinfo.len);
-   // memcpy(bufinfo.buf, (void *)(FLASH_BASE + self->flash_base + offset), bufinfo.len);
+// memcpy(bufinfo.buf, (void *)(FLASH_BASE + self->flash_base + offset), bufinfo.len);
 
     return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(psoc6_flash_readblocks_obj, 3, 4, psoc6_flash_readblocks);
 
 STATIC mp_obj_t psoc6_flash_writeblocks(size_t n_args, const mp_obj_t *args) {
-     
+
     psoc6_flash_obj_t *self = MP_OBJ_TO_PTR(args[0]);
     uint32_t offset = mp_obj_get_int(args[1]) * BLOCK_SIZE_BYTES;
     mp_buffer_info_t bufinfo;
     mp_get_buffer_raise(args[2], &bufinfo, MP_BUFFER_READ);
-    
+
 // printf("psoc6_flash_writeblocks n_args : %u   args[1] : %x     offset : %lx    buffer.len : %x\n", n_args, mp_obj_get_int(args[1]), offset, bufinfo.len);
 
     if (n_args == 3) {
@@ -221,7 +221,7 @@ STATIC mp_obj_t psoc6_flash_writeblocks(size_t n_args, const mp_obj_t *args) {
 
         uint32_t numSectors = bufinfo.len / FLASH_SECTOR_SIZE;
 
-        for(uint32_t i = 0; i <= numSectors; ++i) {
+        for (uint32_t i = 0; i <= numSectors; ++i) {
             // printf("psoc6_flash_writeblocks   erasing at %lx\n", self->flash_base + offset + i * FLASH_SECTOR_SIZE);
             cyhal_flash_erase(&cyhal_flash_obj, self->flash_base + offset + i * FLASH_SECTOR_SIZE);
         }
@@ -235,15 +235,15 @@ STATIC mp_obj_t psoc6_flash_writeblocks(size_t n_args, const mp_obj_t *args) {
     } else {
         offset += mp_obj_get_int(args[3]);
     }
- 
- 
+
+
     // Flash erase/program must run in an atomic section because the XIP bit gets disabled.
     mp_uint_t atomic_state = MICROPY_BEGIN_ATOMIC_SECTION();
 
     // cyhal_flash_write(&cyhal_flash_obj, self->flash_base + offset, bufinfo.buf);
     uint32_t numPages = bufinfo.len / FLASH_SECTOR_SIZE; // TODO: should be page size
 
-    for(uint32_t i = 0; i <= numPages; ++i) {
+    for (uint32_t i = 0; i <= numPages; ++i) {
         // printf("psoc6_flash_writeblocks   program  at %lx\n", self->flash_base + offset + i * FLASH_SECTOR_SIZE);
         cyhal_flash_program(&cyhal_flash_obj, self->flash_base + offset + i * FLASH_SECTOR_SIZE, bufinfo.buf + i * FLASH_SECTOR_SIZE);
     }

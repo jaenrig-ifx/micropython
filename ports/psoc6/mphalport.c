@@ -31,11 +31,11 @@ uint64_t mp_hal_time_ns(void) {
     cy_rslt_t result = cyhal_rtc_read(&psoc6_rtc, &current_date_time);
 
     if (CY_RSLT_SUCCESS != result) {
-    printf("cyhal_rtc_read failed !\n");
+        printf("cyhal_rtc_read failed !\n");
     }
 
     uint64_t s = timeutils_seconds_since_epoch(current_date_time.tm_year, current_date_time.tm_mon, current_date_time.tm_mday,
-                                               current_date_time.tm_hour, current_date_time.tm_min, current_date_time.tm_sec);
+        current_date_time.tm_hour, current_date_time.tm_min, current_date_time.tm_sec);
     return s * 1000000000ULL;
 }
 
@@ -48,20 +48,20 @@ void mp_hal_delay_us(mp_uint_t us) {
 
 mp_uint_t mp_hal_ticks_us(void) {
 //    printf("mp_hal_ticks_us not implemented !\n");
-  return( 0UL );
+    return 0UL;
 //    return time_us_32();
 }
 
 
 mp_uint_t mp_hal_ticks_ms(void) {
 //    printf("mp_hal_ticks_ms not implemented !\n");
-  return( 0UL );
+    return 0UL;
 }
 
 
 mp_uint_t begin_atomic_section() {
     __disable_irq();
-    return( 0 );
+    return 0;
 }
 // // Entering a critical section.
 // extern uint32_t mp_thread_begin_atomic_section(void);

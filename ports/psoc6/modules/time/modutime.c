@@ -115,11 +115,11 @@ STATIC mp_obj_t time_time(void) {
     cy_rslt_t result = cyhal_rtc_read(&psoc6_rtc, &current_date_time);
 
     if (CY_RSLT_SUCCESS != result) {
-            printf("cyhal_rtc_read failed !");
+        printf("cyhal_rtc_read failed !");
     }
 
     return mp_obj_new_int_from_ull(timeutils_seconds_since_epoch(current_date_time.tm_year, current_date_time.tm_mon, current_date_time.tm_mday,
-                                                                 current_date_time.tm_hour, current_date_time.tm_min, current_date_time.tm_sec));
+        current_date_time.tm_hour, current_date_time.tm_min, current_date_time.tm_sec));
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(time_time_obj, time_time);
 
