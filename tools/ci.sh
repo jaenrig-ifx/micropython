@@ -257,6 +257,7 @@ function ci_psoc6_setup {
 
 function ci_psoc6_build {
     docker exec mtb-ci make mpy_mtb_init
+    docker exec mtb-ci make submodules
     docker exec mtb-ci make
 }
 
