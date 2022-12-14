@@ -1,15 +1,31 @@
 @echo off
 
+echo Welcome to the MicroPython PSoC6 installer!
+
+Rem Board selection
 set board=%1
-if [%board%]==[] echo No board defined
-echo MicroPython PSoC Board   :: %board%
+set board_list[0]=cy8cproto-062-4343w
+if [%board%]==[] (
+    echo:
+    echo ###################################
+    echo Supported MicroPython PSoC6 boards: 
+    echo ###################################
+    echo:
+    echo 0 - CY8CPROTO-062-4343W (default^)
+    echo:
+    echo No user selection required. Only one choice.
+	set board_index=0
+	echo:
+    Rem set  /p/( "board_index=Please type the desired board number. " --> Uncomment and remove preselection above when more options are available
+)
+call echo MicroPython PSoC Board   :: %%board_list[%board_index%]%%
 
-
+Rem Version selection
 set mpy_ifx_version=%2
 if [%mpy_ifx_version%]==[] set mpy_ifx_version=latest
 
 echo Micropython PSoC Version :: %mpy_ifx_version% 
-
+echo:
 
 echo Downloading MicroPython PSoC6 port %mpy_ifx_version% for %board% board...
 Rem curl.exe -s -L https://github.com/jaenrig-ifx/micropython/releases/download/%mpy_ifx_version%/micropython-ifx-%board%.hex > micropython-ifx-%board%.hex
