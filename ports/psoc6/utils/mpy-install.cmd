@@ -39,7 +39,7 @@ Rem Version selection
 set mpy_ifx_version=%2
 if [%mpy_ifx_version%]==[] set mpy_ifx_version=latest
 
-echo MicroPython PSoC Version :: %mpy_ifx_version% 
+echo MicroPython PSoC6 Version :: %mpy_ifx_version% 
 echo:
 
 echo Downloading MicroPython PSoC6 port %mpy_ifx_version% for %board% board...
@@ -56,20 +56,30 @@ echo Please CONNECT THE BOARD and PRESS ANY KEY to start the firmware deployment
 pause >nul
 
 echo Deploying Micropython...
-Rem openocd/bin/openocd.exe -s openocd/scripts -c "source [find interface/kitprog3.cfg]; ; source [find target/psoc6_2m.cfg]; psoc6 allow_efuse_program off; psoc6 sflash_restrictions 1; program micropython-ifx-%board%.hex verify reset exit;"
-Rem /home/jaenrig/ModusToolbox/tools_3.0/openocd/bin/openocd -s /home/jaenrig/ModusToolbox/tools_3.0/openocd/scripts -s bsps/TARGET_APP_CY8CPROTO-062-4343W/config/GeneratedSource -c "source [find interface/kitprog3.cfg]; ; source [find target/psoc6_2m.cfg]; psoc6 allow_efuse_program off; psoc6 sflash_restrictions 1; program $(BUILD)/firmware.hex verify reset exit;"
+openocd\bin\openocd.exe -s openocd\scripts -c "source [find interface/kitprog3.cfg]; ; source [find target/psoc6_2m.cfg]; psoc6 allow_efuse_program off; psoc6 sflash_restrictions 1; program firmware.hex verify reset exit;"
 
+@REM echo:
+@REM echo Downloading Arduino Lab for Micropython...
+@REM curl.exe -s -L https://github.com/arduino/lab-micropython-editor/releases/download/0.5.0-alpha/Arduino.Lab.for.Micropython-win_x64.zip > arduino-for-micropython.zip
+
+@REM echo Extracting Arduino Lab for Micropython...
+@REM tar.exe -xf arduino-for-micropython.zip
+
+@REM echo Launching Arduino Lab for Micropython...
+@REM start "" "Arduino Lab for Micropython"
+
+echo:
 echo Cleaning up downloaded files...
 Rem del micropython-ifx-%board%.hex
+del arduino-for-micropython.zip
 del openocd.zip 
 rmdir /s /q openocd
 
-
 echo:   
-echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-echo  The installation is completed. Enjoy :)                 
-echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                              
+echo ###########################################
+echo  The installation is completed. Have fun :)                 
+echo ###########################################      
 
 echo:
-echo Press any quit to exit...
+echo Press any key to exit...
 pause >nul
