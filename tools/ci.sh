@@ -253,6 +253,9 @@ function ci_psoc6_setup {
       -w /micropython/ports/psoc6 \
       ifxmakers/mpy-mtb-ci:${MPY_MTB_CI_DOCKER_VERSION}
     docker ps -a
+    
+    # This command prevents the issue "fatal: detected dubious ownership in repository at '/micropython'""
+    docker exec mtb-ci /bin/bash -c "git config --global --add safe.directory /micropython"
 }
 
 function ci_psoc6_build {
