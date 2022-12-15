@@ -24,13 +24,14 @@
  * THE SOFTWARE.
  */
 
+// std includes
 #include <stdio.h>
 #include <string.h>
-
-#include <time.h>
 #include <sys/time.h>
+#include <time.h>
 
 
+// micropython includes
 #include "py/nlr.h"
 #include "py/obj.h"
 #include "py/runtime.h"
@@ -40,9 +41,11 @@
 #include "py/misc.h"
 
 
+// MTB includes
 #include "cyhal.h"
 
 
+// port-specific includes
 #include "modmachine.h"
 
 
@@ -69,16 +72,14 @@ STATIC mp_obj_t machine_rtc_make_new(const mp_obj_type_t *type, size_t n_args, s
         cy_rslt_t result = cyhal_rtc_init(&psoc6_rtc);
 
         if (CY_RSLT_SUCCESS != result) {
-//            mp_raise_NotImplementedError(mp_rom_error_text_t "cyhal_rtc_init failed !");
-            printf("cyhal_rtc_init failed !");
+            mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_init failed !"));
         }
 
         struct tm current_date_time = { .tm_mon = 1, .tm_mday = 1 };
         result = cyhal_rtc_write(&psoc6_rtc, &current_date_time);
 
         if (CY_RSLT_SUCCESS != result) {
-            // mp_raise_NotImplementedError("cyhal_rtc_write failed !");
-            printf("cyhal_rtc_write failed !");
+            mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_write failed !"));
         }
     }
 
@@ -92,8 +93,7 @@ STATIC mp_obj_t machine_rtc_datetime(mp_uint_t n_args, const mp_obj_t *args) {
         cy_rslt_t result = cyhal_rtc_read(&psoc6_rtc, &current_date_time);
 
         if (CY_RSLT_SUCCESS != result) {
-            // mp_raise_NotImplementedError("cyhal_rtc_read failed !");
-            printf("cyhal_rtc_read failed !");
+            mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_read failed !"));
         }
 
         mp_obj_t tuple[8] = {
@@ -129,8 +129,7 @@ STATIC mp_obj_t machine_rtc_datetime(mp_uint_t n_args, const mp_obj_t *args) {
         cy_rslt_t result = cyhal_rtc_write(&psoc6_rtc, &current_date_time);
 
         if (CY_RSLT_SUCCESS != result) {
-            // mp_raise_NotImplementedError("cyhal_rtc_write failed !");
-            printf("cyhal_rtc_write failed !");
+            mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_write failed !"));
         }
 
     }

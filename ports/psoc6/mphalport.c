@@ -1,13 +1,14 @@
+// std includes
 #include "stdio.h"
 
 
+// micropython includes
 #include "mpconfigport.h"
 #include "mphalport.h"
-
-
 #include "shared/timeutils/timeutils.h"
 
 
+// MTB includes
 #include "cyhal.h"
 #include "cy_retarget_io.h"
 
@@ -16,7 +17,7 @@ extern cyhal_rtc_t psoc6_rtc;
 
 
 void mp_hal_delay_ms(mp_uint_t ms) {
-    printf("mp_hal_delay_ms not implemented !\n");
+    mp_raise_NotImplementedError(MP_ERROR_TEXT("mp_hal_delay_ms not implemented !\n"));
     // absolute_time_t t = make_timeout_time_ms(ms);
     // while (!time_reached(t)) {
     //     MICROPY_EVENT_POLL_HOOK_FAST;
@@ -31,7 +32,7 @@ uint64_t mp_hal_time_ns(void) {
     cy_rslt_t result = cyhal_rtc_read(&psoc6_rtc, &current_date_time);
 
     if (CY_RSLT_SUCCESS != result) {
-        printf("cyhal_rtc_read failed !\n");
+        mp_raise_NotImplementedError(MP_ERROR_TEXT("cyhal_rtc_read failed !"));
     }
 
     uint64_t s = timeutils_seconds_since_epoch(current_date_time.tm_year, current_date_time.tm_mon, current_date_time.tm_mday,
@@ -41,20 +42,21 @@ uint64_t mp_hal_time_ns(void) {
 
 
 void mp_hal_delay_us(mp_uint_t us) {
-    printf("mp_hal_delay_us not implemented !\n");
+    mp_raise_NotImplementedError(MP_ERROR_TEXT("mp_hal_delay_us not implemented !"));
+//    printf("mp_hal_delay_us not implemented !\n");
 //    sleep_us(us);
 }
 
 
 mp_uint_t mp_hal_ticks_us(void) {
-//    printf("mp_hal_ticks_us not implemented !\n");
+//     mp_raise_NotImplementedError(MP_ERROR_TEXT("mp_hal_ticks_us not implemented !"));
     return 0UL;
 //    return time_us_32();
 }
 
 
 mp_uint_t mp_hal_ticks_ms(void) {
-//    printf("mp_hal_ticks_ms not implemented !\n");
+//     mp_raise_NotImplementedError(MP_ERROR_TEXT("mp_hal_ticks_ms not implemented !"));
     return 0UL;
 }
 
@@ -76,7 +78,7 @@ void end_atomic_section(mp_uint_t state) {
 
 
 uintptr_t mp_hal_stdio_poll(uintptr_t poll_flags) {
-    printf("mp_hal_stdio_poll not implemented !");
+    mp_raise_NotImplementedError(MP_ERROR_TEXT("mp_hal_stdio_poll not implemented !"));
     uintptr_t ret = 0;
     // #if MICROPY_HW_ENABLE_USBDEV
     // poll_cdc_interfaces();

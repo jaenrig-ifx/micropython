@@ -1,12 +1,11 @@
-
 // std includes
 #include <stdio.h>
 #include <unistd.h>
 
 
-
 // micropython includes
 #include "py/mpconfig.h"
+#include "py/runtime.h"
 
 
 // MTB includes
@@ -45,7 +44,9 @@ static inline mp_uint_t mp_hal_ticks_cpu(void) {
     // ticks_cpu() is defined as using the highest-resolution timing source
     // in the system. This is usually a CPU clock, but doesn't have to be.
     // return time_us_32();
-    printf("mp_hal_ticks_cpu not implemented !");
+
+    // printf("mp_hal_ticks_cpu not implemented !");
+    mp_raise_NotImplementedError(MP_ERROR_TEXT("mp_hal_ticks_cpu not implemented !"));
     return 0;
 }
 

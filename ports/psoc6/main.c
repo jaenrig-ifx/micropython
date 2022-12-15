@@ -19,14 +19,12 @@
 #include "cyhal.h"
 #include "cy_retarget_io.h"
 
-// port-specific includes
-#include "mplogger.h"
 
 // port-specific includes
 #include "mplogger.h"
 
 
-cyhal_rtc_t psoc6_rtc;
+extern cyhal_rtc_t psoc6_rtc;
 
 
 #if MICROPY_ENABLE_GC
@@ -107,7 +105,7 @@ int main(int argc, char **argv) {
     }
 
     /* \x1b[2J\x1b[;H - ANSI ESC sequence for clear screen */
-    printf("\x1b[2J\x1b[;H");
+    mp_printf(&mp_plat_print, "\x1b[2J\x1b[;H");
 
     mp_hal_stdout_tx_str(MICROPY_BANNER_NAME_AND_VERSION);
     mp_hal_stdout_tx_str("; " MICROPY_BANNER_MACHINE);
@@ -169,7 +167,7 @@ soft_reset:
         }
     }
 
-    printf("MPY: soft reboot\n");
+    mp_printf(&mp_plat_print, "MPY: soft reboot\n");
 
     mp_deinit();
 
@@ -181,7 +179,7 @@ soft_reset:
 
 // TODO: to be implemented
 void nlr_jump_fail(void *val) {
-    printf("nlr_jump_fail\n");
+    mp_printf(&mp_plat_print, "nlr_jump_fail\n");
 
     while (1) {
         ;

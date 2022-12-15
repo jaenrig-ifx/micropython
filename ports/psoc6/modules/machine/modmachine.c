@@ -22,8 +22,8 @@
 
 // port-specific includes
 #include "drivers/machine/psoc6_system.h"
-
 #include "modmachine.h"
+
 
 #if MICROPY_PY_MACHINE
 
@@ -40,7 +40,6 @@ void machine_deinit(void) {
 
 // machine.info([dump_alloc_table])
 // Print out lots of information about the board.
-// TODO: rework printfs to mp_printfs etc
 STATIC mp_obj_t machine_info(size_t n_args, const mp_obj_t *args) {
 
     mp_printf(&mp_plat_print, "info about machine\n");
@@ -49,17 +48,17 @@ STATIC mp_obj_t machine_info(size_t n_args, const mp_obj_t *args) {
     {
         size_t n_pool, n_qstr, n_str_data_bytes, n_total_bytes;
         qstr_pool_info(&n_pool, &n_qstr, &n_str_data_bytes, &n_total_bytes);
-        printf("qstr:\n  n_pool=%u\n  n_qstr=%u\n  n_str_data_bytes=%u\n  n_total_bytes=%u\n", n_pool, n_qstr, n_str_data_bytes, n_total_bytes);
+        mp_printf(&mp_plat_print, "qstr:\n  n_pool=%u\n  n_qstr=%u\n  n_str_data_bytes=%u\n  n_total_bytes=%u\n", n_pool, n_qstr, n_str_data_bytes, n_total_bytes);
     }
 
     // GC info
     {
         gc_info_t info;
         gc_info(&info);
-        printf("GC:\n");
-        printf("  %u total\n", info.total);
-        printf("  %u : %u\n", info.used, info.free);
-        printf("  1=%u 2=%u m=%u\n", info.num_1block, info.num_2block, info.max_block);
+        mp_printf(&mp_plat_print, "GC:\n");
+        mp_printf(&mp_plat_print, "  %u total\n", info.total);
+        mp_printf(&mp_plat_print, "  %u : %u\n", info.used, info.free);
+        mp_printf(&mp_plat_print, "  1=%u 2=%u m=%u\n", info.num_1block, info.num_2block, info.max_block);
     }
 
     return mp_const_none;

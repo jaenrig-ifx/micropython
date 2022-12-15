@@ -24,18 +24,21 @@
  * THE SOFTWARE.
  */
 
+// std includes
 #include "stdio.h"
 
 
+// micropython includes
+#include "extmod/utime_mphal.h"
 #include "py/runtime.h"
 #include "shared/timeutils/timeutils.h"
-#include "extmod/utime_mphal.h"
 
 
+// MTB includes
 #include "cyhal.h"
 
 
-extern cyhal_rtc_t psoc6_rtc;
+cyhal_rtc_t psoc6_rtc;
 
 
 // localtime([secs])
@@ -48,8 +51,7 @@ STATIC mp_obj_t time_localtime(size_t n_args, const mp_obj_t *args) {
         cy_rslt_t result = cyhal_rtc_read(&psoc6_rtc, &current_date_time);
 
         if (CY_RSLT_SUCCESS != result) {
-            printf("cyhal_rtc_read failed !");
-            // mp_raise_OSError(MP_EIO);
+            mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_read failed !"));
         }
 
         mp_obj_t tuple[8] = {
@@ -115,7 +117,7 @@ STATIC mp_obj_t time_time(void) {
     cy_rslt_t result = cyhal_rtc_read(&psoc6_rtc, &current_date_time);
 
     if (CY_RSLT_SUCCESS != result) {
-        printf("cyhal_rtc_read failed !");
+        mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_read failed !"));
     }
 
     return mp_obj_new_int_from_ull(timeutils_seconds_since_epoch(current_date_time.tm_year, current_date_time.tm_mon, current_date_time.tm_mday,

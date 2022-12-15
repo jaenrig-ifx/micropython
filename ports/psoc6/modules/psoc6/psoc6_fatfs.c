@@ -24,12 +24,16 @@
  * THE SOFTWARE.
  */
 
+// std includes
 #include <stdio.h>
 
 
+// micropython includes
 #include "lib/oofatfs/ff.h"
+#include "py/runtime.h"
 
 
+// MTB includes
 #include "cyhal.h"
 
 
@@ -42,8 +46,7 @@ MP_WEAK DWORD get_fattime(void) {
     cy_rslt_t result = cyhal_rtc_read(&psoc6_rtc, &current_date_time);
 
     if (CY_RSLT_SUCCESS != result) {
-        // mp_raise_NotImplementedError("cyhal_rtc_read failed !");
-        printf("cyhal_rtc_read failed !");
+        mp_raise_NotImplementedError(MP_ERROR_TEXT("cyhal_rtc_read failed !"));
     }
 
     return ((current_date_time.tm_year - 1980) << 25) | ((current_date_time.tm_mon) << 21) | ((current_date_time.tm_mday) << 16) | ((current_date_time.tm_hour) << 11) | ((current_date_time.tm_min) << 5) | (current_date_time.tm_sec / 2);
