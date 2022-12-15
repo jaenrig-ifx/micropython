@@ -58,7 +58,9 @@
 #define MICROPY_PY_BUILTINS_HELP_TEXT       samd_help_text
 #define MICROPY_PY_BUILTINS_HELP_MODULES    (1)
 #define MICROPY_ENABLE_SCHEDULER            (1)
+#define MICROPY_SCHEDULER_STATIC_NODES      (1)
 #define MICROPY_MODULE_WEAK_LINKS           (1)
+#define MICROPY_HW_USB_CDC_1200BPS_TOUCH    (1)
 
 // Control over Python builtins
 #define MICROPY_PY_BUILTINS_BYTES_HEX       (1)
@@ -93,6 +95,8 @@
 #define MICROPY_PY_MACHINE_SOFTI2C          (1)
 #define MICROPY_PY_MACHINE_SPI              (1)
 #define MICROPY_PY_MACHINE_SOFTSPI          (1)
+#define MICROPY_HW_SOFTSPI_MIN_DELAY        (1)
+#define MICROPY_HW_SOFTSPI_MAX_BAUDRATE     (1000000)
 #define MICROPY_PY_MACHINE_TIMER            (1)
 #define MICROPY_PY_OS_DUPTERM               (3)
 #define MICROPY_PY_MACHINE_BITSTREAM        (1)
@@ -123,7 +127,7 @@ __attribute__((always_inline)) static inline uint32_t disable_irq(void) {
     do { \
         extern void mp_handle_pending(bool); \
         mp_handle_pending(true); \
-        __WFI(); \
+        __WFE(); \
     } while (0);
 
 #define MICROPY_MAKE_POINTER_CALLABLE(p) ((void *)((mp_uint_t)(p) | 1))
