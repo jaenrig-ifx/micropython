@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     mp_stack_ctrl_init();
 
 
-   #ifdef SIGPIPE
+    #ifdef SIGPIPE
     // Do not raise SIGPIPE, instead return EPIPE. Otherwise, e.g. writing
     // to peer-closed socket will lead to sudden termination of MicroPython
     // process. SIGPIPE is particularly nasty, because unix shell doesn't
@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
 
     cy_rslt_t result;
 
-#if defined(CY_DEVICE_SECURE)
+    #if defined(CY_DEVICE_SECURE)
 
     cyhal_wdt_t wdt_obj;
 
@@ -113,8 +113,8 @@ int main(int argc, char **argv) {
     mp_hal_stdout_tx_str("; " MICROPY_BANNER_MACHINE);
     mp_hal_stdout_tx_str("\nUse Ctrl-D to exit, Ctrl-E for paste mode\n");
 
-    setvbuf( stdin,  NULL, _IONBF, 0 );
-    setvbuf( stdout, NULL, _IONBF, 0 ); 
+    setvbuf(stdin,  NULL, _IONBF, 0);
+    setvbuf(stdout, NULL, _IONBF, 0);
 
 soft_reset:
 
@@ -158,7 +158,7 @@ soft_reset:
     __enable_irq();
 
     for (;;) {
-       if (pyexec_mode_kind == PYEXEC_MODE_RAW_REPL) {
+        if (pyexec_mode_kind == PYEXEC_MODE_RAW_REPL) {
             if (pyexec_raw_repl() != 0) {
                 break;
             }

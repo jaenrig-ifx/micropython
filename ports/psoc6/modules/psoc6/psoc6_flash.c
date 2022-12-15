@@ -120,13 +120,15 @@ STATIC mp_obj_t psoc6_flash_readblocks(size_t n_args, const mp_obj_t *args) {
     }
 
     cyhal_flash_read(&cyhal_flash_obj, self->flash_base + offset, bufinfo.buf, bufinfo.len);
+    // TODO: or simply do it like this ?
+    // memcpy(bufinfo.buf, (void *)(self->flash_base + offset), bufinfo.len);
 
     return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(psoc6_flash_readblocks_obj, 3, 4, psoc6_flash_readblocks);
 
 STATIC mp_obj_t psoc6_flash_writeblocks(size_t n_args, const mp_obj_t *args) {
-     
+
     psoc6_flash_obj_t *self = MP_OBJ_TO_PTR(args[0]);
     uint32_t offset = mp_obj_get_int(args[1]) * BLOCK_SIZE_BYTES;
     mp_buffer_info_t bufinfo;

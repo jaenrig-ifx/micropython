@@ -63,23 +63,23 @@ STATIC mp_obj_t machine_rtc_make_new(const mp_obj_type_t *type, size_t n_args, s
     mp_arg_check_num(n_args, n_kw, 0, 0, false);
     bool r = cyhal_rtc_is_enabled(&psoc6_rtc);
 
-    if ( !r ) {
+    if (!r) {
         // This shouldn't happen as rtc_init() is already called in main so
         // it's here just in case
-       cy_rslt_t result = cyhal_rtc_init(&psoc6_rtc);
+        cy_rslt_t result = cyhal_rtc_init(&psoc6_rtc);
 
-       if (CY_RSLT_SUCCESS != result) {
+        if (CY_RSLT_SUCCESS != result) {
 //            mp_raise_NotImplementedError(mp_rom_error_text_t "cyhal_rtc_init failed !");
             printf("cyhal_rtc_init failed !");
-       }
+        }
 
-       struct tm current_date_time = { .tm_mon = 1, .tm_mday = 1 };
-       result = cyhal_rtc_write(&psoc6_rtc, &current_date_time);
+        struct tm current_date_time = { .tm_mon = 1, .tm_mday = 1 };
+        result = cyhal_rtc_write(&psoc6_rtc, &current_date_time);
 
-       if (CY_RSLT_SUCCESS != result) {
+        if (CY_RSLT_SUCCESS != result) {
             // mp_raise_NotImplementedError("cyhal_rtc_write failed !");
             printf("cyhal_rtc_write failed !");
-       }
+        }
     }
 
     // return constant object
@@ -115,12 +115,12 @@ STATIC mp_obj_t machine_rtc_datetime(mp_uint_t n_args, const mp_obj_t *args) {
 
         struct tm current_date_time =
         {
-                .tm_year = mp_obj_get_int(items[0]),
-                .tm_mon  = mp_obj_get_int(items[1]),
-                .tm_mday = mp_obj_get_int(items[2]),
-                .tm_hour = mp_obj_get_int(items[4]),
-                .tm_min  = mp_obj_get_int(items[5]),
-                .tm_sec  = mp_obj_get_int(items[6]),
+            .tm_year = mp_obj_get_int(items[0]),
+            .tm_mon = mp_obj_get_int(items[1]),
+            .tm_mday = mp_obj_get_int(items[2]),
+            .tm_hour = mp_obj_get_int(items[4]),
+            .tm_min = mp_obj_get_int(items[5]),
+            .tm_sec = mp_obj_get_int(items[6]),
         };
 
         // Deliberately ignore the weekday argument and compute the proper value

@@ -13,7 +13,7 @@
 #include "cyhal.h"
 
 
-extern __attribute__((weak)) int _write(int fd, const char* ptr, int len);
+extern __attribute__((weak)) int _write(int fd, const char *ptr, int len);
 
 
 #define RAISE_ERRNO(err_flag, error_val) \
@@ -46,7 +46,7 @@ static inline mp_uint_t mp_hal_ticks_cpu(void) {
     // in the system. This is usually a CPU clock, but doesn't have to be.
     // return time_us_32();
     printf("mp_hal_ticks_cpu not implemented !");
-    return( 0 );
+    return 0;
 }
 
 
