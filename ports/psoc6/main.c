@@ -31,7 +31,6 @@ cyhal_rtc_t psoc6_rtc;
 
 #if MICROPY_ENABLE_GC
 
-//static char *stack_top;
 // TODO: set to proper value for our MCU
 static char heap[192 * 1024];
 
@@ -67,7 +66,7 @@ int main(int argc, char **argv) {
     #endif
 
 
-//    // Define a reasonable stack limit to detect stack overflow.
+//    // TODO: Define a reasonable stack limit to detect stack overflow.
 //     mp_uint_t stack_limit = 40000 * (sizeof(void *) / 4);
 //     #if defined(__arm__) && !defined(__thumb2__)
 //     // ARM (non-Thumb) architectures require more stack.
@@ -115,13 +114,9 @@ int main(int argc, char **argv) {
     mp_hal_stdout_tx_str("\nUse Ctrl-D to exit, Ctrl-E for paste mode\n");
 
     setvbuf( stdin,  NULL, _IONBF, 0 );
-    setvbuf( stdout, NULL, _IONBF, 0 );
-    
-    // int stack_dummy;
+    setvbuf( stdout, NULL, _IONBF, 0 ); 
 
 soft_reset:
-
-    // stack_top = (char *)&stack_dummy;
 
     #if MICROPY_ENABLE_GC
 
@@ -131,7 +126,6 @@ soft_reset:
 
     mp_init();
 
-    // mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_lib));
     mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash));
     mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash_slash_lib));
 
@@ -139,9 +133,6 @@ soft_reset:
 
     // indicate in REPL console when debug mode is selected
     mplogger_print("\n...LOGGER DEBUG MODE...\n\n");
-
-//    pyexec_frozen_module("vfs_lfs2.py");
-    // pyexec_frozen_module("vfs_fat.py");
 
     #if MICROPY_VFS_FAT
     // pyexec_frozen_module("vfs_fat.py");

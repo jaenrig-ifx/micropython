@@ -41,40 +41,6 @@ STATIC mp_obj_t mp_uos_getenv(mp_obj_t var_in) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(mp_uos_getenv_obj, mp_uos_getenv);
 
-// STATIC mp_obj_t mp_uos_putenv(mp_obj_t key_in, mp_obj_t value_in) {
-//     const char *key = mp_obj_str_get_str(key_in);
-//     const char *value = mp_obj_str_get_str(value_in);
-//     int ret;
-
-//     // #if _WIN32
-//     // ret = _putenv_s(key, value);
-//     // #else
-//     ret = setenv(key, value, 1);
-// //    #endif
-
-//     if (ret == -1) {
-//         mp_raise_OSError(errno);
-//     }
-//     return mp_const_none;
-// }
-// STATIC MP_DEFINE_CONST_FUN_OBJ_2(mp_uos_putenv_obj, mp_uos_putenv);
-
-// STATIC mp_obj_t mp_uos_unsetenv(mp_obj_t key_in) {
-//     const char *key = mp_obj_str_get_str(key_in);
-//     int ret;
-
-//     // #if _WIN32
-//     // ret = _putenv_s(key, "");
-//     // #else
-//     ret = unsetenv(key);
-//     // #endif
-
-//     if (ret == -1) {
-//         mp_raise_OSError(errno);
-//     }
-//     return mp_const_none;
-// }
-// STATIC MP_DEFINE_CONST_FUN_OBJ_1(mp_uos_unsetenv_obj, mp_uos_unsetenv);
 
 STATIC mp_obj_t mp_uos_system(mp_obj_t cmd_in) {
     const char *cmd = mp_obj_str_get_str(cmd_in);
@@ -88,16 +54,6 @@ STATIC mp_obj_t mp_uos_system(mp_obj_t cmd_in) {
     return MP_OBJ_NEW_SMALL_INT(r);
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(mp_uos_system_obj, mp_uos_system);
-
-
-// STATIC mp_obj_t mp_uos_urandom(mp_obj_t num) {
-//     mp_int_t n = mp_obj_get_int(num);
-//     vstr_t vstr;
-//     vstr_init_len(&vstr, n);
-// //    mp_hal_get_random(n, vstr.buf);
-//     return mp_obj_new_bytes_from_vstr(&vstr);
-// }
-// STATIC MP_DEFINE_CONST_FUN_OBJ_1(mp_uos_urandom_obj, mp_uos_urandom);
 
 
 STATIC mp_obj_t mp_uos_errno(size_t n_args, const mp_obj_t *args) {
