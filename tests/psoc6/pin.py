@@ -1,26 +1,24 @@
 from machine import Pin
-import time
 
 # Tests for Output pin
 # Instantiate output pin for led operation
+# Constr
 p1 = Pin("P13_7")
-print(p1)
 p1.init(Pin.OUT)
-p1.value(0)
-print(p1.value())
-p1.value(1)
-print(p1.value())
-p1.value(False)
-print(p1.value())
-p1.value(True)
-print(p1.value())
+print(p1)  # Pin:111 or P13_7, Mode=OUT, Pull=None, Value=1
+
+p1.value(0)  # Led glows
+print(p1.value())  # None
+
+p1.off()  # Switches off led
+print(p1.off())  # None
+
+p1.value(False)  # Led glows
+print(p1.value())  # None
 
 # Tests for Input pin
 # Instantiate input pin for button operation
 p2 = Pin("P0_4", Pin.IN)
-print(p2)
+print(p2)  # Pin:4 or P0_4, Mode=IN, Pull=None, Value=1
 p2.value()
-print(p2.value()) # Should be 1 - button is released
-
-p2.value()
-print(p2.value()) # Should be 0 - button is pressed
+print(p2.value())  # 1 - button is released
