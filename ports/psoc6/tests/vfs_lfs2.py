@@ -29,4 +29,4 @@ with open("/tests/hello.txt", "w") as f:
 #    f.write('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
 
 
-print(open('/tests/hello.txt').read())
+print(open("/tests/hello.txt").read())

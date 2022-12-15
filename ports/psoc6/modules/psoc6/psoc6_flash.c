@@ -133,14 +133,14 @@ STATIC mp_obj_t psoc6_flash_writeblocks(size_t n_args, const mp_obj_t *args) {
     uint32_t offset = mp_obj_get_int(args[1]) * BLOCK_SIZE_BYTES;
     mp_buffer_info_t bufinfo;
     mp_get_buffer_raise(args[2], &bufinfo, MP_BUFFER_READ);
-    
+
     if (n_args == 3) {
         // Flash erase/program must run in an atomic section.
         mp_uint_t atomic_state = MICROPY_BEGIN_ATOMIC_SECTION();
 
         uint32_t numSectors = bufinfo.len / FLASH_SECTOR_SIZE;
 
-        for(uint32_t i = 0; i <= numSectors; ++i) {
+        for (uint32_t i = 0; i <= numSectors; ++i) {
             cyhal_flash_erase(&cyhal_flash_obj, self->flash_base + offset + i * FLASH_SECTOR_SIZE);
         }
 
@@ -149,14 +149,14 @@ STATIC mp_obj_t psoc6_flash_writeblocks(size_t n_args, const mp_obj_t *args) {
     } else {
         offset += mp_obj_get_int(args[3]);
     }
- 
- 
+
+
     // Flash erase/program must run in an atomic section.
     mp_uint_t atomic_state = MICROPY_BEGIN_ATOMIC_SECTION();
 
     uint32_t numPages = bufinfo.len / FLASH_SECTOR_SIZE; // TODO: should be page size
 
-    for(uint32_t i = 0; i <= numPages; ++i) {
+    for (uint32_t i = 0; i <= numPages; ++i) {
         cyhal_flash_program(&cyhal_flash_obj, self->flash_base + offset + i * FLASH_SECTOR_SIZE, bufinfo.buf + i * FLASH_SECTOR_SIZE);
     }
 
