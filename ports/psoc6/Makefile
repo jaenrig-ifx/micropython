@@ -18,12 +18,21 @@ QSTR_DEFS = qstrdefsport.h
 # MicroPython feature configurations
 MICROPY_ROM_TEXT_COMPRESSION ?= 1
 
+MICROPY_FROZEN_MANIFEST      = boards/manifest.py
+MICROPY_USER_FROZEN_MANIFEST = $(MICROPY_FROZEN_MANIFEST)
+
+MICROPY_QSTR_EXTRA_POOL = mp_qstr_frozen_const_pool
+
+
 CROSS_COMPILE ?= arm-none-eabi-
 
 
 # include py core make definitions
 include ../../py/mkenv.mk
+-include mpconfigport.mk
 include $(TOP)/py/py.mk
+
+include $(BOARD_DIR)/mpconfigboard.mk
 
 
 # get path to this file
@@ -43,7 +52,8 @@ CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingl
 
 
 # used for HelloWorld MTB
-CFLAGS  = $(INC) -Wall -Werror -std=c99 $(CFLAGS_CORTEX_M4) $(COPT)
+CFLAGS  = $(INC) -Wall -Werror $(CFLAGS_CORTEX_M4) $(COPT) -std=c11
+#CFLAGS  = $(INC) -Wall -Werror -std=c99 $(CFLAGS_CORTEX_M4) $(COPT)
 LDFLAGS = -Wl,--cref -Wl,--gc-sections
 
 
@@ -63,39 +73,74 @@ CXXFLAGS += $(CXXFLAGS_MOD)
 
 # Flags for user C modules
 CFLAGS  += $(CFLAGS_MOD)
+CFLAGS  += -DFFCONF_H=\"lib/oofatfs/ffconf.h\" -DLFS1_NO_MALLOC -DLFS1_NO_DEBUG -DLFS1_NO_WARN -DLFS1_NO_ERROR -DLFS1_NO_ASSERT -DLFS2_NO_MALLOC -DLFS2_NO_DEBUG -DLFS2_NO_WARN -DLFS2_NO_ERROR -DLFS2_NO_ASSERT
+
 LDFLAGS += $(LDFLAGS_MOD)
 
 LIBS =
 
+
+MPY_SRC_C += extmod/moduos.c \
+			 \
+		 	 extmod/utime_mphal.c \
+             \
+			 extmod/vfs_blockdev.c extmod/vfs_reader.c extmod/vfs.c \
+			 extmod/vfs_lfs.c \
+		 	 extmod/vfs_fat.c extmod/vfs_fat_diskio.c extmod/vfs_fat_file.c \
+		 	 \
+		 	 lib/littlefs/lfs1.c lib/littlefs/lfs1_util.c lib/littlefs/lfs2.c lib/littlefs/lfs2_util.c \
+		 	 lib/oofatfs/ff.c lib/oofatfs/ffunicode.c \
+		 	 \
+			 py/frozenmod.c py/lexer.c \
+		 	 py/modcmath.c py/moduerrno.c py/qstr.c py/repl.c \
+		 	 \
+		 	 shared/readline/readline.c \
+			 shared/runtime/interrupt_char.c \
+		 	 shared/runtime/pyexec.c \
+		 	 shared/runtime/stdout_helpers.c \
+		 	 shared/timeutils/timeutils.c
+
+#			py/modbuiltins.c py/modsys.c shared/runtime/sys_stdio_mphal.c py/mpprint.c
+
+
 SRC_C = \
  	main.c \
-	uart_core.c \
+	\
+	mphalport.c \
+	\
+    drivers/machine/psoc6_system.c  \
+    drivers/machine/psoc6_gpio.c \
+	\
+	modules/gc/modgc.c \
 	\
 	modules/machine/modmachine.c \
 	modules/machine/machine_pin.c \
 	modules/machine/pins.c \
+	modules/machine/rtc.c \
 	\
-	shared/runtime/pyexec.c \
-	shared/readline/readline.c \
-	shared/runtime/stdout_helpers.c \
+	modules/psoc6/modpsoc6.c \
+	modules/psoc6/psoc6_fatfs.c \
+	modules/psoc6/psoc6_flash.c \
 	\
-	drivers/psoc6_system.c  \
-	drivers/psoc6_gpio.c \
+	modules/time/modutime.c \
 	\
-	mphalport.c \
-	$(BUILD)/_frozen_mpy.c
+	$(MPY_SRC_C) \
+	\
+	$(BUILD)/frozen_content.c
 
-# the order of driver sources matter above. 
-# TODO: investigate the circular includes and remove the redundant ones
-
-SRC_C    += shared/libc/string0.c
 
 SRC_C    += $(SRC_MOD) $(SRC_USERMOD) 
 SRC_CXX  += $(SRC_MOD_CXX)
 
-SRC_QSTR += shared/readline/readline.c shared/runtime/pyexec.c
-SRC_QSTR += $(SRC_MOD) $(SRC_MOD_CXX) $(SRC_USERMOD) 
-SRC_QSTR += modules/machine/modmachine.c modules/machine/machine_pin.c
+
+SRC_QSTR += $(MPY_SRC_C) $(SRC_MOD) $(SRC_MOD_CXX) $(SRC_USERMOD) 
+SRC_QSTR += modules/machine/modmachine.c modules/machine/machine_pin.c modules/machine/rtc.c \
+            \
+            modules/os/moduos.c \
+			\
+            modules/psoc6/modpsoc6.c modules/psoc6/psoc6_fatfs.c modules/psoc6/psoc6_flash.c \
+			\
+			modules/time/modutime.c extmod/utime_mphal.c
 
 
 OBJ += $(PY_CORE_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o))
@@ -109,20 +154,14 @@ ifeq ($(MP_LOGGER_DEBUG), 1)
   CFLAGS += -DMICROPY_LOGGER_DEBUG=1
 endif
 
-all: $(MPY_MAIN_BUILD_DIR)/firmware.hex
-
-
-$(BUILD)/_frozen_mpy.c: frozentest.mpy $(BUILD)/genhdr/qstrdefs.generated.h
-	$(info )
-	$(info Freezing bytecode)
-	$(Q)$(TOP)/tools/mpy-tool.py -f -q $(BUILD)/genhdr/qstrdefs.preprocessed.h -mlongint-impl=none $< > $@
-
 
 $(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ)
 	$(info )
 	$(info Linking $@ ...)
 	$(Q)$(LD) $(LDFLAGS) -o $@ $^ 
+	$(info Linking $@ done.)
 	$(Q)$(SIZE) $@
+	$(info )
 
 
 $(MPY_MAIN_BUILD_DIR)/firmware.hex: $(MPY_MAIN_BUILD_DIR)/firmware.elf
@@ -134,3 +173,6 @@ include $(BOARD_DIR)/makefile_mtb.mk
 
 # include py core make definitions
 include $(TOP)/py/mkrules.mk
+
+
+all: $(MPY_MAIN_BUILD_DIR)/firmware.hex

@@ -1,15 +1,15 @@
-
 // std includes
-#include <stdint.h>
 #include <stdio.h>
-#include <stdbool.h>
+
+
 // micropython includes
-#include "py/builtin.h"
+#include "genhdr/mpversion.h"
 #include "py/compile.h"
 #include "py/gc.h"
+#include "py/mpconfig.h"
 #include "py/mperrno.h"
-#include "py/repl.h"
-#include "py/runtime.h"
+#include "py/mphal.h"
+#include "py/stackctrl.h"
 #include "shared/readline/readline.h"
 #include "shared/runtime/pyexec.h"
 
@@ -19,34 +19,16 @@
 #include "cyhal.h"
 #include "cy_retarget_io.h"
 
+
 // port-specific includes
 #include "mplogger.h"
 
-#if MICROPY_ENABLE_COMPILER
 
-void do_str(const char *src, mp_parse_input_kind_t input_kind) {
-    nlr_buf_t nlr;
-
-    if (nlr_push(&nlr) == 0) {
-        mp_lexer_t *lex = mp_lexer_new_from_str_len(MP_QSTR__lt_stdin_gt_, src, strlen(src), 0);
-        qstr source_name = lex->source_name;
-        mp_parse_tree_t parse_tree = mp_parse(lex, input_kind);
-        mp_obj_t module_fun = mp_compile(&parse_tree, source_name, true);
-
-        mp_call_function_0(module_fun);
-        nlr_pop();
-    } else {
-        // uncaught exception
-        mp_obj_print_exception(&mp_plat_print, (mp_obj_t)nlr.ret_val);
-    }
-}
-
-#endif
+extern cyhal_rtc_t psoc6_rtc;
 
 
 #if MICROPY_ENABLE_GC
 
-static char *stack_top;
 // TODO: set to proper value for our MCU
 static char heap[192 * 1024];
 
@@ -54,6 +36,43 @@ static char heap[192 * 1024];
 
 
 int main(int argc, char **argv) {
+    #if MICROPY_PY_THREAD
+    mp_thread_init();
+    #endif
+
+
+    // We should capture stack top ASAP after start, and it should be
+    // captured guaranteedly before any other stack variables are allocated.
+    // For this, actual main (renamed main_) should not be inlined into
+    // this function. main_() itself may have other functions inlined (with
+    // their own stack variables), that's why we need this main/main_ split.
+    mp_stack_ctrl_init();
+
+
+    #ifdef SIGPIPE
+    // Do not raise SIGPIPE, instead return EPIPE. Otherwise, e.g. writing
+    // to peer-closed socket will lead to sudden termination of MicroPython
+    // process. SIGPIPE is particularly nasty, because unix shell doesn't
+    // print anything for it, so the above looks like completely sudden and
+    // silent termination for unknown reason. Ignoring SIGPIPE is also what
+    // CPython does. Note that this may lead to problems using MicroPython
+    // scripts as pipe filters, but again, that's what CPython does. So,
+    // scripts which want to follow unix shell pipe semantics (where SIGPIPE
+    // means "pipe was requested to terminate, it's not an error"), should
+    // catch EPIPE themselves.
+    signal(SIGPIPE, SIG_IGN);
+    #endif
+
+
+//    // TODO: Define a reasonable stack limit to detect stack overflow.
+//     mp_uint_t stack_limit = 40000 * (sizeof(void *) / 4);
+//     #if defined(__arm__) && !defined(__thumb2__)
+//     // ARM (non-Thumb) architectures require more stack.
+//     stack_limit *= 2;
+//     #endif
+//     mp_stack_set_limit(stack_limit);
+
+
     cy_rslt_t result;
 
     #if defined(CY_DEVICE_SECURE)
@@ -67,6 +86,7 @@ int main(int argc, char **argv) {
 
     #endif /* #if defined (CY_DEVICE_SECURE) */
 
+
     /* Initialize the device and board peripherals */
     result = cybsp_init();
 
@@ -75,8 +95,6 @@ int main(int argc, char **argv) {
         CY_ASSERT(0);
     }
 
-    // /* Enable global interrupts */
-    // __enable_irq();
 
     /* Initialize retarget-io to use the debug UART port */
     result = cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, CY_RETARGET_IO_BAUDRATE);
@@ -86,14 +104,17 @@ int main(int argc, char **argv) {
         CY_ASSERT(0);
     }
 
+    /* \x1b[2J\x1b[;H - ANSI ESC sequence for clear screen */
+    mp_printf(&mp_plat_print, "\x1b[2J\x1b[;H");
+
+    mp_hal_stdout_tx_str(MICROPY_BANNER_NAME_AND_VERSION);
+    mp_hal_stdout_tx_str("; " MICROPY_BANNER_MACHINE);
+    mp_hal_stdout_tx_str("\nUse Ctrl-D to exit, Ctrl-E for paste mode\n");
+
     setvbuf(stdin,  NULL, _IONBF, 0);
     setvbuf(stdout, NULL, _IONBF, 0);
 
-    int stack_dummy;
-
 soft_reset:
-
-    stack_top = (char *)&stack_dummy;
 
     #if MICROPY_ENABLE_GC
 
@@ -102,13 +123,37 @@ soft_reset:
     #endif
 
     mp_init();
-    mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_lib));
+
+    mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash));
+    mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash_slash_lib));
+
     readline_init0();
 
     // indicate in REPL console when debug mode is selected
     mplogger_print("\n...LOGGER DEBUG MODE...\n\n");
 
-    #if MICROPY_ENABLE_COMPILER
+    #if MICROPY_VFS_FAT
+    // pyexec_frozen_module("vfs_fat.py");
+    // #else
+    pyexec_frozen_module("vfs_lfs2.py");
+    #endif
+
+    // Execute user scripts.
+    int ret = pyexec_file_if_exists("flash/boot.py");
+
+    if (ret & PYEXEC_FORCED_EXIT) {
+        goto soft_reset;
+    }
+
+    if (pyexec_mode_kind == PYEXEC_MODE_FRIENDLY_REPL) {
+        ret = pyexec_file_if_exists("flash/main.py");
+
+        if (ret & PYEXEC_FORCED_EXIT) {
+            goto soft_reset;
+        }
+    }
+
+    __enable_irq();
 
     for (;;) {
         if (pyexec_mode_kind == PYEXEC_MODE_RAW_REPL) {
@@ -122,58 +167,21 @@ soft_reset:
         }
     }
 
-    #else
-
-    #endif
-
-    printf("MPY: soft reboot\n");
+    mp_printf(&mp_plat_print, "MPY: soft reboot\n");
 
     mp_deinit();
 
     goto soft_reset;
 
-    return false;
-}
-
-
-#if MICROPY_ENABLE_GC
-
-void gc_collect(void) {
-    // WARNING: This gc_collect implementation doesn't try to get root
-    // pointers from CPU registers, and thus may function incorrectly.
-    void *dummy;
-    gc_collect_start();
-    gc_collect_root(&dummy, ((mp_uint_t)stack_top - (mp_uint_t)&dummy) / sizeof(mp_uint_t));
-    gc_collect_end();
-    gc_dump_info();
-}
-
-#endif
-
-
-// TODO: to be implemented
-mp_lexer_t *mp_lexer_new_from_file(const char *filename) {
-    mp_raise_OSError(MP_ENOENT);
-}
-
-
-// TODO: to be implemented
-mp_import_stat_t mp_import_stat(const char *path) {
-    return MP_IMPORT_STAT_NO_EXIST;
+    return 0;
 }
 
 
 // TODO: to be implemented
 void nlr_jump_fail(void *val) {
+    mp_printf(&mp_plat_print, "nlr_jump_fail\n");
+
     while (1) {
         ;
     }
 }
-
-
-// TODO: to be implemented
-mp_obj_t mp_builtin_open(size_t n_args, const mp_obj_t *args, mp_map_t *kwargs) {
-    return mp_const_none;
-}
-
-MP_DEFINE_CONST_FUN_OBJ_KW(mp_builtin_open_obj, 1, mp_builtin_open);

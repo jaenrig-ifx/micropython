@@ -3,7 +3,7 @@
 
 // port-specific includes
 #include "modmachine.h"
-#include "drivers/psoc6_gpio.h"
+#include "drivers/machine/psoc6_gpio.h"
 #include "pins.h"
 #include "mplogger.h"
 
