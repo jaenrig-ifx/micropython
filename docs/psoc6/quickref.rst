@@ -30,7 +30,7 @@ General board control
 The MicroPython REPL is accessed via the USB serial port. Paste mode (ctrl-E) is useful to paste a
 large slab of Python code into the REPL. 
 
-This port implements most of the methods described in the :ref:`machine <machine>` module. Tab-completion is useful to
+This port implements most of the methods described in the :mod:`machine` module. Tab-completion is useful to
 find out what methods an instantiated object has. 
 
 The :mod:`machine` module::
