@@ -114,7 +114,8 @@ Methods
 ^^^^^^^
 
 .. method:: Pin.toggle()
-    Set pin value to its complement.
+
+   Set pin value to its complement.
 
 
 Constants
@@ -124,4 +125,4 @@ The following constants are used to configure the pin objects in addition to the
 .. data:: Pin.STATE_LOW
           Pin.STATE_HIGH
           
-   Selects the pin value.
+    Selects the pin value.
