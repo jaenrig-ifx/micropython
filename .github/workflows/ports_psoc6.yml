@@ -14,12 +14,15 @@ on:
 jobs:
   server-build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        board: [CY8CPROTO-062-4343W]
     steps:
       - uses: actions/checkout@v2
       - name: Install packages
         run: source tools/ci.sh && ci_psoc6_setup
       - name: Build
-        run: source tools/ci.sh && ci_psoc6_build
+        run: source tools/ci.sh && ci_psoc6_build ${{ matrix.board }}
       - name: Gets commit SHA
         id: commit_sha
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
