@@ -1,3 +1,7 @@
 // qstrs specific to this port
 // *FORMAT-OFF*
-Q(/lib)
+
+Q(/flash)
+Q(/flash/lib)
+
+Q(/)

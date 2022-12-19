@@ -10,25 +10,25 @@ The following port is using Infineon ModusToolbox™ to resolve the specific PSo
 
 2. In order to use the same gcc for compiling both mpy sources and ModusToolbox™ add also the latest to the system PATH.
 
-    $ export PATH=/home/{user}/ModusToolbox/tools_{version}/gcc/bin:$PATH
+    export PATH=/home/{user}/ModusToolbox/tools_{version}/gcc/bin:$PATH
 
 ## Building and running Linux version
 
 As we are working on the ports/psoc6 branch (for now), first checkout that branch after cloning this repo:
 
-    $ git checkout --track origin/ports/psoc6
+    git checkout --track origin/ports/psoc6
 
 Then initialize the ModusToolbox™ environment: 
 
-    $ make mpy_mtb_init
+    make mpy_mtb_init
 
 Build the firmware:
 
-    $ make
+    make
 
 To build and program the device:
 
-    $ make mpy_program
+    make mpy_program
 
 ### Working from WSL
 

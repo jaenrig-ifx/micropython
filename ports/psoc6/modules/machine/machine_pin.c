@@ -3,7 +3,7 @@
 
 // port-specific includes
 #include "modmachine.h"
-#include "drivers/psoc6_gpio.h"
+#include "drivers/machine/psoc6_gpio.h"
 #include "pins.h"
 #include "mplogger.h"
 
@@ -292,7 +292,6 @@ STATIC mp_obj_t machine_pin_low(mp_obj_t self_in) {
 
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_pin_low_obj, machine_pin_low);
-
 
 STATIC const mp_rom_map_elem_t machine_pin_locals_dict_table[] = {
     // Instance methods

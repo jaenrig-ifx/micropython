@@ -95,7 +95,7 @@ void common_uart_irq_handler(int uart_id) {
                 uart->USART.DATA.bit.DATA = ringbuf_get(&self->write_buffer);
             } else {
                 // Stop the interrupt if there is no more data
-                uart->USART.INTENCLR.bit.DRE = 1;
+                uart->USART.INTENCLR.reg = SERCOM_USART_INTENCLR_DRE;
             }
             #endif
         } else {
@@ -236,11 +236,9 @@ STATIC mp_obj_t machine_uart_init_helper(machine_uart_obj_t *self, size_t n_args
 
         // Allocate the RX/TX buffers.
         ringbuf_alloc(&(self->read_buffer), rxbuf_len + 1);
-        MP_STATE_PORT(samd_uart_rx_buffer[self->id]) = self->read_buffer.buf;
 
         #if MICROPY_HW_UART_TXBUF
         ringbuf_alloc(&(self->write_buffer), txbuf_len + 1);
-        MP_STATE_PORT(samd_uart_tx_buffer[self->id]) = self->write_buffer.buf;
         #endif
 
         // Step 1: Configure the Pin mux.
@@ -263,8 +261,11 @@ STATIC mp_obj_t machine_uart_init_helper(machine_uart_obj_t *self, size_t n_args
         #if defined(MCU_SAMD21)
         if (self->tx_pad_config.pad_nr == 2) { // Map pad 2 to TXPO = 1
             txpo = 1;
-        }
+        } else
         #endif
+        if (self->tx_pad_config.pad_nr != 0) {
+            mp_raise_ValueError(MP_ERROR_TEXT("invalid tx pin"));
+        }
 
         uart->USART.CTRLA.reg =
             SERCOM_USART_CTRLA_DORD // Data order
@@ -291,7 +292,7 @@ STATIC mp_obj_t machine_uart_init_helper(machine_uart_obj_t *self, size_t n_args
         sercom_register_irq(self->id, &common_uart_irq_handler);
 
         // Enable RXC interrupt
-        uart->USART.INTENSET.bit.RXC = 1;
+        uart->USART.INTENSET.reg = SERCOM_USART_INTENSET_RXC;
         #if defined(MCU_SAMD21)
         NVIC_EnableIRQ(SERCOM0_IRQn + self->id);
         #elif defined(MCU_SAMD51)
@@ -321,8 +322,7 @@ STATIC mp_obj_t machine_uart_make_new(const mp_obj_type_t *type, size_t n_args, 
     }
 
     // Create the UART object and fill it with defaults.
-    machine_uart_obj_t *self = m_new_obj_with_finaliser(machine_uart_obj_t);
-    self->base.type = &machine_uart_type;
+    machine_uart_obj_t *self = mp_obj_malloc(machine_uart_obj_t, &machine_uart_type);
     self->id = uart_id;
     self->baudrate = DEFAULT_UART_BAUDRATE;
     self->bits = 8;
@@ -347,23 +347,22 @@ MP_DEFINE_CONST_FUN_OBJ_KW(machine_uart_init_obj, 1, machine_uart_init);
 
 STATIC mp_obj_t machine_uart_deinit(mp_obj_t self_in) {
     machine_uart_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    Sercom *uart = sercom_instance[self->id];
-    // Disable interrupts
-    uart->USART.INTENCLR.reg = 0xff;
-    // clear table entry of uart
-    MP_STATE_PORT(sercom_table[self->id]) = NULL;
-    MP_STATE_PORT(samd_uart_rx_buffer[self->id]) = NULL;
-    #if MICROPY_HW_UART_TXBUF
-    MP_STATE_PORT(samd_uart_tx_buffer[self->id]) = NULL;
-    #endif
+    // Check if it is the active object.
+    if (MP_STATE_PORT(sercom_table)[self->id] == self) {
+        Sercom *uart = sercom_instance[self->id];
+        // Disable interrupts and de-register the IRQ
+        if (uart) {
+            uart->USART.INTENCLR.reg = 0xff;
+            sercom_register_irq(self->id, NULL);
+            sercom_enable(uart, 0);
+        }
+    }
     return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_uart_deinit_obj, machine_uart_deinit);
 
 STATIC mp_obj_t machine_uart_any(mp_obj_t self_in) {
     machine_uart_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    // get all bytes from the fifo first. May be obsolete.
-    uart_drain_rx_fifo(self, sercom_instance[self->id]);
     return MP_OBJ_NEW_SMALL_INT(ringbuf_avail(&self->read_buffer));
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_uart_any_obj, machine_uart_any);
@@ -422,7 +421,6 @@ STATIC const mp_rom_map_elem_t machine_uart_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_readline), MP_ROM_PTR(&mp_stream_unbuffered_readline_obj) },
     { MP_ROM_QSTR(MP_QSTR_readinto), MP_ROM_PTR(&mp_stream_readinto_obj) },
     { MP_ROM_QSTR(MP_QSTR_write), MP_ROM_PTR(&mp_stream_write_obj) },
-    { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&machine_uart_deinit_obj) },
 };
 STATIC MP_DEFINE_CONST_DICT(machine_uart_locals_dict, machine_uart_locals_dict_table);
 
@@ -431,16 +429,10 @@ STATIC mp_uint_t machine_uart_read(mp_obj_t self_in, void *buf_in, mp_uint_t siz
     uint64_t t = mp_hal_ticks_ms_64() + self->timeout;
     uint64_t timeout_char = self->timeout_char;
     uint8_t *dest = buf_in;
-    Sercom *uart = sercom_instance[self->id];
 
     for (size_t i = 0; i < size; i++) {
         // Wait for the first/next character
         while (ringbuf_avail(&self->read_buffer) == 0) {
-            if (uart->USART.INTFLAG.bit.RXC != 0) {
-                // Force a few incoming bytes to the buffer
-                uart_drain_rx_fifo(self, uart);
-                break;
-            }
             if (mp_hal_ticks_ms_64() > t) {  // timed out
                 if (i <= 0) {
                     *errcode = MP_EAGAIN;
@@ -452,7 +444,7 @@ STATIC mp_uint_t machine_uart_read(mp_obj_t self_in, void *buf_in, mp_uint_t siz
             MICROPY_EVENT_POLL_HOOK
         }
         *dest++ = ringbuf_get(&(self->read_buffer));
-        t = mp_hal_ticks_ms() + timeout_char;
+        t = mp_hal_ticks_ms_64() + timeout_char;
     }
     return size;
 }
@@ -481,7 +473,7 @@ STATIC mp_uint_t machine_uart_write(mp_obj_t self_in, const void *buf_in, mp_uin
         }
         ringbuf_put(&(self->write_buffer), *src++);
         i++;
-        uart->USART.INTENSET.bit.DRE = 1; // kick off the IRQ
+        uart->USART.INTENSET.reg = SERCOM_USART_INTENSET_DRE; // kick off the IRQ
     }
 
     #else
@@ -552,8 +544,3 @@ MP_DEFINE_CONST_OBJ_TYPE(
     protocol, &uart_stream_p,
     locals_dict, &machine_uart_locals_dict
     );
-
-MP_REGISTER_ROOT_POINTER(void *samd_uart_rx_buffer[SERCOM_INST_NUM]);
-#if MICROPY_HW_UART_TXBUF
-MP_REGISTER_ROOT_POINTER(void *samd_uart_tx_buffer[SERCOM_INST_NUM]);
-#endif

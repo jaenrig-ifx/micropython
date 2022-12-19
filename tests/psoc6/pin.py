@@ -1,4 +1,6 @@
 from machine import Pin
+import time
+import machine
 
 # Tests for Output pin
 # Instantiate output pin for led operation
