@@ -11,11 +11,11 @@ on:
       - 'lib/**'
       - 'ports/psoc6/**'
 
+strategy:
+  matrix:
+    board: [CY8CPROTO-062-4343W]
+    
 jobs:
-  strategy:
-    matrix:
-      board: [CY8CPROTO-062-4343W]
-
   server-build:
     runs-on: ubuntu-latest
     steps:
