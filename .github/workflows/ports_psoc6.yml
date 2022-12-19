@@ -85,7 +85,7 @@ jobs:
     - name: Download binaries
       uses: actions/download-artifact@v3
     - name: Display downloaded binaries
-      run: ls -R
+      run: ls mpy-psoc6_${{ matrix.board }}_*
     # - name: Setup
     #   run: 
     # - name: Deploy firmware
