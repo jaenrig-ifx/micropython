@@ -31,7 +31,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v3
         with: 
-          name: micropython-psoc6-${{ matrix.board }}-${{ steps.commit_sha.outputs.sha_short }}
+          name: mpy-psoc6_${{ matrix.board }}_${{ steps.commit_sha.outputs.sha_short }}
           path: ports/psoc6/build/firmware.hex
 
   # hil-build-deploy-test-release:
@@ -73,15 +73,25 @@ jobs:
   #       docker stop mtb-ci
   #       docker system prune --all --force
 
-  # hil-on-target-tests:
-  #   runs-on: self-hosted
-  #   needs: server-build
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - name: Deploy firmware
-  #     run: ./tools/psoc6/mpy-psoc6.sh firmware-deploy ${{ matrix.board }} micropython-psoc6-${{ matrix.board }}-${{ steps.commit_sha.outputs.sha_short }}
-  #   - name: Run tests
-  #     run: cd ../../tests && ./run-tests.py --target psoc6 --device /dev/ttyACM0 basics/0prelim.py
+  hil-on-target-tests:
+    runs-on: ubuntu-latest
+    # runs-on: self-hosted
+    needs: server-build
+    strategy:
+      matrix:
+        board: [CY8CPROTO-062-4343W]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Download binaries
+      uses: actions/download-artifact@v3
+    - name: Display downloaded binaries
+      run: ls -R
+    # - name: Setup
+    #   run: 
+    # - name: Deploy firmware
+    #   run: ./tools/psoc6/mpy-psoc6.sh firmware-deploy ${{ matrix.board }} micropython-psoc6-${{ matrix.board }}-${{ steps.commit_sha.outputs.sha_short }}
+    # - name: Run tests
+    #   run: cd ../../tests && ./run-tests.py --target psoc6 --device /dev/ttyACM0 basics/0prelim.py
 
   # release:
   #   needs: hil-on-taget-tests
