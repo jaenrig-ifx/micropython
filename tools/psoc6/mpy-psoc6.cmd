@@ -36,7 +36,7 @@ rem ~~~~~~~~~~~~~~~~
     echo   quick-start          Setup of MicroPython IDE and PSoC6 board.
     echo                        Use this command for a guided installation and 
     echo                        quick start using MicroPython PSoC6. 
-    echo                        usage: mpy-psoc6.cmd quick-start [board] [version]
+    echo                        usage: mpy-psoc6.cmd quick-start [board [version]]
     echo:
     echo                        board       PSoC6 prototyping kit name
     echo                        version     MicroPython PSoC6 firmware version
@@ -45,19 +45,17 @@ rem ~~~~~~~~~~~~~~~~
     echo                        Use this command to install the deployment tools 
     echo                        and MicroPython firmware binary, and deploy the
     echo                        firmware on the PSoC6 device.
-    echo                        usage: mpy-psoc6.cmd device-setup [board] [version] ^<\q^>
+    echo                        usage: mpy-psoc6.cmd device-setup [board [[version [\q]]]
     echo:
     echo                        board       PSoC6 prototyping kit name
     echo                        version     MicroPython PSoC6 firmware version
-    echo:
-    echo                        Options:
-    echo                            \q      Quiet. Do not prompt any user confirmation request
+    echo                        \q          Quiet. Do not prompt any user confirmation request
     echo:
     echo   firmware-deploy      Firmware deployment on MicroPython board.
     echo                        Use this command to deploy an existing .hex file 
     echo                        on a PSoC board.
     echo                        Requires openocd available on the system path.
-    echo                        usage: mpy-psoc6.cmd firmware-deploy [board] [hex_file] 
+    echo                        usage: mpy-psoc6.cmd firmware-deploy ^<board^> ^<hex_file^>
     echo:
     echo                        board       PSoC6 prototyping kit name
     echo                        hex_file    MicroPython PSoC6 firmware .hex file
