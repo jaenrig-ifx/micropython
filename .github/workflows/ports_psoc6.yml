@@ -12,11 +12,12 @@ on:
       - 'ports/psoc6/**'
 
 jobs:
+  strategy:
+    matrix:
+      board: [CY8CPROTO-062-4343W]
+
   server-build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        board: [CY8CPROTO-062-4343W]
     steps:
       - uses: actions/checkout@v2
       - name: Install packages
@@ -30,44 +31,75 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v3
         with: 
-          name: micropython-psoc6-${{ steps.commit_sha.outputs.sha_short }}
+          name: micropython-psoc6-${{ matrix.board }}-${{ steps.commit_sha.outputs.sha_short }}
           path: ports/psoc6/build/firmware.hex
 
-  hil-build-deploy-test-release:
-    runs-on: self-hosted
-    needs: server-build
-    steps:
-    - uses: actions/checkout@v2
-    - name: Setup
-      run: echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S chmod 666 /var/run/docker.sock
-    - name: Install packages
-      run: source tools/ci.sh && ci_psoc6_setup --dev-access
-    - name: Build
-      run: source tools/ci.sh && ci_psoc6_build 
-    - name: Deploy
-      run: source tools/ci.sh && ci_psoc6_deploy
-    - name: Run tests
-      run: source tools/ci.sh && ci_psoc6_run_tests
-    - name: Prepare release assets
-      if: startsWith(github.ref, 'refs/tags/v') 
-      run: echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S cp ports/psoc6/build/firmware.hex ports/psoc6/build/micropython-psoc6-${{  github.ref_name  }}.hex
-    - name: Build release changelog
-      id: build_changelog
-      uses: mikepenz/release-changelog-builder-action@v3
-      if: startsWith(github.ref, 'refs/tags/v') 
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/v')
-      with:
-        name: Micropython PSoC6 ${{  github.ref_name  }}
-        files: ports/psoc6/build/micropython-psoc6-${{  github.ref_name  }}.hex
-        body: ${{steps.build_changelog.outputs.changelog}}
-    - name: Cleanup 
-      if: success() || failure()
-      run: |
-        echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S rm -rf ${GITHUB_WORKSPACE}
-        mkdir ${GITHUB_WORKSPACE}
-        docker stop mtb-ci
-        docker system prune --all --force
+  # hil-build-deploy-test-release:
+  #   runs-on: self-hosted
+  #   needs: server-build
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - name: Setup
+  #     run: echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S chmod 666 /var/run/docker.sock
+  #   - name: Install packages
+  #     run: source tools/ci.sh && ci_psoc6_setup --dev-access
+  #   - name: Build
+  #     run: source tools/ci.sh && ci_psoc6_build 
+  #   - name: Deploy
+  #     run: source tools/ci.sh && ci_psoc6_deploy
+  #   - name: Run tests
+  #     run: source tools/ci.sh && ci_psoc6_run_tests
+  #   - name: Prepare release assets
+  #     if: startsWith(github.ref, 'refs/tags/v') 
+  #     run: echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S cp ports/psoc6/build/firmware.hex ports/psoc6/build/micropython-psoc6-${{  github.ref_name  }}.hex
+  #   - name: Build release changelog
+  #     id: build_changelog
+  #     uses: mikepenz/release-changelog-builder-action@v3
+  #     if: startsWith(github.ref, 'refs/tags/v') 
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #   - name: Release
+  #     uses: softprops/action-gh-release@v1
+  #     if: startsWith(github.ref, 'refs/tags/v')
+  #     with:
+  #       name: Micropython PSoC6 ${{  github.ref_name  }}
+  #       files: ports/psoc6/build/micropython-psoc6-${{  github.ref_name  }}.hex
+  #       body: ${{steps.build_changelog.outputs.changelog}}
+  #   - name: Cleanup 
+  #     if: success() || failure()
+  #     run: |
+  #       echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S rm -rf ${GITHUB_WORKSPACE}
+  #       mkdir ${GITHUB_WORKSPACE}
+  #       docker stop mtb-ci
+  #       docker system prune --all --force
+
+  # hil-on-target-tests:
+  #   runs-on: self-hosted
+  #   needs: server-build
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - name: Deploy firmware
+  #     run: ./tools/psoc6/mpy-psoc6.sh firmware-deploy ${{ matrix.board }} micropython-psoc6-${{ matrix.board }}-${{ steps.commit_sha.outputs.sha_short }}
+  #   - name: Run tests
+  #     run: cd ../../tests && ./run-tests.py --target psoc6 --device /dev/ttyACM0 basics/0prelim.py
+
+  # release:
+  #   needs: hil-on-taget-tests
+  #   if: startsWith(github.ref, 'refs/tags/v')
+  #   steps:
+  #   - name: Prepare release assets
+  #     if: startsWith(github.ref, 'refs/tags/v') 
+  #     run: echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S cp ports/psoc6/build/firmware.hex ports/psoc6/build/micropython-psoc6-${{  github.ref_name  }}.hex
+  #   - name: Build release changelog
+  #     id: build_changelog
+  #     uses: mikepenz/release-changelog-builder-action@v3
+  #     if: startsWith(github.ref, 'refs/tags/v') 
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #   - name: Release
+  #     uses: softprops/action-gh-release@v1
+  #     if: startsWith(github.ref, 'refs/tags/v')
+  #     with:
+  #       name: Micropython PSoC6 ${{  github.ref_name  }}
+  #       files: ports/psoc6/build/micropython-psoc6-${{  github.ref_name  }}.hex
+  #       body: ${{steps.build_changelog.outputs.changelog}}
