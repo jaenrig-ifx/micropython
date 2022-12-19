@@ -1,25 +1,82 @@
 @echo off
 setlocal
 
-call :quick_start %1 %2 
+if "%1"=="quick-start" goto cmd_quick_start
+if "%1"=="device-setup" goto cmd_device_setup
+if "%1"=="firmware-deploy" goto cmd_firmware_deploy
+if "%1"=="help" goto help
+
+goto help
 
 exit /b %ERRORLEVEL%
+
+:cmd_quick_start
+    call :mpy_quick_start %2 %3
+exit /b 0
+
+:cmd_device_setup
+    call :mpy_device_setup %2 %3 %4
+exit /b 0
+
+:cmd_firmware_deploy
+    call :mpy_firmware_deploy %2 %3
+exit /b 0
+
 
 rem ~~~~~~~~~~~~~~~~
 rem Script functions
 rem ~~~~~~~~~~~~~~~~
 
-:mpy_deploy_firmware
+:help
 
+    echo Micropython PSoC6 utility script
+    echo usage: mpy-psoc6.cmd ^<command^> 
+    echo The available commands are:
+    echo: 
+    echo   quick-start          Setup of MicroPython IDE and PSoC6 board.
+    echo                        Use this command for a guided installation and 
+    echo                        quick start using MicroPython PSoC6. 
+    echo                        usage: mpy-psoc6.cmd quick-start [board] [version]
+    echo:
+    echo                        board       PSoC6 prototyping kit name
+    echo                        version     MicroPython PSoC6 firmware version
+    echo:
+    echo   device-setup         Setup of MicroPython PSoC6 board.
+    echo                        Use this command to install the deployment tools 
+    echo                        and MicroPython firmware binary, and deploy the
+    echo                        firmware on the PSoC6 device.
+    echo                        usage: mpy-psoc6.cmd device-setup [board] [version] ^<\q^>
+    echo:
+    echo                        board       PSoC6 prototyping kit name
+    echo                        version     MicroPython PSoC6 firmware version
+    echo:
+    echo                        Options:
+    echo                            \q      Quiet. Do not prompt any user confirmation request
+    echo:
+    echo   firmware-deploy      Firmware deployment on MicroPython board.
+    echo                        Use this command to deploy an existing .hex file 
+    echo                        on a PSoC board.
+    echo                        Requires openocd available on the system path.
+    echo                        usage: mpy-psoc6.cmd firmware-deploy [board] [hex_file] 
+    echo:
+    echo                        board       PSoC6 prototyping kit name
+    echo                        hex_file    MicroPython PSoC6 firmware .hex file
+    echo:
+
+exit /b 0
+
+:mpy_firmware_deploy
+
+    Rem Board is yet unused. In future the suitable target .cfg selection needs to be based on the board.
     set board=%~1
     set hex_file=%~2
 
     echo Deploying Micropython...
-    openocd\bin\openocd.exe -s openocd\scripts -c "source [find interface/kitprog3.cfg]; ; source [find target/psoc6_2m.cfg]; psoc6 allow_efuse_program off; psoc6 sflash_restrictions 1; program %fhex_file% verify reset exit;"
+    openocd.exe -s openocd\scripts -c "source [find interface/kitprog3.cfg]; ; source [find target/psoc6_2m.cfg]; psoc6 allow_efuse_program off; psoc6 sflash_restrictions 1; program %hex_file% verify reset exit;"
 
 exit /b 0
 
-:mpy_download_firmware:
+:mpy_firmware_download:
 
     set board=%~1
     set version=%~2
@@ -55,25 +112,7 @@ exit /b 0
 
 exit /b 0
 
-:arduino_lab_download_and_launch
-
-    echo Downloading Arduino Lab for Micropython...
-    curl.exe -s -L https://github.com/arduino/lab-micropython-editor/releases/download/0.5.0-alpha/Arduino.Lab.for.Micropython-win_x64.zip > arduino-for-micropython.zip
-    echo Extracting Arduino Lab for Micropython...
-    tar.exe -xf arduino-for-micropython.zip
-    echo Launching Arduino Lab for Micropython...
-    start "" "Arduino Lab for Micropython"
-
-exit /b 0
-
-:arduino_lab_install_package_clean
-
-    echo Cleaning up Arduino Lab for Micropython installation package...
-    del arduino-for-micropython.zip
-
-exit /b 0
-
-:mpy_setup_device
+:mpy_device_setup
 
     setlocal enabledelayedexpansion
 
@@ -105,7 +144,8 @@ exit /b 0
 
     Rem Download flashing tool and firmware
     call :openocd_download_install
-    call :mpy_download_firmware %board% %mpy_firmware_version%
+    set PATH=%PATH%;openocd\bin
+    call :mpy_firmware_download %board% %mpy_firmware_version%
 
     if not [%~3]==[\q] (
         echo:
@@ -115,7 +155,8 @@ exit /b 0
     )
 
     Rem Deploy on board
-    call :mpy_deploy_firmware %board% %mpy_firmware_version%
+    call :mpy_firmware_deploy %board% firmware.hex
+    REM %board% mpy-psoc6-%board%.hex
     echo Device firmware deployment completed.   
 
     call :openocd_uninstall_clean
@@ -131,7 +172,28 @@ exit /b 0
 
 exit /b 0
 
-:quick_start
+:arduino_lab_download_and_launch
+
+    echo Downloading Arduino Lab for Micropython...
+    curl.exe -s -L https://github.com/arduino/lab-micropython-editor/releases/download/0.5.0-alpha/Arduino.Lab.for.Micropython-win_x64.zip > arduino-for-micropython.zip
+    echo Extracting Arduino Lab for Micropython...
+    mkdir arduino-lab-mpy
+    tar.exe -xf arduino-for-micropython.zip -C arduino-lab-mpy
+    cd arduino-lab-mpy
+    echo Launching Arduino Lab for Micropython...
+    start "" "Arduino Lab for Micropython"
+    cd ..
+
+exit /b 0
+
+:arduino_lab_install_package_clean
+
+    echo Cleaning up Arduino Lab for Micropython installation package...
+    del arduino-for-micropython.zip
+
+exit /b 0
+
+:mpy_quick_start
 
     setlocal enabledelayedexpansion
 
@@ -148,7 +210,7 @@ exit /b 0
     echo                  Quick Start
     echo ################################################
 
-    call :mpy_setup_device %1 %2
+    call :mpy_device_setup %~1 %~2
 
     call :arduino_lab_download_and_launch
 
