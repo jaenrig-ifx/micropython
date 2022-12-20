@@ -72,7 +72,7 @@ function openocd_download_install {
     curl -s -L https://github.com/Infineon/openocd/releases/download/release-v4.4.0/openocd-4.4.0.2134-linux.tar.gz > openocd.tar.gz
     echo Extracting openocd...
     tar -xf openocd.tar.gz
-    export PATH=openocd/bin:$PATH
+    export PATH=${PWD}/openocd/bin:$PATH
 
 }
 
