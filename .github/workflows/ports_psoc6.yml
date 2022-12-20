@@ -15,6 +15,7 @@ on:
 jobs:
   server-build:
     runs-on: ubuntu-latest
+    id: server_build
     strategy:
       matrix:
         board: [CY8CPROTO-062-4343W]
@@ -34,45 +35,6 @@ jobs:
           name: mpy-psoc6_${{ matrix.board }}_${{ steps.commit_sha.outputs.sha_short }}
           path: ports/psoc6/build/firmware.hex
 
-  # hil-build-deploy-test-release:
-  #   runs-on: self-hosted
-  #   needs: server-build
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - name: Setup
-  #     run: echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S chmod 666 /var/run/docker.sock
-  #   - name: Install packages
-  #     run: source tools/ci.sh && ci_psoc6_setup --dev-access
-  #   - name: Build
-  #     run: source tools/ci.sh && ci_psoc6_build 
-  #   - name: Deploy
-  #     run: source tools/ci.sh && ci_psoc6_deploy
-  #   - name: Run tests
-  #     run: source tools/ci.sh && ci_psoc6_run_tests
-  #   - name: Prepare release assets
-  #     if: startsWith(github.ref, 'refs/tags/v') 
-  #     run: echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S cp ports/psoc6/build/firmware.hex ports/psoc6/build/micropython-psoc6-${{  github.ref_name  }}.hex
-  #   - name: Build release changelog
-  #     id: build_changelog
-  #     uses: mikepenz/release-changelog-builder-action@v3
-  #     if: startsWith(github.ref, 'refs/tags/v') 
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #   - name: Release
-  #     uses: softprops/action-gh-release@v1
-  #     if: startsWith(github.ref, 'refs/tags/v')
-  #     with:
-  #       name: Micropython PSoC6 ${{  github.ref_name  }}
-  #       files: ports/psoc6/build/micropython-psoc6-${{  github.ref_name  }}.hex
-  #       body: ${{steps.build_changelog.outputs.changelog}}
-  #   - name: Cleanup 
-  #     if: success() || failure()
-  #     run: |
-  #       echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S rm -rf ${GITHUB_WORKSPACE}
-  #       mkdir ${GITHUB_WORKSPACE}
-  #       docker stop mtb-ci
-  #       docker system prune --all --force
-
   on-target-test:
     runs-on: self-hosted
     needs: server-build
@@ -84,11 +46,11 @@ jobs:
     - name: Download binaries
       uses: actions/download-artifact@v3
     - name: Display downloaded binaries
-      run: ls mpy-psoc6_${{ matrix.board }}_${{ steps.commit_sha.outputs.sha_short }}
+      run: ls mpy-psoc6_${{ matrix.board }}_${{ jobs.server_build.steps.commit_sha.outputs.sha_short }}
     - name: Setup tools
       run: if [ ! -d "openocd" ]; then source tools/psoc6/mpy-psoc6.sh && openocd_download_install; fi
     - name: Deploy firmware
-      run:  export PATH=${PWD}/openocd/bin:$PATH && source tools/psoc6/mpy-psoc6.sh && mpy_firmware_deploy ${{ matrix.board }} mpy-psoc6_${{ matrix.board }}_${{ steps.commit_sha.outputs.sha_short }}/firmware.hex
+      run:  export PATH=${PWD}/openocd/bin:$PATH && source tools/psoc6/mpy-psoc6.sh && mpy_firmware_deploy ${{ matrix.board }} mpy-psoc6_${{ matrix.board }}_${{ jobs.server_build.steps.commit_sha.outputs.sha_short }}/firmware.hex
     - name: Run tests
       run: cd ../../tests && ./run-tests.py --target psoc6 --device /dev/ttyACM0 -d psoc6
 
