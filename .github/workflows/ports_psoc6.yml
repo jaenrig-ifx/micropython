@@ -53,6 +53,7 @@ jobs:
         cd tools/psoc6
         cp ../../mpy-psoc6_${{ matrix.board }}_${{ needs.server-build.outputs.commit_sha }}/firmware.hex .
         if [ ! -d "openocd" ]; then source mpy-psoc6.sh && openocd_download_install; fi
+        echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S openocd/udev_rules/install_rules.sh
         export PATH=${PWD}/openocd/bin:$PATH
         source mpy-psoc6.sh && mpy_firmware_deploy ${{ matrix.board }} firmware.hex
         cd ../..
