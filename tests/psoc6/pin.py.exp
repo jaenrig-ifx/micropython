@@ -1,21 +1,6 @@
-Pin constructor invoked
-Pin class object instantiated
-init helper function called
-Direction: 1, Drive:6, Value:1
-machine pin print
 Pin:111 or P13_7, Mode=OUT, Pull=None, Value=1
-machine pin call
-machine pin call
 None
 None
-machine pin call
-machine pin call
 None
-Pin constructor invoked
-init helper function called
-Direction: 0, Drive:8, Value:1
-machine pin print
 Pin:4 or P0_4, Mode=IN, Pull=None, Value=1
-machine pin call
-machine pin call
 1
