@@ -87,7 +87,7 @@ jobs:
       run: ls mpy-psoc6_${{ matrix.board }}_*
     - name: Setup tools
       run: |
-        if [! -d "openocd"] then; source tools/psoc6/mpy-psoc6.sh && openocd_download_install; fi
+        if [ ! -d "openocd" ] then; source tools/psoc6/mpy-psoc6.sh && openocd_download_install; fi
     - name: Deploy firmware
       run: source tools/psoc6/mpy-psoc6.sh && mpy_firmware_deploy ${{ matrix.board }} mpy-psoc6_${{ matrix.board }}_*/*.hex
     - name: Run tests
