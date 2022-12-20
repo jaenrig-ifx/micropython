@@ -43,8 +43,7 @@ function mpy_firmware_deploy {
     
     board=$1
     hex_file=$2
-    echo "board --> ${board}"
-    echo "hex_file --> ${hex_file}"
+
     echo Deploying Micropython...
     openocd -s openocd\scripts -c "source [find interface/kitprog3.cfg]; ; source [find target/psoc6_2m.cfg]; psoc6 allow_efuse_program off; psoc6 sflash_restrictions 1; program ${hex_file} verify reset exit;"
 
