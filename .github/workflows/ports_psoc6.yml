@@ -84,11 +84,11 @@ jobs:
     - name: Download binaries
       uses: actions/download-artifact@v3
     - name: Display downloaded binaries
-      run: ls mpy-psoc6_${{ matrix.board }}_*
+      run: ls mpy-psoc6_${{ matrix.board }}_${{ steps.commit_sha.outputs.sha_short }}
     - name: Setup tools
       run: if [ ! -d "openocd" ]; then source tools/psoc6/mpy-psoc6.sh && openocd_download_install; fi
     - name: Deploy firmware
-      run:  export PATH=${PWD}/openocd/bin:$PATH && source tools/psoc6/mpy-psoc6.sh && mpy_firmware_deploy ${{ matrix.board }} mpy-psoc6_${{ matrix.board }}_*/*.hex
+      run:  export PATH=${PWD}/openocd/bin:$PATH && source tools/psoc6/mpy-psoc6.sh && mpy_firmware_deploy ${{ matrix.board }} mpy-psoc6_${{ matrix.board }}_${{ steps.commit_sha.outputs.sha_short }}/firmware.hex
     - name: Run tests
       run: cd ../../tests && ./run-tests.py --target psoc6 --device /dev/ttyACM0 -d psoc6
 
