@@ -9,6 +9,7 @@
 #include "py/mpconfig.h"
 #include "py/mperrno.h"
 #include "py/mphal.h"
+#include "py/runtime.h"
 #include "py/stackctrl.h"
 #include "shared/readline/readline.h"
 #include "shared/runtime/pyexec.h"
@@ -29,8 +30,9 @@ extern cyhal_rtc_t psoc6_rtc;
 
 #if MICROPY_ENABLE_GC
 
-// TODO: set to proper value for our MCU
-static char heap[192 * 1024];
+extern uint8_t __StackTop, __StackLimit;
+
+__attribute__((section(".bss"))) static char gc_heap[MICROPY_GC_HEAP_SIZE];
 
 #endif
 
@@ -41,12 +43,13 @@ int main(int argc, char **argv) {
     #endif
 
 
-    // We should capture stack top ASAP after start, and it should be
-    // captured guaranteedly before any other stack variables are allocated.
-    // For this, actual main (renamed main_) should not be inlined into
-    // this function. main_() itself may have other functions inlined (with
-    // their own stack variables), that's why we need this main/main_ split.
-    mp_stack_ctrl_init();
+    #if MICROPY_ENABLE_GC
+
+    mp_stack_set_top(&__StackTop);
+    mp_stack_set_limit((mp_uint_t)&__StackTop - 256 - MICROPY_GC_HEAP_SIZE);
+    gc_init(&gc_heap[0], &gc_heap[MP_ARRAY_SIZE(gc_heap)]);
+
+    #endif
 
 
     #ifdef SIGPIPE
@@ -64,27 +67,7 @@ int main(int argc, char **argv) {
     #endif
 
 
-//    // TODO: Define a reasonable stack limit to detect stack overflow.
-//     mp_uint_t stack_limit = 40000 * (sizeof(void *) / 4);
-//     #if defined(__arm__) && !defined(__thumb2__)
-//     // ARM (non-Thumb) architectures require more stack.
-//     stack_limit *= 2;
-//     #endif
-//     mp_stack_set_limit(stack_limit);
-
-
     cy_rslt_t result;
-
-    #if defined(CY_DEVICE_SECURE)
-
-    cyhal_wdt_t wdt_obj;
-
-    /* Clear watchdog timer so that it doesn't trigger a reset */
-    result = cyhal_wdt_init(&wdt_obj, cyhal_wdt_get_max_timeout_ms());
-    CY_ASSERT(CY_RSLT_SUCCESS == result);
-    cyhal_wdt_free(&wdt_obj);
-
-    #endif /* #if defined (CY_DEVICE_SECURE) */
 
 
     /* Initialize the device and board peripherals */
@@ -92,7 +75,7 @@ int main(int argc, char **argv) {
 
     /* Board init failed. Stop program execution */
     if (result != CY_RSLT_SUCCESS) {
-        CY_ASSERT(0);
+        mp_raise_ValueError(MP_ERROR_TEXT("cybsp_init failed !\n"));
     }
 
 
@@ -101,12 +84,15 @@ int main(int argc, char **argv) {
 
     /* retarget-io init failed. Stop program execution */
     if (result != CY_RSLT_SUCCESS) {
-        CY_ASSERT(0);
+        mp_raise_ValueError(MP_ERROR_TEXT("cy_retarget_io_init failed !\n"));
     }
+
+soft_reset:
+
+    mp_init();
 
     /* \x1b[2J\x1b[;H - ANSI ESC sequence for clear screen */
     mp_printf(&mp_plat_print, "\x1b[2J\x1b[;H");
-
     mp_hal_stdout_tx_str(MICROPY_BANNER_NAME_AND_VERSION);
     mp_hal_stdout_tx_str("; " MICROPY_BANNER_MACHINE);
     mp_hal_stdout_tx_str("\nUse Ctrl-D to exit, Ctrl-E for paste mode\n");
@@ -114,28 +100,21 @@ int main(int argc, char **argv) {
     setvbuf(stdin,  NULL, _IONBF, 0);
     setvbuf(stdout, NULL, _IONBF, 0);
 
-soft_reset:
-
-    #if MICROPY_ENABLE_GC
-
-    gc_init(heap, heap + sizeof(heap));
-
-    #endif
-
-    mp_init();
-
     mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash));
     mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash_slash_lib));
 
     readline_init0();
+    // TODO: other init functions
+    // machine_pin_init();
 
     // indicate in REPL console when debug mode is selected
     mplogger_print("\n...LOGGER DEBUG MODE...\n\n");
 
     #if MICROPY_VFS_FAT
-    // pyexec_frozen_module("vfs_fat.py");
+    pyexec_frozen_module("vfs_fat.py");
+
     // #else
-    pyexec_frozen_module("vfs_lfs2.py");
+    // pyexec_frozen_module("vfs_lfs2.py");
     #endif
 
     // Execute user scripts.
@@ -169,6 +148,9 @@ soft_reset:
 
     mp_printf(&mp_plat_print, "MPY: soft reboot\n");
 
+    // TODO: other deinit functions
+    // machine_pin_deinit();
+    gc_sweep_all();
     mp_deinit();
 
     goto soft_reset;
@@ -179,9 +161,39 @@ soft_reset:
 
 // TODO: to be implemented
 void nlr_jump_fail(void *val) {
-    mp_printf(&mp_plat_print, "nlr_jump_fail\n");
+    mplogger_print("nlr_jump_fail\n");
+    mp_obj_print_exception(&mp_plat_print, MP_OBJ_FROM_PTR(val));
 
-    while (1) {
-        ;
+    for (;;) {
+        __BKPT(0);
     }
 }
+
+
+const char psoc6_help_text[] =
+    "Welcome to MicroPython!\n"
+    "\n"
+    "For online help please visit https://micropython.org/help/.\n"
+    "\n"
+    "For access to the hardware use the 'machine' module.  PSoC6 specific commands\n"
+    "are in the 'psoc6' module.\n"
+    "\n"
+    "Quick overview of some objects:\n"
+    "  machine.Pin(pin) -- get a pin, eg machine.Pin(0)\n"
+    "  machine.Pin(pin, m, [p]) -- get a pin and configure it for IO mode m, pull mode p\n"
+    "    methods: init(..), value([v]), high(), low(), irq(handler)\n"
+    "  machine.I2C(id) -- create an I2C object (id=0,1)\n"
+    "    methods: readfrom(addr, buf, stop=True), writeto(addr, buf, stop=True)\n"
+    "             readfrom_mem(addr, memaddr, arg), writeto_mem(addr, memaddr, arg)\n"
+    "\n"
+    "Pin IO modes are: Pin.IN, Pin.OUT, Pin.ALT\n"
+    "Pin pull modes are: Pin.PULL_UP, Pin.PULL_DOWN\n"
+    "\n"
+    "Useful control commands:\n"
+    "  CTRL-C -- interrupt a running program\n"
+    "  CTRL-D -- on a blank line, do a soft reset of the board\n"
+    "  CTRL-E -- on a blank line, enter paste mode\n"
+    "\n"
+    "For further help on a specific object, type help(obj)\n"
+    "For a list of available modules, type help('modules')\n"
+;

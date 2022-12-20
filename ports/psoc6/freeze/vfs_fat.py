@@ -7,11 +7,11 @@ bdev = psoc6.Flash()
 
 try:
     vfs = os.VfsFat(bdev)
+    os.mount(vfs, "/flash")
 except:
     os.VfsFat.mkfs(bdev)
     vfs = os.VfsFat(bdev)
-
-os.mount(vfs, "/flash")
+    os.mount(vfs, "/flash")
 
 print("FAT filesystem mounted at /flash\n")
 

@@ -37,7 +37,7 @@
 
 #define FLASH_BASE_TRUE        (0x10000000)
 
-#define FLASH_BASE        (0x10100000)
+#define FLASH_BASE        (0x101A0000)
 #define FLASH_SIZE        (0x00200000 - (FLASH_BASE - FLASH_BASE_TRUE))
 
 #define FLASH_SECTOR_SIZE (0x200)
@@ -89,10 +89,11 @@ STATIC mp_obj_t psoc6_flash_make_new(const mp_obj_type_t *type, size_t n_args, s
     psoc6_flash_obj_t *self = mp_obj_malloc(psoc6_flash_obj_t, &psoc6_flash_type);
 
     mp_int_t start = args[ARG_start].u_int;
+
     if (start == -1) {
         start = 0;
     } else if (!(0 <= start && start < MICROPY_HW_FLASH_STORAGE_BYTES && start % BLOCK_SIZE_BYTES == 0)) {
-        mp_raise_ValueError(NULL);
+        mp_raise_ValueError(MP_ERROR_TEXT("Invalid 'start' value specified for psoc6_flash_make_new !\n"));
     }
 
     mp_int_t len = args[ARG_len].u_int;
@@ -100,7 +101,7 @@ STATIC mp_obj_t psoc6_flash_make_new(const mp_obj_type_t *type, size_t n_args, s
     if (len == -1) {
         len = MICROPY_HW_FLASH_STORAGE_BYTES - start;
     } else if (!(0 < len && start + len <= MICROPY_HW_FLASH_STORAGE_BYTES && len % BLOCK_SIZE_BYTES == 0)) {
-        mp_raise_ValueError(NULL);
+        mp_raise_ValueError(MP_ERROR_TEXT("Invalid 'len' value specified for psoc6_flash_make_new !\n"));
     }
 
     self->flash_base = MICROPY_HW_FLASH_STORAGE_BASE + start;

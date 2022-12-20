@@ -18,8 +18,9 @@ QSTR_DEFS = qstrdefsport.h
 # MicroPython feature configurations
 MICROPY_ROM_TEXT_COMPRESSION ?= 1
 
-MICROPY_FROZEN_MANIFEST      = boards/manifest.py
-MICROPY_USER_FROZEN_MANIFEST = $(MICROPY_FROZEN_MANIFEST)
+MICROPY_FROZEN_MANIFEST      ?= boards/manifest.py
+MICROPY_USER_FROZEN_MANIFEST ?= $(MICROPY_FROZEN_MANIFEST)
+FROZEN_MANIFEST              ?= $(MICROPY_FROZEN_MANIFEST)
 
 MICROPY_QSTR_EXTRA_POOL = mp_qstr_frozen_const_pool
 
@@ -31,6 +32,7 @@ CROSS_COMPILE ?= arm-none-eabi-
 include ../../py/mkenv.mk
 -include mpconfigport.mk
 include $(TOP)/py/py.mk
+include $(TOP)/extmod/extmod.mk
 
 include $(BOARD_DIR)/mpconfigboard.mk
 
@@ -80,27 +82,22 @@ LDFLAGS += $(LDFLAGS_MOD)
 LIBS =
 
 
-MPY_SRC_C += extmod/moduos.c \
-			 \
-		 	 extmod/utime_mphal.c \
-             \
-			 extmod/vfs_blockdev.c extmod/vfs_reader.c extmod/vfs.c \
-			 extmod/vfs_lfs.c \
-		 	 extmod/vfs_fat.c extmod/vfs_fat_diskio.c extmod/vfs_fat_file.c \
-		 	 \
-		 	 lib/littlefs/lfs1.c lib/littlefs/lfs1_util.c lib/littlefs/lfs2.c lib/littlefs/lfs2_util.c \
+MPY_SRC_C += lib/littlefs/lfs1.c lib/littlefs/lfs1_util.c lib/littlefs/lfs2.c lib/littlefs/lfs2_util.c \
 		 	 lib/oofatfs/ff.c lib/oofatfs/ffunicode.c \
 		 	 \
-			 py/frozenmod.c py/lexer.c \
-		 	 py/modcmath.c py/moduerrno.c py/qstr.c py/repl.c \
-		 	 \
 		 	 shared/readline/readline.c \
+			 \
+			 shared/runtime/gchelper_native.c \
 			 shared/runtime/interrupt_char.c \
 		 	 shared/runtime/pyexec.c \
 		 	 shared/runtime/stdout_helpers.c \
-		 	 shared/timeutils/timeutils.c
+			 \
+		 	 shared/timeutils/timeutils.c \
+		     \
+			 shared/runtime/sys_stdio_mphal.c 
 
-#			py/modbuiltins.c py/modsys.c shared/runtime/sys_stdio_mphal.c py/mpprint.c
+
+SRC_ASM = shared/runtime/gchelper_m0.s
 
 
 SRC_C = \
@@ -125,26 +122,30 @@ SRC_C = \
 	modules/time/modutime.c \
 	\
 	$(MPY_SRC_C) \
-	\
+    \
 	$(BUILD)/frozen_content.c
 
 
-SRC_C    += $(SRC_MOD) $(SRC_USERMOD) 
-SRC_CXX  += $(SRC_MOD_CXX)
+SRC_C    += $(SRC_USERMOD)
+# $(SRC_EXTMOD_C)
+SRC_CXX   = 
 
 
-SRC_QSTR += $(MPY_SRC_C) $(SRC_MOD) $(SRC_MOD_CXX) $(SRC_USERMOD) 
-SRC_QSTR += modules/machine/modmachine.c modules/machine/machine_pin.c modules/machine/rtc.c \
+SRC_QSTR += $(MPY_SRC_C) $(SRC_USERMOD) $(SRC_EXTMOD_C)
+SRC_QSTR += modules/machine/modmachine.c \
+            modules/machine/machine_pin.c \
+			modules/machine/rtc.c \
             \
             modules/os/moduos.c \
 			\
             modules/psoc6/modpsoc6.c modules/psoc6/psoc6_fatfs.c modules/psoc6/psoc6_flash.c \
 			\
-			modules/time/modutime.c extmod/utime_mphal.c
+			modules/time/modutime.c
 
 
-OBJ += $(PY_CORE_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o))
+OBJ += $(PY_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o)) $(addprefix $(BUILD)/, $(SRC_ASM:.s=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_CXX:.cpp=.o))
+
 
 # switch for debug mode, also added to mpconfigport.h
 # TODO: keep the more suitable one, delete the other
