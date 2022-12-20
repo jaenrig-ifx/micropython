@@ -73,9 +73,8 @@ jobs:
   #       docker stop mtb-ci
   #       docker system prune --all --force
 
-  hil-on-target-tests:
-    runs-on: ubuntu-latest
-    # runs-on: self-hosted
+  on-target-test:
+    runs-on: self-hosted
     needs: server-build
     strategy:
       matrix:
@@ -86,15 +85,18 @@ jobs:
       uses: actions/download-artifact@v3
     - name: Display downloaded binaries
       run: ls mpy-psoc6_${{ matrix.board }}_*
-    # - name: Setup
-    #   run: 
-    # - name: Deploy firmware
-    #   run: ./tools/psoc6/mpy-psoc6.sh firmware-deploy ${{ matrix.board }} micropython-psoc6-${{ matrix.board }}-${{ steps.commit_sha.outputs.sha_short }}
-    # - name: Run tests
-    #   run: cd ../../tests && ./run-tests.py --target psoc6 --device /dev/ttyACM0 basics/0prelim.py
+    - name: Setup tools
+      run: |
+        if [! -d "openocd"] then;
+          source tools/psoc6/mpy-psoc6.sh && openocd_download_install
+        fi
+    - name: Deploy firmware
+      run: source tools/psoc6/mpy-psoc6.sh && mpy_firmware_deploy ${{ matrix.board }} mpy-psoc6_${{ matrix.board }}_*/*.hex
+    - name: Run tests
+      run: cd ../../tests && ./run-tests.py --target psoc6 --device /dev/ttyACM0 -d psoc6
 
   # release:
-  #   needs: hil-on-taget-tests
+  #   needs: hil-on-target-tests
   #   if: startsWith(github.ref, 'refs/tags/v')
   #   steps:
   #   - name: Prepare release assets
