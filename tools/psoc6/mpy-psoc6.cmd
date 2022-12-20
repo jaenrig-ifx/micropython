@@ -53,7 +53,7 @@ rem ~~~~~~~~~~~~~~~~
     echo:
     echo   firmware-deploy      Firmware deployment on MicroPython board.
     echo                        Use this command to deploy an existing .hex file 
-    echo                        on a PSoC board.
+    echo                        on a PSoC6 board.
     echo                        Requires openocd available on the system path.
     echo                        usage: mpy-psoc6.cmd firmware-deploy ^<board^> ^<hex_file^>
     echo:
@@ -86,7 +86,7 @@ exit /b 0
 
 exit /b 0
 
-:mpy_clean:
+:mpy_firmware_clean
 
     echo Cleaning up micropython hex files...
     Rem del micropython-ifx-%board%.hex
@@ -99,6 +99,7 @@ exit /b 0
     curl.exe -s -L https://github.com/Infineon/openocd/releases/download/release-v4.4.0/openocd-4.4.0.2134-windows.zip > openocd.zip
     echo Extracting openocd...
     tar.exe -xf openocd.zip
+    set PATH=%PATH%;openocd\bin
 
 exit /b 0
 
@@ -142,7 +143,6 @@ exit /b 0
 
     Rem Download flashing tool and firmware
     call :openocd_download_install
-    set PATH=%PATH%;openocd\bin
     call :mpy_firmware_download %board% %mpy_firmware_version%
 
     if not [%~3]==[\q] (
@@ -166,7 +166,6 @@ exit /b 0
         pause >nul
         echo:
     )
-
 
 exit /b 0
 
@@ -215,9 +214,9 @@ exit /b 0
     call :arduino_lab_install_package_clean
 
     echo:   
-    echo ###########################################
-    echo  The installation is completed. Have fun :)                 
-    echo ###########################################     
+    echo ################################################
+    echo    The installation is completed. Have fun :)                 
+    echo ################################################  
 
     echo:
     echo Press any key to exit...
