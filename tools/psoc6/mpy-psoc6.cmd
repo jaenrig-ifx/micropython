@@ -81,8 +81,7 @@ exit /b 0
 
     if [%version%]==[latest]] (
         call set sub_url=latest/download
-    )
-    else (
+    ) else (
         call set sub_url=download/%version%
     )
 
