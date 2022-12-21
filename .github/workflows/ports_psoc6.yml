@@ -67,8 +67,8 @@ jobs:
       uses: actions/download-artifact@v3
     - name: Prepare release assets
       run: | 
-      cd mpy-psoc6_${{ matrix.board }}_${{ needs.server-build.outputs.commit_sha }}
-      mv firmware.hex ../mpy-psoc6_${{ matrix.board }}_${{  github.ref_name  }}.hex
+        cd mpy-psoc6_${{ matrix.board }}_${{ needs.server-build.outputs.commit_sha }}
+        mv firmware.hex ../mpy-psoc6_${{ matrix.board }}_${{  github.ref_name  }}.hex
     - name: Build release changelog
       id: build_changelog
       uses: mikepenz/release-changelog-builder-action@v3
