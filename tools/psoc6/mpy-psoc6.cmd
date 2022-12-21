@@ -79,17 +79,23 @@ exit /b 0
     set board=%~1
     set version=%~2
 
-    @REM set mpy_hex=micropython-ifx-%board%-%mpy_ifx_version%
-    set mpy_hex=firmware.hex
+    if [%version%]==[latest]] (
+        call set sub_url=latest/download
+    )
+    else (
+        call set sub_url=download/%version%
+    )
+
     echo Downloading MicroPython PSoC6 port %version% for %board% board...
-    Rem curl.exe -s -L https://github.com/jaenrig-ifx/micropython/releases/download/%mpy_ifx_version%/micropython-ifx-!board!.hex > micropython-ifx-!board!.hex
+    curl.exe -s -L https://github.com/jaenrig-ifx/micropython/releases/%sub_url%/mpy-psoc6_%board%.hex > mpy-psoc6_%board%.hex
 
 exit /b 0
 
 :mpy_firmware_clean
 
+    set board=%~1
     echo Cleaning up micropython hex files...
-    Rem del micropython-ifx-%board%.hex
+    del mpy-psoc6_%board%.hex
 
 exit /b 0
 
@@ -153,12 +159,11 @@ exit /b 0
     )
 
     Rem Deploy on board
-    call :mpy_firmware_deploy %board% firmware.hex
-    REM %board% mpy-psoc6-%board%.hex
+    call :mpy_firmware_deploy %board% mpy-psoc6_%board%.hex
     echo Device firmware deployment completed.   
 
     call :openocd_uninstall_clean
-    call :mpy_clean
+    call :mpy_firmware_clean %board%
 
     if not [%~3]==[\q] (
         echo:

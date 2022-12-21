@@ -55,14 +55,21 @@ function mpy_firmware_download {
     version=$2
 
     echo Downloading MicroPython PSoC6 port ${version} for ${board} board...
-    #curl -s -L https://github.com/jaenrig-ifx/micropython/releases/download/%mpy_ifx_version%/micropython-ifx-!board!.hex > micropython-ifx-!board!.hex
-
+    if [ "$version" = "latest" ]; then 
+        sub_url="latest/download"
+    else
+        sub_url="download/${version}"
+    fi
+    curl -s -L https://github.com/jaenrig-ifx/micropython/releases/${sub_url}/mpy-psoc6_${board}.hex > mpy-psoc6_${board}.hex
+   
 }
 
 function mpy_firmware_clean {
 
+    board=$1
+
     echo Cleaning up micropython hex files...
-    #del micropython-ifx-%board%.hex
+    rm mpy-psoc6_${board}.hex
 
 }
 
@@ -135,11 +142,11 @@ function mpy_device_setup {
     fi
 
     # Deploy on board
-    mpy_firmware_deploy ${board} firmware.hex
+    mpy_firmware_deploy ${board} mpy-psoc6_${board}.hex
     echo Device firmware deployment completed.   
 
     openocd_uninstall_clean
-    mpy_firmware_clean
+    mpy_firmware_clean ${board}
 
     if [ "$3" != "\q" ]; then
         echo ''
@@ -202,4 +209,22 @@ function mpy_quick_start {
 
 }
 
-# help
+# Main script commands
+
+case $1 in
+   "quick-start")
+        mpy_quick_start $2 $3
+        ;;
+    "device-setup")
+        mpy_device_setup $2 $3 $4
+        ;;
+   "firmware-deploy")
+        mpy_firmware_deploy $2 $3
+        ;;
+   "help")
+        help
+        ;;
+   *)
+        help
+        ;;
+esac
