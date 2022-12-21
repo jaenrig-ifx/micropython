@@ -52,10 +52,11 @@ jobs:
       run: |
         cd tools/psoc6
         cp ../../mpy-psoc6_${{ matrix.board }}_${{ needs.server-build.outputs.commit_sha }}/firmware.hex .
-        if [ ! -d "openocd" ]; then source mpy-psoc6.sh && openocd_download_install; fi
-        echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S openocd/udev_rules/install_rules.sh
-        export PATH=${PWD}/openocd/bin:$PATH
-        source mpy-psoc6.sh && mpy_firmware_deploy ${{ matrix.board }} firmware.hex
+        # if [ ! -d "openocd" ]; then source mpy-psoc6.sh && openocd_download_install; fi
+        # echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S openocd/udev_rules/install_rules.sh
+        # export PATH=${PWD}/openocd/bin:$PATH
+        # source mpy-psoc6.sh && mpy_firmware_deploy ${{ matrix.board }} firmware.hex
+        source mpy-psoc6.sh && openocd_download_install && mpy_firmware_deploy xxx firmware.hex
         cd ../..
     - name: Run tests
       run: cd tests && ./run-tests.py --target psoc6 --device /dev/ttyACM0 -d psoc6

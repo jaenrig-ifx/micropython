@@ -73,6 +73,7 @@ function openocd_download_install {
     echo Extracting openocd...
     tar -xf openocd.tar.gz
     export PATH=${PWD}/openocd/bin:$PATH
+    ./openocd/udev_rules/install_rules.sh
 
 }
 
@@ -138,7 +139,7 @@ function mpy_device_setup {
     echo Device firmware deployment completed.   
 
     openocd_uninstall_clean
-    mpy_clean
+    mpy_firmware_clean
 
     if [ "$3" != "\q" ]; then
         echo ''
