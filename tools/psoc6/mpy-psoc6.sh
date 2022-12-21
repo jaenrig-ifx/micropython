@@ -103,7 +103,7 @@ function mpy_device_setup {
         echo '+---------+-----------------------------------+'
         echo '|   ID    |              Board                |'
         echo '+---------+-----------------------------------+'
-        echo '|   0     |  CY8CPROTO-062-4343W (default^)   |'
+        echo '|   0     |  CY8CPROTO-062-4343W (default)    |'
         echo '+---------+-----------------------------------+'
         echo ''
         echo 'No user selection required. Only one choice.'
