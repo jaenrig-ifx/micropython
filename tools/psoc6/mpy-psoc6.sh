@@ -162,11 +162,11 @@ function arduino_lab_download_and_launch {
     curl -s -L https://github.com/arduino/lab-micropython-editor/releases/download/0.5.0-alpha/Arduino.Lab.for.Micropython-linux_x64.zip > arduino-for-micropython.zip
     echo Extracting Arduino Lab for Micropython...
     mkdir arduino-lab-mpy
-    tar -xf arduino-for-micropython.zip -C arduino-lab-mpy
+    unzip arduino-for-micropython.zip -d arduino-lab-mpy
     cd arduino-lab-mpy
     echo Launching Arduino Lab for Micropython...
-    # start "" "Arduino Lab for Micropython"
-    # cd ..
+    ./arduino-lab-for-micropython-ide
+    cd ..
 
 }
 
