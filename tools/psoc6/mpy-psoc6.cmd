@@ -79,7 +79,7 @@ exit /b 0
     set board=%~1
     set version=%~2
 
-    if [%version%]==[latest]] (
+    if "%version%" == "latest" (
         call set sub_url=latest/download
     ) else (
         call set sub_url=download/%version%
