@@ -131,7 +131,7 @@ typedef long mp_off_t;
 #define MICROPY_BOARD_ENTER_BOOTLOADER(nargs, args)
 #endif
 
-#define MICROPY_LOGGER_DEBUG                    (1)
+#define MICROPY_LOGGER_DEBUG                    (0)
 
 
 #define MICROPY_ENABLE_FINALISER    (1)
