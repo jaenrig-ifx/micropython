@@ -194,9 +194,9 @@ function mpy_quick_start {
 
     mpy_device_setup $1 $2
 
-    #arduino_lab_download_and_launch
+    arduino_lab_download_and_launch
 
-    #arduino_lab_install_package_clean
+    arduino_lab_install_package_clean
 
     echo '################################################'
     echo '   The installation is completed. Have fun :)   '                 
