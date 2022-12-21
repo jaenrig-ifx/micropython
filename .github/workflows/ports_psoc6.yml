@@ -63,20 +63,19 @@ jobs:
         board: [CY8CPROTO-062-4343W]
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
+    - name: Download binaries
+      uses: actions/download-artifact@v3
     - name: Prepare release assets
-      if: startsWith(github.ref, 'refs/tags/v') 
       run: | 
       cd mpy-psoc6_${{ matrix.board }}_${{ needs.server-build.outputs.commit_sha }}
       mv firmware.hex ../mpy-psoc6_${{ matrix.board }}_${{  github.ref_name  }}.hex
     - name: Build release changelog
       id: build_changelog
       uses: mikepenz/release-changelog-builder-action@v3
-      if: startsWith(github.ref, 'refs/tags/v') 
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Release
       uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/v')
       with:
         name: Micropython PSoC6 ${{  github.ref_name  }}
         files: mpy-psoc6_${{ matrix.board }}_${{  github.ref_name  }}.hex
