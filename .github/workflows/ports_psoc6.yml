@@ -46,38 +46,38 @@ jobs:
     - uses: actions/checkout@v2
     - name: Download binaries
       uses: actions/download-artifact@v3
-    - name: Display downloaded binaries
-      run: ls mpy-psoc6_${{ matrix.board }}_${{ needs.server-build.outputs.commit_sha }}
     - name: Setup device
       run: |
         cd tools/psoc6
         cp ../../mpy-psoc6_${{ matrix.board }}_${{ needs.server-build.outputs.commit_sha }}/firmware.hex .
-        # if [ ! -d "openocd" ]; then source mpy-psoc6.sh && openocd_download_install; fi
-        # echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S openocd/udev_rules/install_rules.sh
-        # export PATH=${PWD}/openocd/bin:$PATH
-        # source mpy-psoc6.sh && mpy_firmware_deploy ${{ matrix.board }} firmware.hex
         source mpy-psoc6.sh && openocd_download_install && mpy_firmware_deploy xxx firmware.hex
         cd ../..
     - name: Run tests
       run: cd tests && ./run-tests.py --target psoc6 --device /dev/ttyACM0 -d psoc6
 
-  # release:
-  #   needs: hil-on-target-tests
-  #   if: startsWith(github.ref, 'refs/tags/v')
-  #   steps:
-  #   - name: Prepare release assets
-  #     if: startsWith(github.ref, 'refs/tags/v') 
-  #     run: echo ${{ secrets.SELF_HOSTED_PASSWORD }} | sudo -S cp ports/psoc6/build/firmware.hex ports/psoc6/build/micropython-psoc6-${{  github.ref_name  }}.hex
-  #   - name: Build release changelog
-  #     id: build_changelog
-  #     uses: mikepenz/release-changelog-builder-action@v3
-  #     if: startsWith(github.ref, 'refs/tags/v') 
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #   - name: Release
-  #     uses: softprops/action-gh-release@v1
-  #     if: startsWith(github.ref, 'refs/tags/v')
-  #     with:
-  #       name: Micropython PSoC6 ${{  github.ref_name  }}
-  #       files: ports/psoc6/build/micropython-psoc6-${{  github.ref_name  }}.hex
-  #       body: ${{steps.build_changelog.outputs.changelog}}
+  release:
+    runs-on: ubuntu-latest
+    needs: hil-on-target-tests
+    strategy:
+      matrix:
+        board: [CY8CPROTO-062-4343W]
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - name: Prepare release assets
+      if: startsWith(github.ref, 'refs/tags/v') 
+      run: | 
+      cd mpy-psoc6_${{ matrix.board }}_${{ needs.server-build.outputs.commit_sha }}
+      mv firmware.hex ../mpy-psoc6_${{ matrix.board }}_${{  github.ref_name  }}.hex
+    - name: Build release changelog
+      id: build_changelog
+      uses: mikepenz/release-changelog-builder-action@v3
+      if: startsWith(github.ref, 'refs/tags/v') 
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/v')
+      with:
+        name: Micropython PSoC6 ${{  github.ref_name  }}
+        files: mpy-psoc6_${{ matrix.board }}_${{  github.ref_name  }}.hex
+        body: ${{steps.build_changelog.outputs.changelog}}
