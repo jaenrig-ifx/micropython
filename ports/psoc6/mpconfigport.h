@@ -295,55 +295,64 @@ typedef intptr_t mp_off_t;
 
 
 ////////////////////////////////////////////////////////////////////////
+// TODO: Remove options implicitly set by setting feature level. Must work for all feature levels !
 // the following entries have been added by JB
 // Usually passed from Makefile
 #ifndef MICROPY_GC_HEAP_SIZE
-#define MICROPY_GC_HEAP_SIZE (512 * 1024)
-// #define MICROPY_GC_HEAP_SIZE (192 * 1024)
+#define MICROPY_GC_HEAP_SIZE (256 * 1024)
 #endif
 
 
-#define MICROPY_LOGGER_DEBUG              (1)
+// #ifndef MICROPY_GC_STACK_SIZE
+// #define MICROPY_GC_STACK_SIZE (64 * 1024)
+// #endif
+
+
+#define MICROPY_LOGGER_DEBUG              (0)
 #define MICROPY_MODULE_FROZEN_MPY         (1)
 
 
-#define MICROPY_PY_BUILTINS_HELP        (1)
-#define MICROPY_PY_BUILTINS_HELP_MODULES (1)
-
-
-#include "shared/runtime/interrupt_char.h"
+#define MICROPY_PY_BUILTINS_HELP          (1)
+#define MICROPY_PY_BUILTINS_HELP_MODULES  (1)
 
 
 
 #define MICROPY_ENABLE_COMPILER           (1)
 #define MICROPY_QSTR_EXTRA_POOL           mp_qstr_frozen_const_pool
 #define MICROPY_ALLOC_PARSE_CHUNK_INIT    (16)
-#define MICROPY_KBD_EXCEPTION (1)
+#define MICROPY_KBD_EXCEPTION             (1)
 
-#define MICROPY_ENABLE_SOURCE_LINE      (1)
+#define MICROPY_ENABLE_SOURCE_LINE        (1)
 
-#define MICROPY_USE_INTERNAL_PRINTF (0)
-#define MICROPY_ENABLE_FINALISER    (1)
-#define MICROPY_VFS_POSIX           (0)
-#define MICROPY_READER_POSIX        (0)
+#define MICROPY_USE_INTERNAL_PRINTF       (0)
+#define MICROPY_ENABLE_FINALISER          (1)
+#define MICROPY_VFS_POSIX                 (0)
+#define MICROPY_READER_POSIX              (0)
 
 
 #ifndef MICROPY_PY_SYS_PATH_DEFAULT
-#define MICROPY_PY_SYS_PATH_DEFAULT "/flash:~/.micropython/lib:/usr/lib/micropython"
+#define MICROPY_PY_SYS_PATH_DEFAULT       "/flash:~/.micropython/lib:/usr/lib/micropython"
 #endif
 
 
-#define MICROPY_REPL_INFO (1)
+#define MICROPY_REPL_INFO                 (1)
 
 // Set to zero explicitly ! Or mounting the /flash fs must be done inside try/except for both branches !
 // #define MICROPY_MODULE_BUILTIN_INIT (0)
 
-#define MICROPY_PY_MICROPYTHON (1)
-#define MICROPY_PY_GC (1)
-#define MICROPY_PY_IO (1)
-#define MICROPY_PY_IO_IOBASE (1)
+#define MICROPY_PY_MICROPYTHON            (1)
+#define MICROPY_PY_GC                     (1)
+#define MICROPY_PY_IO                     (1)
+#define MICROPY_PY_IO_IOBASE              (1)
 
 
 #define MICROPY_PY_USELECT                (0)
 
-#define MICROPY_STACK_CHECK (1)
+#define MICROPY_STACK_CHECK               (1)
+
+// TODO: helpful to abstract main.c ?
+// #define MICROPY_PORT_INIT_FUNC ??
+// #define MICROPY_PORT_DEINIT_FUNC ??
+
+
+#include "shared/runtime/interrupt_char.h"

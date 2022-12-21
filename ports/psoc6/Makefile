@@ -103,6 +103,7 @@ SRC_ASM = shared/runtime/gchelper_m0.s
 SRC_C = \
  	main.c \
 	\
+	help.c \
 	mphalport.c \
 	\
     drivers/machine/psoc6_system.c  \
@@ -127,7 +128,6 @@ SRC_C = \
 
 
 SRC_C    += $(SRC_USERMOD)
-# $(SRC_EXTMOD_C)
 SRC_CXX   = 
 
 

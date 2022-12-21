@@ -24,16 +24,21 @@
  * THE SOFTWARE.
  */
 
+// std includes
 #include <stdio.h>
 #include <string.h>
 
 
-#include "cyhal.h"
-
-
+// micropython includes
 #include "py/runtime.h"
 #include "extmod/vfs.h"
 #include "modpsoc6.h"
+
+
+// MTB includes
+#include "cyhal.h"
+
+
 
 #define FLASH_BASE_TRUE        (0x10000000)
 
@@ -120,7 +125,12 @@ STATIC mp_obj_t psoc6_flash_readblocks(size_t n_args, const mp_obj_t *args) {
         offset += mp_obj_get_int(args[3]);
     }
 
-    cyhal_flash_read(&cyhal_flash_obj, self->flash_base + offset, bufinfo.buf, bufinfo.len);
+    cy_rslt_t result = cyhal_flash_read(&cyhal_flash_obj, self->flash_base + offset, bufinfo.buf, bufinfo.len);
+
+    if (CY_RSLT_SUCCESS != result) {
+        mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_read failed !"));
+    }
+
     // TODO: or simply do it like this ?
     // memcpy(bufinfo.buf, (void *)(self->flash_base + offset), bufinfo.len);
 
@@ -142,7 +152,11 @@ STATIC mp_obj_t psoc6_flash_writeblocks(size_t n_args, const mp_obj_t *args) {
         uint32_t numSectors = bufinfo.len / FLASH_SECTOR_SIZE;
 
         for (uint32_t i = 0; i <= numSectors; ++i) {
-            cyhal_flash_erase(&cyhal_flash_obj, self->flash_base + offset + i * FLASH_SECTOR_SIZE);
+            cy_rslt_t result = cyhal_flash_erase(&cyhal_flash_obj, self->flash_base + offset + i * FLASH_SECTOR_SIZE);
+
+            if (CY_RSLT_SUCCESS != result) {
+                mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_read failed !"));
+            }
         }
 
         MICROPY_END_ATOMIC_SECTION(atomic_state);
@@ -158,7 +172,11 @@ STATIC mp_obj_t psoc6_flash_writeblocks(size_t n_args, const mp_obj_t *args) {
     uint32_t numPages = bufinfo.len / FLASH_SECTOR_SIZE; // TODO: should be page size
 
     for (uint32_t i = 0; i <= numPages; ++i) {
-        cyhal_flash_program(&cyhal_flash_obj, self->flash_base + offset + i * FLASH_SECTOR_SIZE, bufinfo.buf + i * FLASH_SECTOR_SIZE);
+        cy_rslt_t result = cyhal_flash_program(&cyhal_flash_obj, self->flash_base + offset + i * FLASH_SECTOR_SIZE, bufinfo.buf + i * FLASH_SECTOR_SIZE);
+
+        if (CY_RSLT_SUCCESS != result) {
+            mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_read failed !"));
+        }
     }
 
     MICROPY_END_ATOMIC_SECTION(atomic_state);
@@ -186,7 +204,12 @@ STATIC mp_obj_t psoc6_flash_ioctl(mp_obj_t self_in, mp_obj_t cmd_in, mp_obj_t ar
             uint32_t offset = mp_obj_get_int(arg_in) * BLOCK_SIZE_BYTES;
             // Flash erase/program must run in an atomic section.
             mp_uint_t atomic_state = MICROPY_BEGIN_ATOMIC_SECTION();
-            cyhal_flash_erase(&cyhal_flash_obj, self->flash_base + offset);
+            cy_rslt_t result = cyhal_flash_erase(&cyhal_flash_obj, self->flash_base + offset);
+
+            if (CY_RSLT_SUCCESS != result) {
+                mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_read failed !"));
+            }
+
             MICROPY_END_ATOMIC_SECTION(atomic_state);
             // TODO: check return value
             return MP_OBJ_NEW_SMALL_INT(0);

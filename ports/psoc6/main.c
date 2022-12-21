@@ -1,13 +1,9 @@
 // std includes
-#include <stdio.h>
 
 
 // micropython includes
 #include "genhdr/mpversion.h"
-#include "py/compile.h"
 #include "py/gc.h"
-#include "py/mpconfig.h"
-#include "py/mperrno.h"
 #include "py/mphal.h"
 #include "py/runtime.h"
 #include "py/stackctrl.h"
@@ -17,15 +13,11 @@
 
 // MTB includes
 #include "cybsp.h"
-#include "cyhal.h"
 #include "cy_retarget_io.h"
 
 
 // port-specific includes
 #include "mplogger.h"
-
-
-extern cyhal_rtc_t psoc6_rtc;
 
 
 #if MICROPY_ENABLE_GC
@@ -37,6 +29,14 @@ __attribute__((section(".bss"))) static char gc_heap[MICROPY_GC_HEAP_SIZE];
 #endif
 
 
+extern void machine_init(void);
+extern void machine_deinit(void);
+
+extern void rtc_init(void);
+extern void time_init(void);
+extern void os_init(void);
+
+
 int main(int argc, char **argv) {
     #if MICROPY_PY_THREAD
     mp_thread_init();
@@ -46,7 +46,10 @@ int main(int argc, char **argv) {
     #if MICROPY_ENABLE_GC
 
     mp_stack_set_top(&__StackTop);
-    mp_stack_set_limit((mp_uint_t)&__StackTop - 256 - MICROPY_GC_HEAP_SIZE);
+    mp_stack_set_limit((mp_uint_t)&__StackTop - (mp_uint_t)&__StackLimit);
+    // mp_stack_set_limit((mp_uint_t)&__StackLimit);
+    // TODO: Or set specific value ?
+    // mp_stack_set_limit((mp_uint_t)&__StackTop - 256 - MICROPY_GC_STACK_SIZE);
     gc_init(&gc_heap[0], &gc_heap[MP_ARRAY_SIZE(gc_heap)]);
 
     #endif
@@ -67,54 +70,53 @@ int main(int argc, char **argv) {
     #endif
 
 
-    cy_rslt_t result;
+    // Initialize the device and board peripherals
+    cy_rslt_t result = cybsp_init();
 
-
-    /* Initialize the device and board peripherals */
-    result = cybsp_init();
-
-    /* Board init failed. Stop program execution */
+    // Board init failed. Stop program execution
     if (result != CY_RSLT_SUCCESS) {
         mp_raise_ValueError(MP_ERROR_TEXT("cybsp_init failed !\n"));
     }
 
 
-    /* Initialize retarget-io to use the debug UART port */
+    // Initialize retarget-io to use the debug UART port
     result = cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, CY_RETARGET_IO_BAUDRATE);
 
-    /* retarget-io init failed. Stop program execution */
+    // retarget-io init failed. Stop program execution
     if (result != CY_RSLT_SUCCESS) {
         mp_raise_ValueError(MP_ERROR_TEXT("cy_retarget_io_init failed !\n"));
     }
+
+    // Initialize modules. Or to be redone after a reset and therefore to be placed next to machine_init below ?
+    os_init();
+    rtc_init();
+    time_init();
+
 
 soft_reset:
 
     mp_init();
 
-    /* \x1b[2J\x1b[;H - ANSI ESC sequence for clear screen */
-    mp_printf(&mp_plat_print, "\x1b[2J\x1b[;H");
-    mp_hal_stdout_tx_str(MICROPY_BANNER_NAME_AND_VERSION);
-    mp_hal_stdout_tx_str("; " MICROPY_BANNER_MACHINE);
-    mp_hal_stdout_tx_str("\nUse Ctrl-D to exit, Ctrl-E for paste mode\n");
+    // ANSI ESC sequence for clear screen. Refer to  https://stackoverflow.com/questions/517970/how-to-clear-the-interpreter-console
+    mp_printf(&mp_plat_print, "\033[H\033[2J");
 
-    setvbuf(stdin,  NULL, _IONBF, 0);
-    setvbuf(stdout, NULL, _IONBF, 0);
+    mp_printf(&mp_plat_print, MICROPY_BANNER_NAME_AND_VERSION);
+    mp_printf(&mp_plat_print, "; " MICROPY_BANNER_MACHINE);
+    mp_printf(&mp_plat_print, "\nUse Ctrl-D to exit, Ctrl-E for paste mode\n");
 
     mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash));
     mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash_slash_lib));
 
-    readline_init0();
-    // TODO: other init functions
-    // machine_pin_init();
-
     // indicate in REPL console when debug mode is selected
     mplogger_print("\n...LOGGER DEBUG MODE...\n\n");
 
+    readline_init0();
+    machine_init();
+
     #if MICROPY_VFS_FAT
     pyexec_frozen_module("vfs_fat.py");
-
-    // #else
-    // pyexec_frozen_module("vfs_lfs2.py");
+    #elif MICROPY_VFS_LFS2
+    pyexec_frozen_module("vfs_lfs2.py");
     #endif
 
     // Execute user scripts.
@@ -148,8 +150,9 @@ soft_reset:
 
     mp_printf(&mp_plat_print, "MPY: soft reboot\n");
 
-    // TODO: other deinit functions
-    // machine_pin_deinit();
+    // Deinitialize modules
+    machine_deinit();
+
     gc_sweep_all();
     mp_deinit();
 
@@ -162,38 +165,11 @@ soft_reset:
 // TODO: to be implemented
 void nlr_jump_fail(void *val) {
     mplogger_print("nlr_jump_fail\n");
+
+    mp_printf(&mp_plat_print, "FATAL: uncaught exception %p\n", val);
     mp_obj_print_exception(&mp_plat_print, MP_OBJ_FROM_PTR(val));
 
     for (;;) {
         __BKPT(0);
     }
 }
-
-
-const char psoc6_help_text[] =
-    "Welcome to MicroPython!\n"
-    "\n"
-    "For online help please visit https://micropython.org/help/.\n"
-    "\n"
-    "For access to the hardware use the 'machine' module.  PSoC6 specific commands\n"
-    "are in the 'psoc6' module.\n"
-    "\n"
-    "Quick overview of some objects:\n"
-    "  machine.Pin(pin) -- get a pin, eg machine.Pin(0)\n"
-    "  machine.Pin(pin, m, [p]) -- get a pin and configure it for IO mode m, pull mode p\n"
-    "    methods: init(..), value([v]), high(), low(), irq(handler)\n"
-    "  machine.I2C(id) -- create an I2C object (id=0,1)\n"
-    "    methods: readfrom(addr, buf, stop=True), writeto(addr, buf, stop=True)\n"
-    "             readfrom_mem(addr, memaddr, arg), writeto_mem(addr, memaddr, arg)\n"
-    "\n"
-    "Pin IO modes are: Pin.IN, Pin.OUT, Pin.ALT\n"
-    "Pin pull modes are: Pin.PULL_UP, Pin.PULL_DOWN\n"
-    "\n"
-    "Useful control commands:\n"
-    "  CTRL-C -- interrupt a running program\n"
-    "  CTRL-D -- on a blank line, do a soft reset of the board\n"
-    "  CTRL-E -- on a blank line, enter paste mode\n"
-    "\n"
-    "For further help on a specific object, type help(obj)\n"
-    "For a list of available modules, type help('modules')\n"
-;

@@ -1,6 +1,3 @@
-// std includes
-
-
 // micropython includes
 #include "py/gc.h"
 #include "shared/runtime/gchelper.h"
@@ -15,7 +12,13 @@ void gc_collect(void) {
     mp_thread_gc_others();
     #endif
     gc_collect_end();
+
+
+    #if MICROPY_LOGGER_DEBUG
+
     gc_dump_info();
+
+    #endif
 }
 
 #endif

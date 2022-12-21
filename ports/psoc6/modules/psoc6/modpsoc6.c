@@ -24,9 +24,11 @@
  * THE SOFTWARE.
  */
 
+// micropython includes
 #include "py/runtime.h"
 
 
+// port-specific includes
 #include "modpsoc6.h"
 
 
