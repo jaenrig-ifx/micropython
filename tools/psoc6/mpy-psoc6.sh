@@ -165,7 +165,7 @@ function arduino_lab_download_and_launch {
     unzip arduino-for-micropython.zip -d arduino-lab-mpy
     cd arduino-lab-mpy
     echo Launching Arduino Lab for Micropython...
-    ./arduino-lab-for-micropython-ide
+    ./arduino-lab-micropython-ide
     cd ..
 
 }
