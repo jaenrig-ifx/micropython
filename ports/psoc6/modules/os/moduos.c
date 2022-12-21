@@ -25,12 +25,30 @@
  * THE SOFTWARE.
  */
 
+// std includes
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
+
+// micropython includes
 #include "py/runtime.h"
 #include "py/mphal.h"
+
+
+#define RAISE_ERRNO(err_flag, error_val) \
+    { if (err_flag == -1) \
+      { mp_raise_OSError(error_val); } }
+
+
+void os_init(void) {
+}
+
+
+void os_deinit(void) {
+
+}
+
 
 STATIC mp_obj_t mp_uos_getenv(mp_obj_t var_in) {
     const char *s = getenv(mp_obj_str_get_str(var_in));

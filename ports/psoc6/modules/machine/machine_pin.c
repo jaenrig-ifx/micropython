@@ -1,5 +1,6 @@
-// mpy includes
+// micropython includes
 #include "py/runtime.h"
+
 
 // port-specific includes
 #include "modmachine.h"

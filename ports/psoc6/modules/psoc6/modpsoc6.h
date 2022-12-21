@@ -26,7 +26,10 @@
 #ifndef MICROPY_INCLUDED_PSOC6_MODPSOC6_H
 #define MICROPY_INCLUDED_PSOC6_MODPSOC6_H
 
+
+// micropython includes
 #include "py/obj.h"
+
 
 extern const mp_obj_type_t psoc6_flash_type;
 

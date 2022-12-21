@@ -38,7 +38,17 @@
 #include "cyhal.h"
 
 
-cyhal_rtc_t psoc6_rtc;
+// object defined in rtc.c
+extern cyhal_rtc_t psoc6_rtc;
+
+
+void time_init(void) {
+}
+
+
+void time_deinit(void) {
+
+}
 
 
 // localtime([secs])
@@ -88,6 +98,7 @@ STATIC mp_obj_t time_localtime(size_t n_args, const mp_obj_t *args) {
 }
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(time_localtime_obj, 0, 1, time_localtime);
 
+
 // mktime()
 // This is inverse function of localtime. It's argument is a full 8-tuple
 // which expresses a time as per localtime. It returns an integer which is
@@ -108,6 +119,7 @@ STATIC mp_obj_t time_mktime(mp_obj_t tuple) {
 }
 MP_DEFINE_CONST_FUN_OBJ_1(time_mktime_obj, time_mktime);
 
+
 // time()
 // Return the number of seconds since the Epoch.
 STATIC mp_obj_t time_time(void) {
@@ -124,6 +136,7 @@ STATIC mp_obj_t time_time(void) {
         current_date_time.tm_hour, current_date_time.tm_min, current_date_time.tm_sec));
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(time_time_obj, time_time);
+
 
 STATIC const mp_rom_map_elem_t mp_module_time_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_utime) },
@@ -147,6 +160,7 @@ STATIC const mp_rom_map_elem_t mp_module_time_globals_table[] = {
 };
 
 STATIC MP_DEFINE_CONST_DICT(mp_module_time_globals, mp_module_time_globals_table);
+
 
 const mp_obj_module_t mp_module_utime = {
     .base = { &mp_type_module },

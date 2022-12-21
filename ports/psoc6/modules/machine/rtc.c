@@ -49,8 +49,7 @@
 #include "modmachine.h"
 
 
-// object defined in main
-extern cyhal_rtc_t psoc6_rtc;
+cyhal_rtc_t psoc6_rtc;
 
 
 typedef struct _machine_rtc_obj_t {
@@ -62,6 +61,27 @@ typedef struct _machine_rtc_obj_t {
 STATIC const machine_rtc_obj_t machine_rtc_obj = {{&machine_rtc_type}};
 
 
+void rtc_init(void) {
+    cy_rslt_t result = cyhal_rtc_init(&psoc6_rtc);
+
+    if (CY_RSLT_SUCCESS != result) {
+        mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_init failed !"));
+    }
+
+    struct tm current_date_time = { .tm_mon = 1, .tm_mday = 1 };
+    result = cyhal_rtc_write(&psoc6_rtc, &current_date_time);
+
+    if (CY_RSLT_SUCCESS != result) {
+        mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_write failed !"));
+    }
+}
+
+
+void rtc_deinit(void) {
+
+}
+
+
 STATIC mp_obj_t machine_rtc_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
     mp_arg_check_num(n_args, n_kw, 0, 0, false);
     bool r = cyhal_rtc_is_enabled(&psoc6_rtc);
@@ -69,18 +89,7 @@ STATIC mp_obj_t machine_rtc_make_new(const mp_obj_type_t *type, size_t n_args, s
     if (!r) {
         // This shouldn't happen as rtc_init() is already called in main so
         // it's here just in case
-        cy_rslt_t result = cyhal_rtc_init(&psoc6_rtc);
-
-        if (CY_RSLT_SUCCESS != result) {
-            mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_init failed !"));
-        }
-
-        struct tm current_date_time = { .tm_mon = 1, .tm_mday = 1 };
-        result = cyhal_rtc_write(&psoc6_rtc, &current_date_time);
-
-        if (CY_RSLT_SUCCESS != result) {
-            mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_write failed !"));
-        }
+        rtc_init();
     }
 
     // return constant object

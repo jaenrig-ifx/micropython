@@ -1,66 +1,60 @@
+/*
+ * This file is part of the MicroPython project, http://micropython.org/
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2020-2021 Damien P. George
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+// Options controlling how MicroPython is built, overriding defaults in py/mpconfig.h
 #include <stdint.h>
+#include "mpconfigboard.h"
 
-// options to control how MicroPython is built
+// Board and hardware specific configuration
+#define MICROPY_HW_MCU_NAME                     "PSoC62"
+#define MICROPY_HELPER_REPL                     (1)
+#define MICROPY_HW_ENABLE_UART_REPL             (0) // useful if there is no USB
+// #define MICROPY_HW_ENABLE_USBDEV                (1)
 
-// Use the minimal starting configuration (disables all optional features).
-// #define MICROPY_CONFIG_ROM_LEVEL (MICROPY_CONFIG_ROM_LEVEL_MINIMUM)
-#define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_CORE_FEATURES)
-// #define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_EXTRA_FEATURES)
-// #define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_EVERYTHING)
+// #if MICROPY_HW_ENABLE_USBDEV
+// // Enable USB-CDC serial port
+// #ifndef MICROPY_HW_USB_CDC
+// #define MICROPY_HW_USB_CDC (1)
+// #endif
+// // Enable USB Mass Storage with FatFS filesystem.
+// #ifndef MICROPY_HW_USB_MSC
+#define MICROPY_HW_USB_MSC (0)
+// #endif
+// #endif
 
-// You can disable the built-in MicroPython compiler by setting the following
-// config option to 0.  If you do this then you won't get a REPL prompt, but you
-// will still be able to execute pre-compiled scripts, compiled with mpy-cross.
-#define MICROPY_ENABLE_COMPILER           (1)
-
-#define MICROPY_QSTR_EXTRA_POOL           mp_qstr_frozen_const_pool
-#define MICROPY_ENABLE_GC                 (1)
-#define MICROPY_HELPER_REPL               (1)
-#define MICROPY_MODULE_FROZEN_MPY         (1)
-#define MICROPY_ENABLE_EXTERNAL_IMPORT    (1)
-
-#define MICROPY_ALLOC_PATH_MAX            (256)
-#define MICROPY_ALLOC_PARSE_CHUNK_INIT    (16)
-
-// type definitions for the specific machine
-
-typedef intptr_t mp_int_t; // must be pointer size
-typedef uintptr_t mp_uint_t; // must be pointer size
-typedef long mp_off_t;
-
-// We need to provide a declaration/definition of alloca()
-#include <alloca.h>
-
-#define MICROPY_HW_BOARD_NAME "CY8CPROTO-062-4343W"
-#define MICROPY_HW_MCU_NAME   "PSoC62"
-#define MICROPY_PY_SYS_PLATFORM             "psoc6"
-
-#ifdef __linux__
-#define MICROPY_MIN_USE_STDOUT (1)
+#ifndef MICROPY_CONFIG_ROM_LEVEL
+// #define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_CORE_FEATURES)
+#define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_EXTRA_FEATURES)
 #endif
 
-#ifdef __thumb__
-#define MICROPY_MIN_USE_CORTEX_CPU (1)
-#define MICROPY_MIN_USE_STM32_MCU (0)
-#endif
-
-
-#define MP_STATE_PORT MP_STATE_VM
-
-
-////////////////////////////////////////////////////////////////////////
-// the following entries have been added by JB
-// Usually passed from Makefile
-#ifndef MICROPY_HEAP_SIZE
-#define MICROPY_HEAP_SIZE (192 * 1024)
-#endif
-
-#define MICROPY_ENABLE_SOURCE_LINE      (1)
-
-#define MICROPY_USE_INTERNAL_PRINTF (0)
-
-#define MICROPY_LONGINT_IMPL                    (MICROPY_LONGINT_IMPL_MPZ)
-#define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_FLOAT)
+// Memory allocation policies
+#define MICROPY_GC_STACK_ENTRY_TYPE             uint16_t
+// #define MICROPY_ALLOC_PATH_MAX                  (128)
+#define MICROPY_ALLOC_PATH_MAX                  (256)
+#define MICROPY_QSTR_BYTES_IN_HASH              (1)
 
 // MicroPython emitters
 #define MICROPY_PERSISTENT_CODE_LOAD            (1)
@@ -69,125 +63,296 @@ typedef long mp_off_t;
 #define MICROPY_EMIT_INLINE_THUMB               (1)
 #define MICROPY_EMIT_INLINE_THUMB_FLOAT         (0)
 
+// Optimisations
+// #define MICROPY_OPT_COMPUTED_GOTO               (1)
+#define MICROPY_OPT_COMPUTED_GOTO               (0)
 
-
-// // Optimisations
-#define MICROPY_ENABLE_SOURCE_LINE      (1)
-#define MICROPY_PY_ARRAY                (1)
-#define MICROPY_PY_BUILTINS_ENUMERATE   (1)
-#define MICROPY_PY_BUILTINS_FILTER      (1)
-#define MICROPY_PY_BUILTINS_MIN_MAX     (1)
-#define MICROPY_PY_BUILTINS_PROPERTY    (1)
-#define MICROPY_PY_BUILTINS_RANGE_ATTRS (1)
-#define MICROPY_PY_BUILTINS_REVERSED    (1)
-#define MICROPY_PY_BUILTINS_SET         (1)
-#define MICROPY_PY_BUILTINS_HELP        (1)
-#define MICROPY_PY_BUILTINS_HELP_MODULES (1)
-#define MICROPY_PY_SYS_MODULES          (1)
-
-#define MICROPY_PY_UOS                        (1)
-#define MICROPY_PY_UOS_INCLUDEFILE            "ports/psoc6/modules/os/moduos.c"
-#define MICROPY_PY_UOS_UNAME                  (1)
-#define MICROPY_PY_UOS_URANDOM                (0)
-#define MICROPY_PY_UOS_GETENV_PUTENV_UNSETENV (0)
-#define MICROPY_PY_UOS_SYSTEM                 (1)
-
-#define MICROPY_PY_UTIME                (1)
-#define MICROPY_PY_UTIME_MP_HAL         (1)
-
-#define MICROPY_PY_MICROPYTHON_MEM_INFO (1)
-#define MICROPY_PY_MACHINE              (1)
-#define MICROPY_MODULE_WEAK_LINKS       (1)
-#define MICROPY_PY_STRUCT               (1)
-
+// Python internal features
+// #define MICROPY_TRACKED_ALLOC                   (MICROPY_SSL_MBEDTLS)
+#define MICROPY_READER_VFS                      (1)
+#define MICROPY_ENABLE_GC                       (1)
+#define MICROPY_ENABLE_EMERGENCY_EXCEPTION_BUF  (1)
+#define MICROPY_LONGINT_IMPL                    (MICROPY_LONGINT_IMPL_MPZ)
+#define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_FLOAT)
+#define MICROPY_SCHEDULER_DEPTH                 (8)
+#define MICROPY_SCHEDULER_STATIC_NODES          (1)
 
 #ifndef MICROPY_USE_INTERNAL_ERRNO
+// #define MICROPY_USE_INTERNAL_ERRNO              (1)
 #define MICROPY_USE_INTERNAL_ERRNO              (0)
 #endif
 
-#if MICROPY_PY_UTIME
-#define MICROPY_PY_UTIME_DEF \
-    { MP_ROM_QSTR(MP_QSTR_utime), MP_ROM_PTR(&mp_module_time) },
-#else
-#define MICROPY_PY_UTIME_DEF
-#endif
+// Fine control over Python builtins, classes, modules, etc
+#define MICROPY_PY_BUILTINS_HELP_TEXT           psoc6_help_text
+#define MICROPY_PY_SYS_PLATFORM                 "psoc6"
+#define MICROPY_PY_THREAD                       (0)
+// #define MICROPY_PY_THREAD                       (1)
+#define MICROPY_PY_THREAD_GIL                   (0)
+// #define MICROPY_THREAD_YIELD()                  mp_handle_pending(true)
 
-#define MICROPY_PORT_BUILTIN_MODULES \
-    { MP_ROM_QSTR(MP_QSTR_machine), MP_ROM_PTR(&mp_module_machine) }, \
-    MICROPY_PY_UTIME_DEF
-
-#define MICROPY_PORT_BUILTIN_MODULE_WEAK_LINKS \
-    { MP_ROM_QSTR(MP_QSTR_time), MP_ROM_PTR(&mp_module_time) }
-
-
-#define MICROPY_COMP_CONST_FOLDING       (0)
-#define MICROPY_COMP_CONST               (0)
-#define MICROPY_COMP_DOUBLE_TUPLE_ASSIGN (0)
-#define MICROPY_COMP_MODULE_CONST (0)
-#define MICROPY_QSTR_BYTES_IN_HASH              (1)
-
-
-#ifndef MICROPY_BOARD_ENTER_BOOTLOADER
-#define MICROPY_BOARD_ENTER_BOOTLOADER(nargs, args)
-#endif
-
-#define MICROPY_LOGGER_DEBUG                    (0)
-
-
-#define MICROPY_ENABLE_FINALISER    (1)
-#define MICROPY_VFS                 (1)
-#define MICROPY_VFS_LFS2            (1)
-#define MICROPY_VFS_FAT             (1)
-#define MICROPY_READER_VFS          (1)
-#define MICROPY_VFS_POSIX           (0)
-#define MICROPY_READER_POSIX        (0)
-
+// Extended modules
+#define MICROPY_EPOCH_IS_1970                   (1)
+#define MICROPY_PY_UOS_INCLUDEFILE              "ports/psoc6/modules/os/moduos.c"
+#define MICROPY_PY_UOS_UNAME                    (1)
+// #define MICROPY_PY_UOS_URANDOM                  (1)
+#define MICROPY_PY_UOS_URANDOM                  (0)
+#define MICROPY_PY_URE_MATCH_GROUPS             (1)
+#define MICROPY_PY_URE_MATCH_SPAN_START_END     (1)
+// #define MICROPY_PY_UCRYPTOLIB                   (1)
+#define MICROPY_PY_UCRYPTOLIB                   (0)
+#define MICROPY_PY_UTIME_MP_HAL                 (1)
+// #define MICROPY_PY_URANDOM_SEED_INIT_FUNC       (rosc_random_u32())
+#define MICROPY_PY_MACHINE                      (1)
+#define MICROPY_PY_MACHINE_PIN_MAKE_NEW         mp_pin_make_new
+// #define MICROPY_PY_MACHINE_BITSTREAM            (1)
+// #define MICROPY_PY_MACHINE_PULSE                (1)
+// #define MICROPY_PY_MACHINE_PWM                  (1)
+// #define MICROPY_PY_MACHINE_PWM_DUTY_U16_NS      (1)
+// #define MICROPY_PY_MACHINE_PWM_INCLUDEFILE      "ports/rp2/machine_pwm.c"
+// #define MICROPY_PY_MACHINE_I2C                  (1)
+// #define MICROPY_PY_MACHINE_SOFTI2C              (1)
+// #define MICROPY_PY_MACHINE_SPI                  (1)
+// #define MICROPY_PY_MACHINE_SPI_MSB              (SPI_MSB_FIRST)
+// #define MICROPY_PY_MACHINE_SPI_LSB              (SPI_LSB_FIRST)
+// #define MICROPY_PY_MACHINE_SOFTSPI              (1)
+// #define MICROPY_PY_ONEWIRE                      (1)
+#define MICROPY_VFS                             (1)
+#define MICROPY_VFS_LFS2                        (1)
+#define MICROPY_VFS_FAT                         (1)
+// #define MICROPY_SSL_MBEDTLS                     (1)
+#define MICROPY_SSL_MBEDTLS                     (0)
+// #define MICROPY_PY_LWIP_SOCK_RAW                (MICROPY_PY_LWIP)
 
 // fatfs configuration
 #define MICROPY_FATFS_ENABLE_LFN                (1)
 #define MICROPY_FATFS_LFN_CODE_PAGE             437 /* 1=SFN/ANSI 437=LFN/U.S.(OEM) */
 #define MICROPY_FATFS_RPATH                     (2)
-
-#if MICROPY_HW_USB_MSC
-#define MICROPY_FATFS_USE_LABEL                 (1)
-#define MICROPY_FATFS_MULTI_PARTITION           (1)
-// Set FatFS block size to flash sector size to avoid caching
-// the flash sector in memory to support smaller block sizes.
-#define MICROPY_FATFS_MAX_SS                    (0x200)
+// #if MICROPY_HW_USB_MSC
+// #define MICROPY_FATFS_USE_LABEL                 (1)
+// #define MICROPY_FATFS_MULTI_PARTITION           (1)
+// // Set FatFS block size to flash sector size to avoid caching
+// // the flash sector in memory to support smaller block sizes.
 // #define MICROPY_FATFS_MAX_SS                    (FLASH_SECTOR_SIZE)
-// #define MICROPY_FATFS_MAX_SS           (4096)
+// #endif
+
+#ifndef MICROPY_BOARD_ENTER_BOOTLOADER
+#define MICROPY_BOARD_ENTER_BOOTLOADER(nargs, args)
 #endif
 
-// VFS stat functions should return time values relative to 1970/1/1
-// #define MICROPY_EPOCH_IS_1970       (1)
+// By default networking should include sockets, ssl, websockets, webrepl, dupterm.
+#if MICROPY_PY_NETWORK
+
+#ifndef MICROPY_PY_USOCKET
+#define MICROPY_PY_USOCKET              (1)
+#endif
+
+#ifndef MICROPY_PY_USSL
+#define MICROPY_PY_USSL                 (1)
+#endif
+
+#ifndef MICROPY_PY_UWEBSOCKET
+#define MICROPY_PY_UWEBSOCKET           (1)
+#endif
+
+#ifndef MICROPY_PY_UHASHLIB_SHA1
+#define MICROPY_PY_UHASHLIB_SHA1        (1)
+#endif
+
+#ifndef MICROPY_PY_WEBREPL
+#define MICROPY_PY_WEBREPL              (1)
+#endif
+
+#ifndef MICROPY_PY_OS_DUPTERM
+#define MICROPY_PY_OS_DUPTERM           (1)
+#endif
+
+#endif
+
+// #if MICROPY_PY_NETWORK_CYW43
+
+// extern const struct _mp_obj_type_t mp_network_cyw43_type;
+// #define MICROPY_HW_NIC_CYW43
+//     { MP_ROM_QSTR(MP_QSTR_WLAN), MP_ROM_PTR(&mp_network_cyw43_type) },
+//     { MP_ROM_QSTR(MP_QSTR_STAT_IDLE), MP_ROM_INT(CYW43_LINK_DOWN) },
+//     { MP_ROM_QSTR(MP_QSTR_STAT_CONNECTING), MP_ROM_INT(CYW43_LINK_JOIN) },
+//     { MP_ROM_QSTR(MP_QSTR_STAT_WRONG_PASSWORD), MP_ROM_INT(CYW43_LINK_BADAUTH) },
+//     { MP_ROM_QSTR(MP_QSTR_STAT_NO_AP_FOUND), MP_ROM_INT(CYW43_LINK_NONET) },
+//     { MP_ROM_QSTR(MP_QSTR_STAT_CONNECT_FAIL), MP_ROM_INT(CYW43_LINK_FAIL) },
+//     { MP_ROM_QSTR(MP_QSTR_STAT_GOT_IP), MP_ROM_INT(CYW43_LINK_UP) },
+
+// #else
+
+// #define MICROPY_HW_NIC_CYW43
+
+// #endif
+
+// #if MICROPY_PY_NETWORK_NINAW10
+// // This Network interface requires the extended socket state.
+// #ifndef MICROPY_PY_USOCKET_EXTENDED_STATE
+// #define MICROPY_PY_USOCKET_EXTENDED_STATE   (1)
+// #endif
+// extern const struct _mod_network_nic_type_t mod_network_nic_type_nina;
+// #define MICROPY_HW_NIC_NINAW10              { MP_ROM_QSTR(MP_QSTR_WLAN), MP_ROM_PTR(&mod_network_nic_type_nina) },
+// #else
+// #define MICROPY_HW_NIC_NINAW10
+// #endif
+
+// #if MICROPY_PY_NETWORK_WIZNET5K
+// #if MICROPY_PY_LWIP
+// extern const struct _mp_obj_type_t mod_network_nic_type_wiznet5k;
+// #else
+// extern const struct _mod_network_nic_type_t mod_network_nic_type_wiznet5k;
+// #endif
+// #define MICROPY_HW_NIC_WIZNET5K             { MP_ROM_QSTR(MP_QSTR_WIZNET5K), MP_ROM_PTR(&mod_network_nic_type_wiznet5k) },
+// #else
+// #define MICROPY_HW_NIC_WIZNET5K
+// #endif
+
+// #ifndef MICROPY_BOARD_NETWORK_INTERFACES
+// #define MICROPY_BOARD_NETWORK_INTERFACES
+// #endif
+
+// #define MICROPY_PORT_NETWORK_INTERFACES
+//     MICROPY_HW_NIC_CYW43
+//     MICROPY_HW_NIC_NINAW10
+//     MICROPY_HW_NIC_WIZNET5K
+//     MICROPY_BOARD_NETWORK_INTERFACES
+
+#define MP_STATE_PORT MP_STATE_VM
+
+// Miscellaneous settings
+
+// #ifndef MICROPY_HW_USB_VID
+// #define MICROPY_HW_USB_VID (0x2E8A) // Raspberry Pi
+// #endif
+// #ifndef MICROPY_HW_USB_PID
+// #define MICROPY_HW_USB_PID (0x0005) // RP2 MicroPython
+// #endif
+
+// // Entering a critical section.
+// extern uint32_t mp_thread_begin_atomic_section(void);
+// extern void mp_thread_end_atomic_section(uint32_t);
+// #define MICROPY_BEGIN_ATOMIC_SECTION()     mp_thread_begin_atomic_section()
+// #define MICROPY_END_ATOMIC_SECTION(state)  mp_thread_end_atomic_section(state)
+
+// // Prevent the "lwIP task" from running when unsafe to do so.
+// #define MICROPY_PY_LWIP_ENTER   lwip_lock_acquire();
+// #define MICROPY_PY_LWIP_REENTER lwip_lock_acquire();
+// #define MICROPY_PY_LWIP_EXIT    lwip_lock_release();
+
+// #if MICROPY_HW_ENABLE_USBDEV
+// #define MICROPY_HW_USBDEV_TASK_HOOK extern void usbd_task(void); usbd_task();
+// #define MICROPY_VM_HOOK_COUNT (10)
+// #define MICROPY_VM_HOOK_INIT static uint vm_hook_divisor = MICROPY_VM_HOOK_COUNT;
+// #define MICROPY_VM_HOOK_POLL if (get_core_num() == 0 && --vm_hook_divisor == 0) {
+//         vm_hook_divisor = MICROPY_VM_HOOK_COUNT;
+//         MICROPY_HW_USBDEV_TASK_HOOK
+// }
+// #define MICROPY_VM_HOOK_LOOP MICROPY_VM_HOOK_POLL
+// #define MICROPY_VM_HOOK_RETURN MICROPY_VM_HOOK_POLL
+// #else
+// #define MICROPY_HW_USBDEV_TASK_HOOK
+// #endif
+
+// #define MICROPY_EVENT_POLL_HOOK_FAST
+//     do {
+//         if (get_core_num() == 0) { MICROPY_HW_USBDEV_TASK_HOOK }
+//         extern void mp_handle_pending(bool);
+//         mp_handle_pending(true);
+//     } while (0)
+
+// #define MICROPY_EVENT_POLL_HOOK
+//     do {
+//         MICROPY_EVENT_POLL_HOOK_FAST;
+//         best_effort_wfe_or_timeout(make_timeout_time_ms(1));
+//     } while (0);
+
+#define MICROPY_MAKE_POINTER_CALLABLE(p) ((void *)((mp_uint_t)(p) | 1))
+
+#define MP_SSIZE_MAX (0x7fffffff)
+typedef intptr_t mp_int_t; // must be pointer size
+typedef uintptr_t mp_uint_t; // must be pointer size
+typedef intptr_t mp_off_t;
+
+// We need to provide a declaration/definition of alloca()
+#include <alloca.h>
+
+// #define BINARY_INFO_TAG_MICROPYTHON BINARY_INFO_MAKE_TAG('M', 'P')
+// #define BINARY_INFO_ID_MP_FROZEN 0x4a99d719
+// #define MICROPY_FROZEN_LIST_ITEM(name, file) bi_decl(bi_string(BINARY_INFO_TAG_MICROPYTHON, BINARY_INFO_ID_MP_FROZEN, name))
+
+// extern uint32_t rosc_random_u32(void);
+// extern void lwip_lock_acquire(void);
+// extern void lwip_lock_release(void);
+
+// extern uint32_t cyw43_country_code;
+// extern void cyw43_irq_init(void);
+// extern void cyw43_post_poll_hook(void);
+
+// #define CYW43_POST_POLL_HOOK cyw43_post_poll_hook();
+// #define MICROPY_CYW43_COUNTRY cyw43_country_code
+
+
+
+////////////////////////////////////////////////////////////////////////
+// TODO: Remove options implicitly set by setting feature level. Must work for all feature levels !
+// the following entries have been added by JB
+// Usually passed from Makefile
+#ifndef MICROPY_GC_HEAP_SIZE
+#define MICROPY_GC_HEAP_SIZE (256 * 1024)
+#endif
+
+
+// #ifndef MICROPY_GC_STACK_SIZE
+// #define MICROPY_GC_STACK_SIZE (64 * 1024)
+// #endif
+
+
+#define MICROPY_LOGGER_DEBUG              (0)
+#define MICROPY_MODULE_FROZEN_MPY         (1)
+
+
+#define MICROPY_PY_BUILTINS_HELP          (1)
+#define MICROPY_PY_BUILTINS_HELP_MODULES  (1)
+
+
+
+#define MICROPY_ENABLE_COMPILER           (1)
+#define MICROPY_QSTR_EXTRA_POOL           mp_qstr_frozen_const_pool
+#define MICROPY_ALLOC_PARSE_CHUNK_INIT    (16)
+#define MICROPY_KBD_EXCEPTION             (1)
+
+#define MICROPY_ENABLE_SOURCE_LINE        (1)
+
+#define MICROPY_USE_INTERNAL_PRINTF       (0)
+#define MICROPY_ENABLE_FINALISER          (1)
+#define MICROPY_VFS_POSIX                 (0)
+#define MICROPY_READER_POSIX              (0)
 
 
 #ifndef MICROPY_PY_SYS_PATH_DEFAULT
-#define MICROPY_PY_SYS_PATH_DEFAULT ".frozen:~/.micropython/lib:/usr/lib/micropython"
+#define MICROPY_PY_SYS_PATH_DEFAULT       "/flash:~/.micropython/lib:/usr/lib/micropython"
 #endif
 
 
-#define MICROPY_PY_THREAD                       (0)
+#define MICROPY_REPL_INFO                 (1)
+
+// Set to zero explicitly ! Or mounting the /flash fs must be done inside try/except for both branches !
+// #define MICROPY_MODULE_BUILTIN_INIT (0)
+
+#define MICROPY_PY_MICROPYTHON            (1)
+#define MICROPY_PY_GC                     (1)
+#define MICROPY_PY_IO                     (1)
+#define MICROPY_PY_IO_IOBASE              (1)
 
 
-#define MP_SSIZE_MAX (0x7fffffff)
+#define MICROPY_PY_USELECT                (0)
 
-#define MICROPY_PY_SYS (1)
-#define MICROPY_PY_SYS_STDIO_BUFFER (1)
+#define MICROPY_STACK_CHECK               (1)
+
+// TODO: helpful to abstract main.c ?
+// #define MICROPY_PORT_INIT_FUNC ??
+// #define MICROPY_PORT_DEINIT_FUNC ??
 
 
-extern mp_uint_t begin_atomic_section();
-extern void end_atomic_section(mp_uint_t state);
-
-#define MICROPY_BEGIN_ATOMIC_SECTION()     begin_atomic_section()
-#define MICROPY_END_ATOMIC_SECTION(state)  end_atomic_section(state)
-
-#define MICROPY_PERSISTENT_CODE_SAVE (1)
-#define MICROPY_PY_SYS_SETTRACE (1)
-#define MICROPY_PY_SYS_EXC_INFO (1)
-#define MICROPY_KBD_EXCEPTION (1)
 #include "shared/runtime/interrupt_char.h"
-
-#define MICROPY_PY_UERRNO (1)
-
-#define MICROPY_REPL_INFO (1)
