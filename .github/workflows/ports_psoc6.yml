@@ -68,7 +68,7 @@ jobs:
     - name: Prepare release assets
       run: | 
         cd mpy-psoc6_${{ matrix.board }}_${{ needs.server-build.outputs.commit_sha }}
-        mv firmware.hex ../mpy-psoc6_${{ matrix.board }}_${{  github.ref_name  }}.hex
+        mv firmware.hex ../mpy-psoc6_${{ matrix.board }}.hex
     - name: Build release changelog
       id: build_changelog
       uses: mikepenz/release-changelog-builder-action@v3
@@ -78,5 +78,5 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         name: Micropython PSoC6 ${{  github.ref_name  }}
-        files: mpy-psoc6_${{ matrix.board }}_${{  github.ref_name  }}.hex
+        files: mpy-psoc6_${{ matrix.board }}.hex
         body: ${{steps.build_changelog.outputs.changelog}}
