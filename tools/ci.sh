@@ -270,7 +270,7 @@ function ci_psoc6_deploy {
 }
 
 function ci_psoc6_run_tests {
-    docker exec mtb-ci /bin/bash -c "cd ../../tests && ./run-tests.py --target psoc6 --device /dev/ttyACM0 basics/0prelim.py"
+    docker exec mtb-ci /bin/bash -c "cd ../../tests && ./run-tests.py --target psoc6 --device /dev/ttyACM0 -d psoc6"
 }
 
 ########################################################################################

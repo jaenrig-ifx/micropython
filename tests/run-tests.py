@@ -30,9 +30,11 @@ def base_path(*p):
 # to the correct executable.
 if os.name == "nt":
     CPYTHON3 = os.getenv("MICROPY_CPYTHON3", "python")
-    MICROPYTHON = os.getenv("MICROPY_MICROPYTHON", base_path("../ports/windows/micropython.exe"))
+    MICROPYTHON = os.getenv(
+        "MICROPY_MICROPYTHON", base_path("../ports/windows/build-standard/micropython.exe")
+    )
     # mpy-cross is only needed if --via-mpy command-line arg is passed
-    MPYCROSS = os.getenv("MICROPY_MPYCROSS", base_path("../mpy-cross/mpy-cross.exe"))
+    MPYCROSS = os.getenv("MICROPY_MPYCROSS", base_path("../mpy-cross/build/mpy-cross.exe"))
 else:
     CPYTHON3 = os.getenv("MICROPY_CPYTHON3", "python3")
     MICROPYTHON = os.getenv(
@@ -540,6 +542,7 @@ def run_tests(pyb, tests, args, result_dir, num_threads=1):
     if not has_coverage:
         skip_tests.add("cmdline/cmd_parsetree.py")
         skip_tests.add("cmdline/repl_sys_ps1_ps2.py")
+        skip_tests.add("extmod/ussl_poll.py")
 
     # Some tests shouldn't be run on a PC
     if args.target == "unix":
