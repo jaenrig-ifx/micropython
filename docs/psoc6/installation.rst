@@ -1,6 +1,32 @@
 
-MicroPython PSoC6™ Installation
+MicroPython PSoC6™ installation
 ===============================
+
+To support the MicroPython installation the ``mpy-psoc6`` utility script is provided for Windows and
+Linux.
+You can easily download from your OS terminal with the following command:
+
+.. tabs::
+
+    .. group-tab:: Linux
+
+        .. code-block:: bash
+
+            curl -s -L https://raw.githubusercontent.com/jaenrig-ifx/micropython/ports/psoc6/tools/psoc6/mpy-psoc6.sh > mpy-psoc6.sh 
+
+        Add execution rights to the script:       
+        
+        .. code-block:: bash                
+           
+            chmod +x mpy-psoc6.sh 
+
+    .. group-tab:: Windows
+    
+        Download the mpy-psoc6 utility script:
+
+            .. code-block:: bash
+
+                curl.exe -s -L https://raw.githubusercontent.com/jaenrig-ifx/micropython/ports/psoc6/tools/psoc6/mpy-psoc6.cmd > mpy-psoc6.cmd
 
 
 Quick Start
@@ -8,30 +34,19 @@ Quick Start
 
 If this your first time with MicroPython, the fastest way to get you up and running with micropython 
 
+         and run the script with the ``quick-start`` command:
+
 .. tabs::
 
-    .. tab:: Linux
-
-        Download the mpy-psoc6 utility script :
-
-            .. code-block:: bash
-
-                curl -s -L https://raw.githubusercontent.com/jaenrig-ifx/micropython/ports/psoc6/tools/psoc6/mpy-psoc6.sh > mpy-psoc6.sh 
+    .. group-tab:: Linux
         
-        Add execution rights and run the script with the ``quick-start`` command:
+
         
             .. code-block:: bash
-    
-                chmod +x mpy-psoc6.sh 
+
                 ./mpy-psoc6.sh quick-start
 
-    .. tab:: Windows
-    
-        Download the mpy-psoc6 utility script:
-
-            .. code-block:: bash
-
-                curl.exe -s -L https://raw.githubusercontent.com/jaenrig-ifx/micropython/ports/psoc6/tools/psoc6/mpy-psoc6.cmd > mpy-psoc6.cmd
+    .. group-tab:: Windows
 
         Run the script with the ``quick-start`` command:
 
@@ -40,15 +55,16 @@ If this your first time with MicroPython, the fastest way to get you up and runn
                 mpy-psoc6.cmd quick-start
 
 Device update
+-------------
 
 Install a specific versions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
-
-Manual fimrware update
+Direct firmware flashing
+------------------------
 
 Getting the firmware
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
 The binary *.hex* file is available in the `GitHub release section <https://github.com/jaenrig-ifx/MicroPython/releases>`_. 
 All PSoC6™ firmware versions for each of the supported boards can be found there. 
