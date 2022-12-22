@@ -104,7 +104,7 @@ exit /b 0
     curl.exe -s -L https://github.com/Infineon/openocd/releases/download/release-v4.4.0/openocd-4.4.0.2134-windows.zip > openocd.zip
     echo Extracting openocd...
     powershell -command "Expand-Archive -Force 'openocd.zip' -DestinationPath '.'"
-    set PATH=%PATH%;openocd\bin
+    set PATH=openocd\bin;%PATH%
 
 exit /b 0
 
