@@ -16,14 +16,9 @@ working with this board it may be useful to get an overview of the microcontroll
    :maxdepth: 1
 
    general.rst
-   tutorial/index.rst
+   intro.rst
    installation.rst
    mpy-usage.rst
-
-Installing MicroPython
-----------------------
-
-See the corresponding section of tutorial: :ref:`psoc6_intro`.
 
 General board control
 ---------------------
