@@ -17,6 +17,8 @@ working with this board it may be useful to get an overview of the microcontroll
 
    general.rst
    tutorial/index.rst
+   installation.rst
+   mpy-usage.rst
 
 Installing MicroPython
 ----------------------
