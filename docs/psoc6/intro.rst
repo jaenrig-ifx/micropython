@@ -17,7 +17,7 @@ The only required hardware is:
 * PSoC6™ board of the :ref:`Supported boards` list.
 * A microUSB cable.
 
-Powering the board
+Power the board
 ------------------
 
 Connect the USB cable to your computer and the micro USB to the board debugger. All the PSoC6™ boards
@@ -25,13 +25,15 @@ come with a on-board debugger required for flashing/debugging operations during 
 corresponding board manual of your board.
 
 Install MicroPython
--------------------
+----------------------
 
-Run the :ref:`Quick Start` command of the mpy-psoc6 utility. In your machine terminal type the following commands and follow the instructions:
+In your computer terminal type the following commands and follow the instructions:
 
 .. tabs::
 
     .. group-tab:: Linux
+
+        Download the mpy-psoc6 utility script:
 
         .. code-block:: bash
 
@@ -51,10 +53,18 @@ Run the :ref:`Quick Start` command of the mpy-psoc6 utility. In your machine ter
             .. code-block:: bash
 
                 curl.exe -s -L https://raw.githubusercontent.com/jaenrig-ifx/micropython/ports/psoc6/tools/psoc6/mpy-psoc6.cmd > mpy-psoc6.cmd
+        
+        And run the script:
+
+            .. code-block:: bash
+
                 mpy-psoc6.cmd quick-start
 
+These will run the :ref:`psoc6_quick_start <quick-start>` command of the mpy-psoc6 utility and take
+care of all the necessary installation steps.
+
 If everything went fine, your PSoC6™ board is now running MicroPython and Arduino IDE for
-Micropython is now started.
+Micropython is now started. If you run into any trouble, please let us know here :) 
 
 Select your serial port of your PSoC6™ board by clicking on the connect icon on the menu bar:
 
@@ -73,4 +83,4 @@ Run your first script
 Upload a script to your device
 ------------------------------
 
-
+*Feature unavailable. To be completed.*

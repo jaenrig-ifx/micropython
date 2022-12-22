@@ -1,7 +1,7 @@
 .. _psoc6_mpy_install:
 
-Installating MicroPython 
-========================
+Installing MicroPython 
+======================
 
 To support the MicroPython PSoC6™ port installation the ``mpy-psoc6`` utility script is provided for Windows and
 Linux.
@@ -46,7 +46,7 @@ Find all the available commands an options by running the script with the comman
             
                 ./mpy-psoc6.sh help
 
-.. _Quick Start:
+.. _psoc6_quick_start:
 
 Quick Start
 ------------
@@ -73,6 +73,7 @@ This will seamlessly take care of the following:
 * Install all required software to work with MicroPython
 * Deploy the latest version of MicroPython PSoC6 firmware on your board
 * Launch Arduino Lab MicroPython IDE
+* Remove all installation packages and software
 
 This command is supporting the getting started tutorial for the first time. Once you get familiar
 with MicroPython and its environment, the ``device-setup`` command will be more appropiate to
@@ -130,6 +131,9 @@ All PSoC6™ firmware versions for each of the supported boards can be found the
 Other installation methods
 --------------------------
 
+Cypress Programmer
+^^^^^^^^^^^^^^^^^^
+
 In order to deploy the firmware in the embedded device, the easiest and quickest way is to use the
 `Cypress Programmer <https://softwaretools.infineon.com/tools/com.ifx.tb.tool.cypressprogrammer>`_.
 It allows to flash a binary in the PSoC6™ microcontrollers family in a few clicks from your Windows,
@@ -149,6 +153,9 @@ Programmer User Guide
 <https://www.infineon.com/dgdl/Infineon-Infineon_Programmer_4.0_GUI_User_Guide-Software-v01_00-EN.pdf?fileId=8ac78c8c7e7124d1017ed9abca6e365c>`_.
 
 You are all set now to start programming with MicroPython!
+
+ModusToolbox™
+^^^^^^^^^^^^^
 
 .. note::
     Alternatively, users familiar with the ModusToolbox™ toolchain and makefile system can also use the corresponding
