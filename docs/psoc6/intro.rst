@@ -27,15 +27,19 @@ corresponding board manual of your board.
 Install MicroPython
 -------------------
 
-In order to simply things, you can run the ``quick-start`` command of the mpy-psoc6 utility. This
-will seamlessly take care of the following:
+In order to simply things, you can run the ``quick-start`` command of the mpy-psoc6 utility. 
 
-* Install all required software to install MicroPython
-* Deploy the latest version of MicroPython PSoC6 firmware on your board
-* Launch Arduino Lab MicroPython IDE
+Interact with the MicroPython prompt
+------------------------------------
 
-Be sure you have the baord at hand. You can already connected to your computer, and then run the
-following commands in a terminal:
 
+
+Run your first script
+---------------------
+
+
+
+Upload a script to your device
+------------------------------
 
 

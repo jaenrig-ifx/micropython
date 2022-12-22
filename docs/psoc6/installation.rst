@@ -1,8 +1,8 @@
 
-MicroPython PSoC6™ installation
+MicroPython installation
 ===============================
 
-To support the MicroPython installation the ``mpy-psoc6`` utility script is provided for Windows and
+To support the MicroPython PSoC6™ port installation the ``mpy-psoc6`` utility script is provided for Windows and
 Linux.
 You can easily download from your OS terminal with the following command:
 
@@ -32,15 +32,12 @@ You can easily download from your OS terminal with the following command:
 Quick Start
 ------------
 
-If this your first time with MicroPython, the fastest way to get you up and running with micropython 
-
-         and run the script with the ``quick-start`` command:
+With the ``mpy-psoc6`` utility script donwloaded, the fastest way to get you up and running with
+micropython is to run the ``quick-start`` command of the script:
 
 .. tabs::
 
     .. group-tab:: Linux
-        
-
         
             .. code-block:: bash
 
@@ -48,20 +45,28 @@ If this your first time with MicroPython, the fastest way to get you up and runn
 
     .. group-tab:: Windows
 
-        Run the script with the ``quick-start`` command:
-
             .. code-block:: bash
                 
                 mpy-psoc6.cmd quick-start
 
-Device update
+This will seamlessly take care of the following:
+
+* Install all required software to install MicroPython
+* Deploy the latest version of MicroPython PSoC6 firmware on your board
+* Launch Arduino Lab MicroPython IDE
+
+This command is supporting the getting started tutorial for the first time. Once you get familiar
+with MicroPython and its environment, the ``device-setup`` command will be more appropiate to
+install MicroPython on PSoC6™ boards, and upgrade your device for newer 
+
+Device setup
 -------------
+
+Updating the device firmware
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Install a specific versions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Direct firmware flashing
-------------------------
 
 Getting the firmware
 ^^^^^^^^^^^^^^^^^^^^
@@ -77,7 +82,7 @@ All PSoC6™ firmware versions for each of the supported boards can be found the
     :width: 520px
 
 Other installation methods
-
+--------------------------
 
 In order to deploy the firmware in the embedded device, the easiest and quickest way is to use the
 `Cypress Programmer <https://softwaretools.infineon.com/tools/com.ifx.tb.tool.cypressprogrammer>`_.
