@@ -6,6 +6,7 @@ Getting started with MicroPython on the PSoC6™
 This tutorial will guide you to get started with running MicroPython on the PSoC6™ microcontrollers. 
 There are only a few step keeping you away from enjoying the python programming experience together
 with the possibilities of PSoC6™ microcontrollers.
+
 Let's get started!
 
 Requirements

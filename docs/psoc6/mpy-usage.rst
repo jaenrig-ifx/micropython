@@ -1,13 +1,14 @@
 .. _mpy_usage:
 
-How to work with MicroPython
-============================
+Working with MicroPython
+=========================
 
-If your board is setup with the MicroPython firmare there are several flavors and
-tools to work with micropython. In this section we introduce some of the ways you can program MicroPython.
+With MicroPython already installed in your board there are several flavors and
+tools to work with micropython (:ref:`_psoc6_mpy_install <Installing MicroPython>`). 
+In this section we introduce some of the ways you can work with MicroPython.
 
-Serial prompt
--------------
+Serial prompt (REPL Mode)
+-------------------------
 
 With MicroPython deployed on your PSoC6™ board, you can access the REPL mode using
 the USB-UART interface from the on-board debugger. 
@@ -56,7 +57,7 @@ Each of the line will be executed in the controller. Any output like print messa
 exceptions will be send through the serial connection to the host machine, which will display them
 in the serial terminal console. 
 
-In this case, the REPL mode is used, but the IDE or command line tool will take care of sending
+The REPL mode is used, but the IDE or command line tool will take care of sending
 each line of the script and process its output to show it in the terminal.
  
 On-target file system mode

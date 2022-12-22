@@ -9,7 +9,7 @@ Quick reference for the PSoC6™
 
 The CY8CPROTO-062-4343W PSoC6™ Board.
 
-Below is a quick reference for PSoC6-based boards.  If it is your first time
+Below is a quick reference for PSoC6-based boards. If it is your first time
 working with this board it may be useful to get an overview of the microcontroller:
 
 .. toctree::
