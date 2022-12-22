@@ -103,7 +103,7 @@ exit /b 0
     echo Downloading openocd...
     curl.exe -s -L https://github.com/Infineon/openocd/releases/download/release-v4.4.0/openocd-4.4.0.2134-windows.zip > openocd.zip
     echo Extracting openocd...
-    tar.exe -xf openocd.zip
+    powershell -command "Expand-Archive -Force 'openocd.zip' -DestinationPath '.'"
     set PATH=%PATH%;openocd\bin
 
 exit /b 0
@@ -179,7 +179,7 @@ exit /b 0
     curl.exe -s -L https://github.com/arduino/lab-micropython-editor/releases/download/0.5.0-alpha/Arduino.Lab.for.Micropython-win_x64.zip > arduino-for-micropython.zip
     echo Extracting Arduino Lab for Micropython...
     mkdir arduino-lab-mpy
-    tar.exe -xf arduino-for-micropython.zip -C arduino-lab-mpy
+	powershell -command "Expand-Archive -Force 'arduino-for-micropython.zip' -DestinationPath 'arduino-lab-mpy'"
     cd arduino-lab-mpy
     echo Launching Arduino Lab for Micropython...
     start "" "Arduino Lab for Micropython"
