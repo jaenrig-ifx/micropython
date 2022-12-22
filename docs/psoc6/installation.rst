@@ -30,6 +30,24 @@ You can easily download from your OS terminal with the following command:
                 curl.exe -s -L https://raw.githubusercontent.com/jaenrig-ifx/micropython/ports/psoc6/tools/psoc6/mpy-psoc6.cmd > mpy-psoc6.cmd
 
 
+Find all the available commands an options by running the script with the command help:
+
+.. tabs::
+
+    .. group-tab:: Linux
+
+        .. code-block:: bash
+
+            ./mpy-psoc6.sh help
+
+    .. group-tab:: Windows
+
+            .. code-block:: bash
+            
+                ./mpy-psoc6.sh help
+
+.. _Quick Start:
+
 Quick Start
 ------------
 
@@ -52,7 +70,7 @@ micropython is to run the ``quick-start`` command of the script:
 
 This will seamlessly take care of the following:
 
-* Install all required software to install MicroPython
+* Install all required software to work with MicroPython
 * Deploy the latest version of MicroPython PSoC6 firmware on your board
 * Launch Arduino Lab MicroPython IDE
 
@@ -62,6 +80,33 @@ install MicroPython on PSoC6™ boards, and upgrade your device for newer
 
 Device setup
 -------------
+
+In order to setup MicroPython in a PSoC6™ board, the ``device-setup`` command of the ``mpy-psoc6``
+can be executed. Follow the instructions to select the target PSoC6™ board, and deploy the latest
+MicropPython firmware version:
+
+.. tabs::
+
+    .. group-tab:: Linux
+        
+            .. code-block:: bash
+
+                ./mpy-psoc6.sh setup-device
+
+    .. group-tab:: Windows
+
+            .. code-block:: bash
+                
+                mpy-psoc6.cmd setup-device
+
+
+You can run any command any time you want to upgrade to the latest MicroPython firmware version.
+This command will take care of the following steps:
+
+* Download and install openocd, which is the software required to deploy a firmware file on PSoC6™ controllers
+* Download the latest ``.hex`` file for your select board
+* Deploy the firmware on your board
+* Remove all installed and donwloaded files
 
 Updating the device firmware
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

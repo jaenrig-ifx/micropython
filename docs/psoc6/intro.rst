@@ -26,8 +26,7 @@ corresponding board manual of your board.
 Install MicroPython
 -------------------
 
-In order to simply things, you can run the ``quick-start`` command of the mpy-psoc6 utility. In your
-machine terminal type the following commands. Follow the instructions on the terminal:
+Run the :ref:`Quick Start` command of the mpy-psoc6 utility. In your machine terminal type the following commands and follow the instructions:
 
 .. tabs::
 
