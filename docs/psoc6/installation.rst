@@ -1,6 +1,7 @@
+.. _psoc6_mpy_install:
 
-MicroPython installation
-===============================
+Installating MicroPython 
+========================
 
 To support the MicroPython PSoC6™ port installation the ``mpy-psoc6`` utility script is provided for Windows and
 Linux.
