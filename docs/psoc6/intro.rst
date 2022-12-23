@@ -60,7 +60,7 @@ In your computer terminal, type the following commands and follow the instructio
 
                 mpy-psoc6.cmd quick-start
 
-These will download and run the :ref:`quick-start <psoc6_quick_start>` command of the mpy-psoc6 utility and take
+These commands will download and run the :ref:`quick-start <psoc6_quick_start>` command of the mpy-psoc6 utility and take
 care of all the necessary installation steps.
 
 If everything went fine, your PSoC6™ board is now running MicroPython and Arduino IDE for
@@ -76,7 +76,7 @@ Select your serial port of your PSoC6™ board by clicking on the connect icon o
 Interact with the MicroPython prompt
 ------------------------------------
 
-As in python, you can use the prompt mode, simply start typing some python commands:
+As in python, you can use the prompt mode. Simply start typing some python commands:
 
 .. image:: img/mpy-ide-prompt.jpg
     :alt: Arduino IDE prompt
@@ -85,7 +85,8 @@ As in python, you can use the prompt mode, simply start typing some python comma
 Run your first script
 ---------------------
 
-Let's try now to run a MicroPython script. As a first example, you are turn on the board LED. 
+Let's try now to run a MicroPython script. As a first example, you will turn on the board LED. 
+
 Copy the following code in the editor and click on run.
 
 .. code-block:: python
@@ -100,7 +101,7 @@ Copy the following code in the editor and click on run.
     :alt: Arduino IDE script
     :width: 520px
 
-The red LED in the board should be now on!
+The red LED in the board should be now on :D
 
 Upload a script to your device
 ------------------------------
@@ -111,7 +112,6 @@ You are all set now to start programming with MicroPython!
 
 Learn more about MicroPython in the following sections:
 
-* `MicroPython language <psoc6_mpy_usage>`_.
-* `MicroPython libraries <https://github.com/jaenrig-ifx/micropython/issues>`_ . 
-* `Quick reference for PSoC6™ <psoc6_quickref>`_.
-* `Working with MicroPython <psoc6_mpy_usage>`_.
+* :ref:`MicroPython libraries <micropython_lib>`_ . 
+* :ref:`Quick reference for PSoC6™ <psoc6_quickref>`_.
+* :ref:`Working with MicroPython <psoc6_mpy_usage>`_.

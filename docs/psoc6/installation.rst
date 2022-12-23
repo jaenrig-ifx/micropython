@@ -112,7 +112,7 @@ Install a previous version
 
 If you want to setup the device with a previous firmware version, you can check the list of available release in the `GitHub release section <https://github.com/jaenrig-ifx/MicroPython/releases>`_. 
 
-The setup command can as well assist you with this process. In this case the board and the desired
+The ``device-setup`` command can as well assist you with this process. In this case the board and the desired
 version need to be passed as arguments.
 
 .. tabs::
