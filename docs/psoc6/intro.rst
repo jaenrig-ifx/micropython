@@ -112,6 +112,6 @@ You are all set now to start programming with MicroPython!
 
 Learn more about MicroPython in the following sections:
 
-* :ref:`MicroPython libraries <micropython_lib>`_ . 
-* :ref:`Quick reference for PSoC6™ <psoc6_quickref>`_.
-* :ref:`Working with MicroPython <psoc6_mpy_usage>`_.
+* :ref:`MicroPython libraries <micropython_lib>` . 
+* :ref:`Quick reference for PSoC6™ <psoc6_quickref>`.
+* :ref:`Working with MicroPython <psoc6_mpy_usage>`.
