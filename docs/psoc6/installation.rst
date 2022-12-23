@@ -68,16 +68,15 @@ micropython is to run the ``quick-start`` command of the script:
                 
                 mpy-psoc6.cmd quick-start
 
-This will seamlessly take care of the following:
+The command will take care of the following:
 
 * Install all required software to work with MicroPython
 * Deploy the latest version of MicroPython PSoC6 firmware on your board
 * Launch Arduino Lab MicroPython IDE
-* Remove all installation packages and software
 
 This command is supporting the getting started tutorial for the first time. Once you get familiar
 with MicroPython and its environment, the ``device-setup`` command will be more appropiate to
-install MicroPython on PSoC6™ boards, and upgrade your device for newer 
+install MicroPython on PSoC6™ boards, and upgrade your device with the lastest firmware. 
 
 Device setup
 -------------
@@ -106,19 +105,45 @@ This command will take care of the following steps:
 
 * Download and install openocd, which is the software required to deploy a firmware file on PSoC6™ controllers
 * Download the latest ``.hex`` file for your select board
-* Deploy the firmware on your board
-* Remove all installed and donwloaded files
+* Deploy the latest version of MicroPython firmware on your board
 
-Updating the device firmware
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Install a specific versions
+Install a previous version
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you want to setup the device with a previous firmware version, you can check the list of available release in the `GitHub release section <https://github.com/jaenrig-ifx/MicroPython/releases>`_. 
+
+The setup command can as well assist you with this process. In this case the board and the desired
+version need to be passed as arguments.
+
+.. tabs::
+
+    .. group-tab:: Linux
+        
+            .. code-block:: bash
+
+                ./mpy-psoc6.sh setup-device CY8CPROTO-062-4343W v0.1.1
+
+    .. group-tab:: Windows
+
+            .. code-block:: bash
+                
+                mpy-psoc6.cmd setup-device  CY8CPROTO-062-4343W v0.1.1
+
+.. warning::
+    
+    Be sure to provide the board name as shown in the ``device-setup`` command when run in interactive mode.
+    Equally, provide a valid tag existing in the release section with the format *v.x.y.z*. 
+    No fail safe mechanisms or error verifications are (yet) implemented on the ``mpy-psoc6`` utility, and the script will fail to retrieve the necessary firmware file.
+
+Direct binary flashing
+^^^^^^^^^^^^^^^^^^^^^^
+
+*To be completed. Placeholder.*
 
 Getting the firmware
 ^^^^^^^^^^^^^^^^^^^^
 
-The binary *.hex* file is available in the `GitHub release section <https://github.com/jaenrig-ifx/MicroPython/releases>`_. 
+The binary *.hex* files are available in the `GitHub release section <https://github.com/jaenrig-ifx/MicroPython/releases>`_. 
 All PSoC6™ firmware versions for each of the supported boards can be found there. 
 
 ..
@@ -128,15 +153,19 @@ All PSoC6™ firmware versions for each of the supported boards can be found the
 ..
     :width: 520px
 
+
+*To be completed. Placeholder.*
+
+
 Other installation methods
 --------------------------
 
 Cypress Programmer
 ^^^^^^^^^^^^^^^^^^
 
-In order to deploy the firmware in the embedded device, the easiest and quickest way is to use the
-`Cypress Programmer <https://softwaretools.infineon.com/tools/com.ifx.tb.tool.cypressprogrammer>`_.
-It allows to flash a binary in the PSoC6™ microcontrollers family in a few clicks from your Windows,
+Alternatively, you can use directly flash the firmware binary file with the `Cypress Programmer
+<https://softwaretools.infineon.com/tools/com.ifx.tb.tool.cypressprogrammer>`_ 
+It allows to program the PSoC6™ microcontrollers family in a few clicks from your Windows,
 Linux or Mac OS machine. 
 Follow the instructions on the provided link to download and install the tool.
 
@@ -152,13 +181,7 @@ For a detailed description on how to use the Cypress Programmer tool, please con
 Programmer User Guide
 <https://www.infineon.com/dgdl/Infineon-Infineon_Programmer_4.0_GUI_User_Guide-Software-v01_00-EN.pdf?fileId=8ac78c8c7e7124d1017ed9abca6e365c>`_.
 
-You are all set now to start programming with MicroPython!
 
-ModusToolbox™
-^^^^^^^^^^^^^
 
-.. note::
-    Alternatively, users familiar with the ModusToolbox™ toolchain and makefile system can also use the corresponding
-    tools for flashing the provided *.hex* file on the target PSoC6™ board. 
 
 

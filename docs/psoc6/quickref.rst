@@ -9,8 +9,8 @@ Quick reference for the PSoC6™
 
 The CY8CPROTO-062-4343W PSoC6™ Board.
 
-Below is a quick reference for PSoC6-based boards. If it is your first time
-working with this board it may be useful to get an overview of the microcontroller:
+Below is a quick reference for PSoC6™ boards. If it is your first time
+working with this port it may be useful to get an overview of the microcontroller:
 
 .. toctree::
    :maxdepth: 1
@@ -46,8 +46,12 @@ The :mod:`machine` module::
 Delay and timing
 ----------------
 
+*Feature unavailable. Placeholder. To be completed.*
+
 Timers
 ------
+
+*Feature unavailable. Placeholder. To be completed.*
 
 Pins and GPIO
 -------------

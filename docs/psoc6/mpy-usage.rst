@@ -1,4 +1,4 @@
-.. _mpy_usage:
+.. _psoc6_mpy_usage:
 
 Working with MicroPython
 =========================

@@ -27,7 +27,7 @@ corresponding board manual of your board.
 Install MicroPython
 ----------------------
 
-In your computer terminal type the following commands and follow the instructions:
+In your computer terminal, type the following commands and follow the instructions:
 
 .. tabs::
 
@@ -60,27 +60,58 @@ In your computer terminal type the following commands and follow the instruction
 
                 mpy-psoc6.cmd quick-start
 
-These will run the :ref:`psoc6_quick_start <quick-start>` command of the mpy-psoc6 utility and take
+These will download and run the :ref:`quick-start <psoc6_quick_start>` command of the mpy-psoc6 utility and take
 care of all the necessary installation steps.
 
 If everything went fine, your PSoC6™ board is now running MicroPython and Arduino IDE for
-Micropython is now started. If you run into any trouble, please let us know here :) 
+Micropython is now started. If you run into any trouble, please let us know `here <https://github.com/jaenrig-ifx/micropython/issues>`_ :) 
 
 Select your serial port of your PSoC6™ board by clicking on the connect icon on the menu bar:
 
+.. image:: img/mpy-ide-connect.jpg
+    :alt: Arduino IDE connect
+    :width: 520px
 
 
 Interact with the MicroPython prompt
 ------------------------------------
 
+As in python, you can use the prompt mode, simply start typing some python commands:
 
+.. image:: img/mpy-ide-prompt.jpg
+    :alt: Arduino IDE prompt
+    :width: 520px
 
 Run your first script
 ---------------------
 
+You can also write a script in the editor section, and click on run. 
 
+Let's try now to run a MicroPython script. As a first example, you are turn on the board LED. 
+Copy the following code in the editor and click on run.
+
+.. code-block:: python
+
+    from machine import Pin
+
+    p1 = Pin("P13_7")   # LED pin for CY8CPROT-062-4343W
+    p1.init(Pin.OUT)
+    p1.on()
+
+.. image:: img/mpy-ide-script.jpg
+    :alt: Arduino IDE script
+    :width: 520px
 
 Upload a script to your device
 ------------------------------
 
-*Feature unavailable. To be completed.*
+*Feature unavailable. Placeholder. To be completed.*
+
+You are all set now to start programming with MicroPython!
+
+Learn more about MicroPython in the following sections:
+
+* `MicroPython language <psoc6_mpy_usage>`_.
+* `MicroPython libraries <https://github.com/jaenrig-ifx/micropython/issues>`_ . 
+* `Working with MicroPython <psoc6_mpy_usage>`_.
+* `Quick reference for PSoC6™ <psoc6_quickref>`_.
