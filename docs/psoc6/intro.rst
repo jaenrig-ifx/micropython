@@ -85,8 +85,6 @@ As in python, you can use the prompt mode, simply start typing some python comma
 Run your first script
 ---------------------
 
-You can also write a script in the editor section, and click on run. 
-
 Let's try now to run a MicroPython script. As a first example, you are turn on the board LED. 
 Copy the following code in the editor and click on run.
 
@@ -102,6 +100,8 @@ Copy the following code in the editor and click on run.
     :alt: Arduino IDE script
     :width: 520px
 
+The red LED in the board should be now on!
+
 Upload a script to your device
 ------------------------------
 
@@ -113,5 +113,5 @@ Learn more about MicroPython in the following sections:
 
 * `MicroPython language <psoc6_mpy_usage>`_.
 * `MicroPython libraries <https://github.com/jaenrig-ifx/micropython/issues>`_ . 
-* `Working with MicroPython <psoc6_mpy_usage>`_.
 * `Quick reference for PSoC6™ <psoc6_quickref>`_.
+* `Working with MicroPython <psoc6_mpy_usage>`_.
