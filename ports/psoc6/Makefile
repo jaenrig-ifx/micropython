@@ -119,6 +119,7 @@ SRC_C = \
 	modules/psoc6/modpsoc6.c \
 	modules/psoc6/psoc6_fatfs.c \
 	modules/psoc6/psoc6_flash.c \
+	modules/psoc6/psoc6_qspi_flash.c \
 	\
 	modules/time/modutime.c \
 	\
@@ -161,7 +162,7 @@ $(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ)
 	$(info Linking $@ ...)
 	$(Q)$(LD) $(LDFLAGS) -o $@ $^ 
 	$(info Linking $@ done.)
-	$(Q)$(SIZE) $@
+	$(Q)$(SIZE) $@ -A
 	$(info )
 
 
