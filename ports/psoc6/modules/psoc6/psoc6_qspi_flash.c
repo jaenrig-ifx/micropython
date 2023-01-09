@@ -80,6 +80,13 @@ STATIC psoc6_qspi_flash_obj_t psoc6_qspi_flash_obj = {
 };
 
 
+// function to erase the entire flash 
+void cy_erase_entire_flash(void){
+    mp_printf(&mp_plat_print,"\nErasing entire flash... might take a while");
+    cy_serial_flash_qspi_erase(0, cy_serial_flash_qspi_get_size());
+    mp_printf(&mp_plat_print,"\nDone");
+}
+
 
 STATIC mp_obj_t psoc6_qspi_flash_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     mplogger_print("qspi flash constructor invoked\n");
@@ -87,7 +94,7 @@ STATIC mp_obj_t psoc6_qspi_flash_make_new(const mp_obj_type_t *type, size_t n_ar
     /* Initialize the QSPI block */
     cy_rslt_t result = cy_serial_flash_qspi_init(smifMemConfigs[MEM_SLOT_NUM], CYBSP_QSPI_D0, CYBSP_QSPI_D1,
         CYBSP_QSPI_D2, CYBSP_QSPI_D3, NC, NC, NC, NC, CYBSP_QSPI_SCK,
-        CYBSP_QSPI_SS, QSPI_BUS_FREQUENCY_HZ);
+        CYBSP_QSPI_SS, QSPI_BUS_FREQUENCY_HZ);    
 
     if (CY_RSLT_SUCCESS != result) {
         mplogger_print("Error code: %u\n", CY_RSLT_GET_CODE(result)); // see file cy_result.h to decode result values
