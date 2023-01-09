@@ -118,7 +118,7 @@
 // #define MICROPY_PY_ONEWIRE                      (1)
 #define MICROPY_VFS                             (1)
 #define MICROPY_VFS_LFS2                        (1)
-#define MICROPY_VFS_FAT                         (1)
+#define MICROPY_VFS_FAT                         (0)
 // #define MICROPY_SSL_MBEDTLS                     (1)
 #define MICROPY_SSL_MBEDTLS                     (0)
 // #define MICROPY_PY_LWIP_SOCK_RAW                (MICROPY_PY_LWIP)
@@ -134,6 +134,10 @@
 // // the flash sector in memory to support smaller block sizes.
 // #define MICROPY_FATFS_MAX_SS                    (FLASH_SECTOR_SIZE)
 // #endif
+
+// set to 1 to enable filesystem to be loaded on external qspi flash
+// if set to 0, filesystem is located in an allotted area of internal flash of PSoC6
+#define MICROPY_ENABLE_EXT_QSPI_FLASH               (1)
 
 #ifndef MICROPY_BOARD_ENTER_BOOTLOADER
 #define MICROPY_BOARD_ENTER_BOOTLOADER(nargs, args)
@@ -308,7 +312,7 @@ typedef intptr_t mp_off_t;
 // #endif
 
 
-#define MICROPY_LOGGER_DEBUG              (0)
+#define MICROPY_LOGGER_DEBUG              (1)
 #define MICROPY_MODULE_FROZEN_MPY         (1)
 
 

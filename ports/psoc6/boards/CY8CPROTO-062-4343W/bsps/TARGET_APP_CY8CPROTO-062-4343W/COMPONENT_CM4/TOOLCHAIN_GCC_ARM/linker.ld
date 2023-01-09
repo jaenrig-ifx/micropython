@@ -86,7 +86,7 @@ MEMORY
     sflash_public_key (rx)    : ORIGIN = 0x16005A00, LENGTH = 0xC00        /* Supervisory flash: Public Key */
     sflash_toc_2      (rx)    : ORIGIN = 0x16007C00, LENGTH = 0x200        /* Supervisory flash: Table of Content # 2 */
     sflash_rtoc_2     (rx)    : ORIGIN = 0x16007E00, LENGTH = 0x200        /* Supervisory flash: Table of Content # 2 Copy */
-    xip               (rx)    : ORIGIN = 0x18000000, LENGTH = 0x20000000    /* 512 MB */
+    xip               (rx)    : ORIGIN = 0x18000000, LENGTH = 0x4000000    /* 512 Mb / 64 MB */
     efuse             (r)     : ORIGIN = 0x90700000, LENGTH = 0x100000     /*   1 MB */
 }
 
