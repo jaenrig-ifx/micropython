@@ -51,7 +51,8 @@
 // See pg. 22 of above datasheet for address maps.
 #define BLOCK_SIZE_BYTES  (FLASH_SECTOR_SIZE) // TODO: verify, since initial 32 sectors are only 4 KB in size
 // TODO: edit cfg register contents to make all sectors uniform, see pg 25 of https://www.infineon.com/dgdl/Infineon-S25HS256T_S25HS512T_S25HS01GT_S25HL256T_S25HL512T_S25HL01GT_256-Mb_(32-MB)_512-Mb_(64-MB)_1-Gb_(128-MB)_HS-T_(1.8-V)_HL-T_(3.0-V)_Semper_Flash_with_Quad_SPI-DataSheet-v02_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0ee674b86ee3&da=t
-#define FLASH_PAGE_SIZE (0x100) // qspi flash page size is 256 B (Factory default), see pg. 80 of https://www.infineon.com/dgdl/Infineon-S25HS256T_S25HS512T_S25HS01GT_S25HL256T_S25HL512T_S25HL01GT_256-Mb_(32-MB)_512-Mb_(64-MB)_1-Gb_(128-MB)_HS-T_(1.8-V)_HL-T_(3.0-V)_Semper_Flash_with_Quad_SPI-DataSheet-v02_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0ee674b86ee3&da=t
+#define FLASH_PAGE_SIZE (0x200) // qspi flash page size is 256 B (Factory default), see pg. 80 of https://www.infineon.com/dgdl/Infineon-S25HS256T_S25HS512T_S25HS01GT_S25HL256T_S25HL512T_S25HL01GT_256-Mb_(32-MB)_512-Mb_(64-MB)_1-Gb_(128-MB)_HS-T_(1.8-V)_HL-T_(3.0-V)_Semper_Flash_with_Quad_SPI-DataSheet-v02_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0ee674b86ee3&da=t
+// but config says it is 512 B
 
 #ifndef MICROPY_HW_FLASH_STORAGE_BYTES
 #define MICROPY_HW_FLASH_STORAGE_BYTES (FLASH_SIZE)
@@ -66,6 +67,8 @@ static_assert(MICROPY_HW_FLASH_STORAGE_BYTES % 4096 == 0, "Flash storage size mu
 #define MEM_SLOT_NUM            (0u)      /* Slot number of the memory to use - For CYPROTO 062 4343W there is one slave slot for QSPI NOR FLASH CHIP*/
 #define QSPI_BUS_FREQUENCY_HZ   (50000000lu) /* Running freq of qspi bus = 50 MHz */
 
+// flag to set of spi flash is init'd
+uint8_t qspi_flash_init = 0;
 
 typedef struct _psoc6_qspi_flash_obj_t {
     mp_obj_base_t base;
@@ -80,22 +83,27 @@ STATIC psoc6_qspi_flash_obj_t psoc6_qspi_flash_obj = {
 };
 
 
-// function to erase the entire flash 
-void cy_erase_entire_flash(void){
-    mp_printf(&mp_plat_print,"\nErasing entire flash... might take a while");
+// function to erase the entire flash
+void cy_erase_entire_flash(void) {
+    mp_printf(&mp_plat_print, "\nErasing entire flash... might take a while");
     cy_serial_flash_qspi_erase(0, cy_serial_flash_qspi_get_size());
-    mp_printf(&mp_plat_print,"\nDone");
+    mp_printf(&mp_plat_print, "\nDone");
 }
 
 
 STATIC mp_obj_t psoc6_qspi_flash_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     mplogger_print("qspi flash constructor invoked\n");
 
-    /* Initialize the QSPI block */
-    cy_rslt_t result = cy_serial_flash_qspi_init(smifMemConfigs[MEM_SLOT_NUM], CYBSP_QSPI_D0, CYBSP_QSPI_D1,
-        CYBSP_QSPI_D2, CYBSP_QSPI_D3, NC, NC, NC, NC, CYBSP_QSPI_SCK,
-        CYBSP_QSPI_SS, QSPI_BUS_FREQUENCY_HZ);    
-
+    // variable initialized to capture status
+    cy_rslt_t result = CY_RSLT_SUCCESS;
+    // init only if not init before
+    if (!qspi_flash_init) {
+        /* Initialize the QSPI block */
+        result = cy_serial_flash_qspi_init(smifMemConfigs[MEM_SLOT_NUM], CYBSP_QSPI_D0, CYBSP_QSPI_D1,
+            CYBSP_QSPI_D2, CYBSP_QSPI_D3, NC, NC, NC, NC, CYBSP_QSPI_SCK,
+            CYBSP_QSPI_SS, QSPI_BUS_FREQUENCY_HZ);
+        qspi_flash_init = 1;
+    }
     if (CY_RSLT_SUCCESS != result) {
         mplogger_print("Error code: %u\n", CY_RSLT_GET_CODE(result)); // see file cy_result.h to decode result values
         mp_raise_msg(&mp_type_Exception, MP_ERROR_TEXT("QSPI Flash INIT failed !\n"));
@@ -233,8 +241,17 @@ STATIC mp_obj_t psoc6_qspi_flash_ioctl(mp_obj_t self_in, mp_obj_t cmd_in, mp_obj
 
     switch (cmd) {
         case MP_BLOCKDEV_IOCTL_INIT:
+            if (!qspi_flash_init) {
+                /* Initialize the QSPI block */
+                cy_serial_flash_qspi_init(smifMemConfigs[MEM_SLOT_NUM], CYBSP_QSPI_D0, CYBSP_QSPI_D1,
+                    CYBSP_QSPI_D2, CYBSP_QSPI_D3, NC, NC, NC, NC, CYBSP_QSPI_SCK,
+                    CYBSP_QSPI_SS, QSPI_BUS_FREQUENCY_HZ);
+            }
             return MP_OBJ_NEW_SMALL_INT(0);
         case MP_BLOCKDEV_IOCTL_DEINIT:
+            if (qspi_flash_init) {
+                cy_serial_flash_qspi_deinit();
+            }
             return MP_OBJ_NEW_SMALL_INT(0);
         case MP_BLOCKDEV_IOCTL_SYNC:
             return MP_OBJ_NEW_SMALL_INT(0);
