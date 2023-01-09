@@ -312,7 +312,7 @@ typedef intptr_t mp_off_t;
 // #endif
 
 
-#define MICROPY_LOGGER_DEBUG              (1)
+#define MICROPY_LOGGER_DEBUG              (0)
 #define MICROPY_MODULE_FROZEN_MPY         (1)
 
 

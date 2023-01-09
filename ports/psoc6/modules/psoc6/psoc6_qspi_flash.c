@@ -47,7 +47,8 @@
 #define FLASH_SIZE        (0x4000000)  // qspi flash is 512 Mb/ 64 MB in size
 
 #define FLASH_SECTOR_SIZE (0x40000) // 256 KB sector size uniform (depends on cfg register). See Table 46 of https://www.infineon.com/dgdl/Infineon-S25HS256T_S25HS512T_S25HS01GT_S25HL256T_S25HL512T_S25HL01GT_256-Mb_(32-MB)_512-Mb_(64-MB)_1-Gb_(128-MB)_HS-T_(1.8-V)_HL-T_(3.0-V)_Semper_Flash_with_Quad_SPI-DataSheet-v02_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0ee674b86ee3&da=t
-// However, tests reveal that all sectors are in fact 256 KB deep. The factory
+// However, tests reveal that all sectors are in fact 256 KB deep. The factory settings must have been overwritten at some point.
+// See pg. 22 of above datasheet for address maps.
 #define BLOCK_SIZE_BYTES  (FLASH_SECTOR_SIZE) // TODO: verify, since initial 32 sectors are only 4 KB in size
 // TODO: edit cfg register contents to make all sectors uniform, see pg 25 of https://www.infineon.com/dgdl/Infineon-S25HS256T_S25HS512T_S25HS01GT_S25HL256T_S25HL512T_S25HL01GT_256-Mb_(32-MB)_512-Mb_(64-MB)_1-Gb_(128-MB)_HS-T_(1.8-V)_HL-T_(3.0-V)_Semper_Flash_with_Quad_SPI-DataSheet-v02_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0ee674b86ee3&da=t
 #define FLASH_PAGE_SIZE (0x100) // qspi flash page size is 256 B (Factory default), see pg. 80 of https://www.infineon.com/dgdl/Infineon-S25HS256T_S25HS512T_S25HS01GT_S25HL256T_S25HL512T_S25HL01GT_256-Mb_(32-MB)_512-Mb_(64-MB)_1-Gb_(128-MB)_HS-T_(1.8-V)_HL-T_(3.0-V)_Semper_Flash_with_Quad_SPI-DataSheet-v02_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0ee674b86ee3&da=t
