@@ -1,32 +1,25 @@
 // std includes
 #include "stdio.h"
 
-
 // micropython includes
 #include "mpconfigport.h"
 #include "mphalport.h"
 #include "shared/timeutils/timeutils.h"
 
-
 // MTB includes
 #include "cyhal.h"
 #include "cy_retarget_io.h"
 
-
-extern cyhal_rtc_t psoc6_rtc;
-
+extern cyhal_rtc_t   psoc6_rtc;
+extern cyhal_timer_t psoc6_timer;
 
 void mp_hal_delay_ms(mp_uint_t ms) {
-    // mp_raise_NotImplementedError(MP_ERROR_TEXT("mp_hal_delay_ms not implemented !\n"));
-    cyhal_system_delay_ms(1);
+    cyhal_system_delay_ms(ms);
 }
-
 
 void mp_hal_delay_us(mp_uint_t us) {
-    // mp_raise_NotImplementedError(MP_ERROR_TEXT("mp_hal_delay_us not implemented !"));
-    cyhal_system_delay_us(1);
+    cyhal_system_delay_us(us);
 }
-
 
 uint64_t mp_hal_time_ns(void) {
     struct tm current_date_time = {0};
@@ -41,19 +34,21 @@ uint64_t mp_hal_time_ns(void) {
     return s * 1000000000ULL;
 }
 
-
 mp_uint_t mp_hal_ticks_ms(void) {
-//     mp_raise_NotImplementedError(MP_ERROR_TEXT("mp_hal_ticks_ms not implemented !"));
-    return 0UL;
-}
+    uint64_t val = cyhal_timer_read(&psoc6_timer);
+    //mp_printf(&mp_plat_print, "\nXTick val: %d", val);
+    //mp_printf("Tick value: %d\n", val);
 
+    return val/20; //cyhal_timer_read(&psoc6_timer);
+}
 
 mp_uint_t mp_hal_ticks_us(void) {
-//     mp_raise_NotImplementedError(MP_ERROR_TEXT("mp_hal_ticks_us not implemented !"));
-    return 0UL;
-//    return time_us_32();
+    return cyhal_timer_read(&psoc6_timer)*1000;
 }
 
+void mp_hal_delay_us_fast(mp_uint_t us){
+    mp_hal_ticks_us();
+}
 
 uintptr_t mp_hal_stdio_poll(uintptr_t poll_flags) {
     mp_raise_NotImplementedError(MP_ERROR_TEXT("mp_hal_stdio_poll not implemented !"));
