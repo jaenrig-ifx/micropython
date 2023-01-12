@@ -47,7 +47,9 @@
 
 #ifndef MICROPY_CONFIG_ROM_LEVEL
 // #define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_CORE_FEATURES)
-#define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_EXTRA_FEATURES)
+// #define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_EXTRA_FEATURES)
+#define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_FULL_FEATURES)
+// #define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_EVERYTHING)
 #endif
 
 // Memory allocation policies
@@ -73,7 +75,8 @@
 #define MICROPY_ENABLE_GC                       (1)
 #define MICROPY_ENABLE_EMERGENCY_EXCEPTION_BUF  (1)
 #define MICROPY_LONGINT_IMPL                    (MICROPY_LONGINT_IMPL_MPZ)
-#define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_FLOAT)
+// #define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_FLOAT)
+#define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_DOUBLE)
 #define MICROPY_SCHEDULER_DEPTH                 (8)
 #define MICROPY_SCHEDULER_STATIC_NODES          (1)
 
@@ -96,6 +99,9 @@
 #define MICROPY_PY_UOS_UNAME                    (1)
 // #define MICROPY_PY_UOS_URANDOM                  (1)
 #define MICROPY_PY_UOS_URANDOM                  (0)
+#define MICROPY_PY_UOS_GETENV_PUTENV_UNSETENV   (1)
+#define MICROPY_PY_UOS_SYSTEM                   (1)
+
 #define MICROPY_PY_URE_MATCH_GROUPS             (1)
 #define MICROPY_PY_URE_MATCH_SPAN_START_END     (1)
 // #define MICROPY_PY_UCRYPTOLIB                   (1)
@@ -109,8 +115,8 @@
 // #define MICROPY_PY_MACHINE_PWM                  (1)
 // #define MICROPY_PY_MACHINE_PWM_DUTY_U16_NS      (1)
 // #define MICROPY_PY_MACHINE_PWM_INCLUDEFILE      "ports/rp2/machine_pwm.c"
-// #define MICROPY_PY_MACHINE_I2C                  (1)
-// #define MICROPY_PY_MACHINE_SOFTI2C              (1)
+#define MICROPY_PY_MACHINE_I2C                  (1)
+#define MICROPY_PY_MACHINE_SOFTI2C              (1)
 // #define MICROPY_PY_MACHINE_SPI                  (1)
 // #define MICROPY_PY_MACHINE_SPI_MSB              (SPI_MSB_FIRST)
 // #define MICROPY_PY_MACHINE_SPI_LSB              (SPI_LSB_FIRST)

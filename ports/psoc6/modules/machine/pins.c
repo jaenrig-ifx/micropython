@@ -6,6 +6,7 @@
 // Function definitions
 int pin_find(mp_obj_t pin, const machine_pin_obj_t machine_pin_obj[], int table_size) {
     int wanted_pin = -1;
+
     if (mp_obj_is_small_int(pin)) {
         // Pin defined by the index of pin table
         wanted_pin = mp_obj_get_int(pin);
@@ -13,15 +14,18 @@ int pin_find(mp_obj_t pin, const machine_pin_obj_t machine_pin_obj[], int table_
         // Search by name
         size_t slen;
         const char *s = mp_obj_str_get_data(pin, &slen);
-        for (wanted_pin = 0; wanted_pin < table_size; wanted_pin++) {
-            if (slen == strlen(machine_pin_obj[wanted_pin].pin_name) &&
-                strncmp(s, machine_pin_obj[wanted_pin].pin_name, slen) == 0) {
+
+        for (int i = 0; i < table_size; ++i) {
+            if (slen == strlen(machine_pin_obj[i].pin_name) && strncmp(s, machine_pin_obj[i].pin_name, slen) == 0) {
+                wanted_pin = machine_pin_obj[i].pin_addr;
                 break;
             }
         }
     }
+
     return wanted_pin;
 }
+
 
 // Pin object instantiations on the basis of selected board (chip package)
 // Generated manually w.r.t cyhal_gpio_psoc6_02_124_bga_t enum for the package present in the CYPROTO-062-4343 target

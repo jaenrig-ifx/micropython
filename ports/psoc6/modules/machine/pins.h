@@ -1,3 +1,7 @@
+#ifndef MICROPY_INCLUDED_PSOC6_PINS_H
+#define MICROPY_INCLUDED_PSOC6_PINS_H
+
+
 // port-specific includes
 #include "modmachine.h"
 
@@ -139,3 +143,6 @@ and thereby capture the obj count. It cannot be declared without a defined size,
 since there are sizeof() and other functions in machine_pin which act on this array
 and need a deterministic size of the array to compile. */
 extern const machine_pin_obj_t machine_pin_obj[102];
+
+
+#endif // MICROPY_INCLUDED_PSOC6_PINS_H

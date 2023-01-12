@@ -53,8 +53,11 @@ LD               = arm-none-eabi-gcc
 CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingle-precision-constant -Wdouble-promotion -Wfloat-conversion -UMICROPY_USE_INTERNAL_PRINTF
 
 
-# used for HelloWorld MTB
-CFLAGS  = $(INC) -Wall -Werror $(CFLAGS_CORTEX_M4) $(COPT) -std=c11
+# c11 : provides "static_assert" (not available in c99) 
+# -D_XOPEN_SOURCE=700 : makes sure the setenv/unsetenv headers are included
+#CFLAGS  = $(INC) -Wall $(CFLAGS_CORTEX_M4) $(COPT) -std=c11 -D_XOPEN_SOURCE=700
+CFLAGS  = $(INC) -Wall -Werror $(CFLAGS_CORTEX_M4) $(COPT) -std=c11 -D_XOPEN_SOURCE=700 -Wno-error=double-promotion 
+
 #CFLAGS  = $(INC) -Wall -Werror -std=c99 $(CFLAGS_CORTEX_M4) $(COPT)
 LDFLAGS = -Wl,--cref -Wl,--gc-sections
 
@@ -106,12 +109,14 @@ SRC_C = \
 	help.c \
 	mphalport.c \
 	\
-    drivers/machine/psoc6_system.c  \
     drivers/machine/psoc6_gpio.c \
+    drivers/machine/psoc6_i2c.c \
+    drivers/machine/psoc6_system.c  \
 	\
 	modules/gc/modgc.c \
 	\
 	modules/machine/modmachine.c \
+	modules/machine/machine_i2c.c \
 	modules/machine/machine_pin.c \
 	modules/machine/pins.c \
 	modules/machine/rtc.c \
@@ -133,6 +138,7 @@ SRC_CXX   =
 
 SRC_QSTR += $(MPY_SRC_C) $(SRC_USERMOD) $(SRC_EXTMOD_C)
 SRC_QSTR += modules/machine/modmachine.c \
+            modules/machine/machine_i2c.c \
             modules/machine/machine_pin.c \
 			modules/machine/rtc.c \
             \
