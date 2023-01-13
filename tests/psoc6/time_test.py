@@ -1,12 +1,13 @@
-'''try:
+"""try:
     import utime
 
     utime.sleep_ms, utime.sleep_us, utime.ticks_diff, utime.ticks_ms, utime.ticks_us, utime.ticks_cpu
 except (ImportError, AttributeError):
     print("SKIP")
     raise SystemExit
-'''
+"""
 import utime
+
 time.sleep_ms(1)
 time.sleep_us(1)
 

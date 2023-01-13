@@ -10,7 +10,7 @@
 #include "cyhal.h"
 #include "cy_retarget_io.h"
 
-extern cyhal_rtc_t   psoc6_rtc;
+extern cyhal_rtc_t psoc6_rtc;
 extern cyhal_timer_t psoc6_timer;
 
 void mp_hal_delay_ms(mp_uint_t ms) {
@@ -36,17 +36,17 @@ uint64_t mp_hal_time_ns(void) {
 
 mp_uint_t mp_hal_ticks_ms(void) {
     uint64_t val = cyhal_timer_read(&psoc6_timer);
-    //mp_printf(&mp_plat_print, "\nXTick val: %d", val);
-    //mp_printf("Tick value: %d\n", val);
+    // mp_printf(&mp_plat_print, "\nXTick val: %d", val);
+    // mp_printf("Tick value: %d\n", val);
 
-    return val/10; //cyhal_timer_read(&psoc6_timer);
+    return val / 10; // cyhal_timer_read(&psoc6_timer);
 }
 
 mp_uint_t mp_hal_ticks_us(void) {
-    return cyhal_timer_read(&psoc6_timer)*1000;
+    return cyhal_timer_read(&psoc6_timer) * 1000;
 }
 
-void mp_hal_delay_us_fast(mp_uint_t us){
+void mp_hal_delay_us_fast(mp_uint_t us) {
     mp_hal_ticks_us();
 }
 

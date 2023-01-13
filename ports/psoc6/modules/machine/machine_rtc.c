@@ -86,10 +86,9 @@ STATIC mp_obj_t machine_rtc_make_new(const mp_obj_type_t *type, size_t n_args, s
     return (mp_obj_t)&machine_rtc_obj;
 }
 
-// Helper function to set/get datetime 
+// Helper function to set/get datetime
 STATIC mp_obj_t machine_rtc_datetime_helper(mp_uint_t n_args, const mp_obj_t *args) {
-    if (n_args == 1) 
-    {
+    if (n_args == 1) {
         struct tm current_date_time = {0};
         cy_rslt_t result = cyhal_rtc_read(&psoc6_rtc, &current_date_time);
         if (CY_RSLT_SUCCESS != result) {
@@ -107,9 +106,7 @@ STATIC mp_obj_t machine_rtc_datetime_helper(mp_uint_t n_args, const mp_obj_t *ar
             mp_obj_new_int(0)
         };
         return mp_obj_new_tuple(8, tuple);
-    } 
-    else 
-    {
+    } else {
         mp_obj_t *items;
 
         mp_obj_get_array_fixed_n(args[1], 8, &items);
@@ -124,7 +121,7 @@ STATIC mp_obj_t machine_rtc_datetime_helper(mp_uint_t n_args, const mp_obj_t *ar
             .tm_min = mp_obj_get_int(items[5]),
             .tm_sec = mp_obj_get_int(items[6]),
         };
-        
+
         cy_rslt_t result = cyhal_rtc_write(&psoc6_rtc, &current_date_time);
 
         if (CY_RSLT_SUCCESS != result) {
@@ -156,19 +153,18 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_2(machine_rtc_init_obj, machine_rtc_init);
 // RTC.deinit()
 STATIC mp_obj_t machine_rtc_deinit(mp_obj_t self_in) {
     /* Resets RTC to 1st Jan' 2015 as mentioned in MPY guide*/
-    struct tm reset_date_time = { 
-        .tm_year  = RTC_INIT_YEAR - TM_YEAR_BASE , 
-        .tm_mon   = RTC_INIT_MONTH - 1, 
-        .tm_mday  = RTC_INIT_DATE,
-        .tm_wday  = RTC_INIT_WEEKDAY,
-        .tm_hour  = RTC_INIT_HOUR,
-        .tm_min   = RTC_INIT_MINUTE,
-        .tm_sec   = RTC_INIT_SECOND,
+    struct tm reset_date_time = {
+        .tm_year = RTC_INIT_YEAR - TM_YEAR_BASE,
+        .tm_mon = RTC_INIT_MONTH - 1,
+        .tm_mday = RTC_INIT_DATE,
+        .tm_wday = RTC_INIT_WEEKDAY,
+        .tm_hour = RTC_INIT_HOUR,
+        .tm_min = RTC_INIT_MINUTE,
+        .tm_sec = RTC_INIT_SECOND,
         .tm_isdst = RTC_INIT_DST
-        };
+    };
     cy_rslt_t result = cyhal_rtc_write(&psoc6_rtc, &reset_date_time);
-    if (CY_RSLT_SUCCESS != result) 
-    {
+    if (CY_RSLT_SUCCESS != result) {
         mp_raise_ValueError(MP_ERROR_TEXT("Deinit failed!"));
     }
     return mp_const_none;
