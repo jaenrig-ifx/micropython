@@ -39,7 +39,7 @@ mp_uint_t mp_hal_ticks_ms(void) {
     //mp_printf(&mp_plat_print, "\nXTick val: %d", val);
     //mp_printf("Tick value: %d\n", val);
 
-    return val/20; //cyhal_timer_read(&psoc6_timer);
+    return val/10; //cyhal_timer_read(&psoc6_timer);
 }
 
 mp_uint_t mp_hal_ticks_us(void) {

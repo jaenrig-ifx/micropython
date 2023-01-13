@@ -46,7 +46,7 @@ void time_init(void) {
     const cyhal_timer_cfg_t timer_cfg =
     {
         .compare_value = 0,                 /* Timer compare value, not used */
-        .period = 20000,//20000,            /* Timer period set to a large enough value
+        .period = 1500000,//20000,          /* Timer period set to a large enough value
                                             /* compared to event being measured */
         .direction = CYHAL_TIMER_DIR_UP,    /* Timer counts up */
         .is_compare = false,                /* Don't use compare mode */
@@ -59,7 +59,7 @@ void time_init(void) {
     /* Apply timer configuration such as period, count direction, run mode, etc. */
     cyhal_timer_configure(&psoc6_timer, &timer_cfg);
     /* Set the frequency of timer to 10000 counts in a second or 10000 Hz */
-    cyhal_timer_set_frequency(&psoc6_timer,2000);
+    cyhal_timer_set_frequency(&psoc6_timer,1500);
     /* Start the timer with the configured settings */
     cyhal_timer_start(&psoc6_timer);
 }

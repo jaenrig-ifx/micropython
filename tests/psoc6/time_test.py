@@ -6,7 +6,7 @@ except (ImportError, AttributeError):
     print("SKIP")
     raise SystemExit
 '''
-import time
+import utime
 time.sleep_ms(1)
 time.sleep_us(1)
 
