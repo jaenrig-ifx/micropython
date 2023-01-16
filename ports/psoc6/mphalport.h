@@ -15,7 +15,7 @@
 // port-specific includes
 
 
-#define MP_HAL_PIN_FMT   "%s"
+#define MP_HAL_PIN_FMT   "%u"
 #define mp_hal_pin_obj_t uint
 
 

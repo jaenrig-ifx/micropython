@@ -92,17 +92,15 @@ mp_obj_t machine_i2c_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
         self->sda = MICROPY_HW_I2C_SDA;
     }
 
-    // initialize I2C Peripheral
-
     self->freq = args[ARG_freq].u_int;
 
-    i2c_init(self); // self->scl, self->sda, self->freq);
+    // initialize I2C Peripheral
+    i2c_init(self);
 
     return MP_OBJ_FROM_PTR(self);
 }
 
 
-// TODO: currently only supports 1 buffer !
 STATIC int machine_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t len, uint8_t *buf, unsigned int flags) {
     machine_i2c_obj_t *self = MP_OBJ_TO_PTR(self_in);
     cy_rslt_t result = CY_RSLT_SUCCESS;
@@ -113,107 +111,23 @@ STATIC int machine_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t le
         result = cyhal_i2c_master_read(self->i2c_obj, addr, buf, len, 0, send_stop);
 
         if (result != CY_RSLT_SUCCESS) {
-            // Will be CY_RSLT_TYPE_INFO, CY_RSLT_TYPE_WARNING, CY_RSLT_TYPE_ERROR, or CY_RSLT_TYPE_FATAL
-            uint8_t type = CY_RSLT_GET_TYPE(result);
-
-// See the "Modules" section for possible values
-            uint16_t module_id = CY_RSLT_GET_MODULE(result);
-
-// Specific error codes are defined by each module
-            uint16_t error_code = CY_RSLT_GET_CODE(result);
-
-            printf("type=%d, module=%d, code=%d\n", type, module_id, error_code);
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_read failed with return code %x !"), result);
-            // mp_raise_ValueError(MP_ERROR_TEXT("cyhal_i2c_master_read failed !"));
         }
     } else {
-        result = cyhal_i2c_master_write(self->i2c_obj, addr, buf, len, 0, send_stop);
+        if (buf == NULL) {
+            uint8_t buf[1] = { 0x00 };
+            result = cyhal_i2c_master_write(self->i2c_obj, addr, buf, len, 0, send_stop);
+        } else {
+            result = cyhal_i2c_master_write(self->i2c_obj, addr, buf, len, 0, send_stop);
 
-        if (result != CY_RSLT_SUCCESS) {
-            // Will be CY_RSLT_TYPE_INFO, CY_RSLT_TYPE_WARNING, CY_RSLT_TYPE_ERROR, or CY_RSLT_TYPE_FATAL
-            uint8_t type = CY_RSLT_GET_TYPE(result);
-
-// See the "Modules" section for possible values
-            uint16_t module_id = CY_RSLT_GET_MODULE(result);
-
-// Specific error codes are defined by each module
-            uint16_t error_code = CY_RSLT_GET_CODE(result);
-
-            printf("type=%d, module=%d, code=%d\n", type, module_id, error_code);
-            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code %x !"), result);
-            // mp_raise_ValueError(MP_ERROR_TEXT("cyhal_i2c_master_write failed !"));
+            if (result != CY_RSLT_SUCCESS) {
+                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code %x !"), result);
+            }
         }
     }
 
     return result;
 }
-
-/*
-int machine_hard_i2c_transfer_single(mp_obj_base_t *self_in, uint16_t addr, size_t len, uint8_t *buf, unsigned int flags) {
-    machine_hard_i2c_obj_t *self = (machine_hard_i2c_obj_t *)self_in;
-
-    nrfx_twi_enable(&self->p_twi);
-
-    nrfx_err_t err_code;
-    int transfer_ret = 0;
-    if (flags & MP_MACHINE_I2C_FLAG_READ) {
-        nrfx_twi_xfer_desc_t desc = NRFX_TWI_XFER_DESC_RX(addr, buf, len);
-        err_code = nrfx_twi_xfer(&self->p_twi, &desc, 0);
-    } else {
-        nrfx_twi_xfer_desc_t desc = NRFX_TWI_XFER_DESC_TX(addr, buf, len);
-        err_code = nrfx_twi_xfer(&self->p_twi, &desc, (flags & MP_MACHINE_I2C_FLAG_STOP) == 0);
-        transfer_ret = len;
-    }
-
-    if (err_code != NRFX_SUCCESS) {
-        if (err_code == NRFX_ERROR_DRV_TWI_ERR_ANACK) {
-            return -MP_ENODEV;
-        }
-        else if (err_code == NRFX_ERROR_DRV_TWI_ERR_DNACK) {
-            return -MP_EIO;
-        }
-        return -MP_ETIMEDOUT;
-    }
-
-    nrfx_twi_disable(&self->p_twi);
-
-    return transfer_ret;
-}
-
-
-
-int machine_hard_i2c_transfer_single(mp_obj_base_t *self_in, uint16_t addr, size_t len, uint8_t *buf, unsigned int flags) {
-    machine_hard_i2c_obj_t *self = (machine_hard_i2c_obj_t *)self_in;
-
-    nrfx_twi_enable(&self->p_twi);
-
-    nrfx_err_t err_code;
-    int transfer_ret = 0;
-    if (flags & MP_MACHINE_I2C_FLAG_READ) {
-        nrfx_twi_xfer_desc_t desc = NRFX_TWI_XFER_DESC_RX(addr, buf, len);
-        err_code = nrfx_twi_xfer(&self->p_twi, &desc, 0);
-    } else {
-        nrfx_twi_xfer_desc_t desc = NRFX_TWI_XFER_DESC_TX(addr, buf, len);
-        err_code = nrfx_twi_xfer(&self->p_twi, &desc, (flags & MP_MACHINE_I2C_FLAG_STOP) == 0);
-        transfer_ret = len;
-    }
-
-    if (err_code != NRFX_SUCCESS) {
-        if (err_code == NRFX_ERROR_DRV_TWI_ERR_ANACK) {
-            return -MP_ENODEV;
-        }
-        else if (err_code == NRFX_ERROR_DRV_TWI_ERR_DNACK) {
-            return -MP_EIO;
-        }
-        return -MP_ETIMEDOUT;
-    }
-
-    nrfx_twi_disable(&self->p_twi);
-
-    return transfer_ret;
-}
-
-*/
 
 
 STATIC const mp_machine_i2c_p_t machine_i2c_p = {
