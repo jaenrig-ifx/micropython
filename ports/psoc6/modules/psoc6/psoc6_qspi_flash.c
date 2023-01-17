@@ -218,8 +218,8 @@ STATIC mp_obj_t psoc6_qspi_flash_writeblocks(size_t n_args, const mp_obj_t *args
     uint32_t numPages = bufinfo.len / FLASH_PAGE_SIZE;
 
     for (uint32_t i = 0; i <= numPages; ++i) {
-        mplogger_print("Address in hex:%04X\n", self->flash_base + offset + i * FLASH_SECTOR_SIZE);
-        cy_rslt_t result = cy_serial_flash_qspi_write(self->flash_base + offset + i * FLASH_SECTOR_SIZE, bufinfo.len, bufinfo.buf + i * FLASH_SECTOR_SIZE);  // TODO: verify this
+        mplogger_print("Address in hex:%04X\n", self->flash_base + offset + i * FLASH_PAGE_SIZE);
+        cy_rslt_t result = cy_serial_flash_qspi_write(self->flash_base + offset + i * FLASH_PAGE_SIZE, FLASH_PAGE_SIZE, bufinfo.buf + i * FLASH_PAGE_SIZE);  // TODO: verify this
 
         if (CY_RSLT_SUCCESS != result) {
             mplogger_print("Error code: %u\n", CY_RSLT_GET_CODE(result));
