@@ -139,7 +139,7 @@ SRC_QSTR += modules/machine/modmachine.c \
             \
             modules/os/moduos.c \
 			\
-            modules/psoc6/modpsoc6.c modules/psoc6/psoc6_fatfs.c modules/psoc6/psoc6_flash.c \
+            modules/psoc6/modpsoc6.c modules/psoc6/psoc6_fatfs.c modules/psoc6/psoc6_flash.c modules/psoc6/psoc6_qspi_flash.c \
 			\
 			modules/time/modutime.c
 
