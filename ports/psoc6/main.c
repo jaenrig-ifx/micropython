@@ -129,7 +129,7 @@ soft_reset:
 
     // Execute user scripts.
     int ret = pyexec_file_if_exists("flash/boot.py");
-    
+
     if (ret & PYEXEC_FORCED_EXIT) {
         goto soft_reset;
     }
