@@ -42,6 +42,7 @@ STATIC void machine_i2c_print(const mp_print_t *print, mp_obj_t self_in, mp_prin
     mp_printf(print, "I2C(%u, freq=%u, scl=%u, sda=%u)", self->i2c_id, self->freq, self->scl, self->sda);
 }
 
+
 mp_obj_t machine_i2c_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     mplogger_print("%q constructor invoked\n", MP_QSTR_I2C);
     enum { ARG_id, ARG_freq, ARG_scl, ARG_sda };
@@ -111,18 +112,28 @@ STATIC int machine_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t le
         result = cyhal_i2c_master_read(self->i2c_obj, addr, buf, len, 0, send_stop);
 
         if (result != CY_RSLT_SUCCESS) {
-            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_read failed with return code %x !"), result);
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_read failed with return code 0x%lx !"), result);
         }
     } else {
+        // handle scan type bus checks
         if (buf == NULL) {
-            uint8_t buf[1] = { 0x00 };
-            result = cyhal_i2c_master_write(self->i2c_obj, addr, buf, len, 0, send_stop);
+            result = cyhal_i2c_master_write(self->i2c_obj, addr, buf, len, 50, send_stop);
+
+            if ((result != CY_RSLT_SUCCESS)) {
+                if (result != 0xaa2004) {
+                    mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code 0x%lx !"), result);
+                }
+
+                return -1;
+            }
+
+            return CY_RSLT_SUCCESS;
         } else {
             result = cyhal_i2c_master_write(self->i2c_obj, addr, buf, len, 0, send_stop);
+        }
 
-            if (result != CY_RSLT_SUCCESS) {
-                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code %x !"), result);
-            }
+        if (result != CY_RSLT_SUCCESS) {
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("4 cyhal_i2c_master_write failed with return code 0x%lx !"), result);
         }
     }
 
@@ -134,6 +145,7 @@ STATIC const mp_machine_i2c_p_t machine_i2c_p = {
     .transfer_single = machine_i2c_transfer,
     .transfer = mp_machine_i2c_transfer_adaptor
 };
+
 
 MP_DEFINE_CONST_OBJ_TYPE(
     machine_i2c_type,

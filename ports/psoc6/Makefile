@@ -162,10 +162,10 @@ ifeq ($(MP_LOGGER_DEBUG), 1)
 endif
 
 
-$(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ)
+$(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ) $(MPY_MTB_LIBRARIES) $(LIBS)
 	$(info )
 	$(info Linking $@ ...)
-	$(Q)$(LD) $(LDFLAGS) -o $@ $^ 
+	$(Q)$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 	$(info Linking $@ done.)
 	$(Q)$(SIZE) $@
 	$(info )

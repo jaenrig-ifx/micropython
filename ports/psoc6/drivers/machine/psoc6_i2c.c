@@ -10,6 +10,7 @@
 // port-specific includes
 #include "drivers/machine/psoc6_gpio.h"
 #include "modules/machine/modmachine.h"
+#include "mplogger.h"
 #include "psoc6_i2c.h"
 
 extern void mp_hal_i2c_delay(machine_i2c_obj_t *self);
@@ -18,7 +19,7 @@ extern void mp_hal_i2c_delay(machine_i2c_obj_t *self);
 void i2c_init(mp_obj_t self_in) {
     machine_i2c_obj_t *self = MP_OBJ_TO_PTR(self_in);
 
-    printf("i2c init : scl : %d   sda : %d   freq : %lu\n", self->scl, self->sda, self->freq);
+    mplogger_print("i2c init : scl : %d   sda : %d   freq : %lu\n", self->scl, self->sda, self->freq);
 
     // Define the I2C master configuration structure
     cyhal_i2c_cfg_t i2c_master_config =
