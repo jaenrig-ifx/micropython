@@ -27,7 +27,6 @@
 // std includes
 #include "stdio.h"
 
-
 // micropython includes
 #include "extmod/utime_mphal.h"
 #include "py/runtime.h"
@@ -35,7 +34,6 @@
 
 // MTB includes
 #include "cyhal.h"
-
 
 // object defined in rtc.c
 extern cyhal_rtc_t psoc6_rtc;
@@ -46,11 +44,11 @@ void time_init(void) {
     const cyhal_timer_cfg_t timer_cfg =
     {
         .compare_value = 0,                 /* Timer compare value, not used */
-        .period = 1500000,// 20000,          /* Timer period set to a large enough value
-        /* compared to event being measured */
+        .period = 15000000,                 /* Timer period set to a large enough value */
+                                            /* compared to event being measured */
         .direction = CYHAL_TIMER_DIR_UP,    /* Timer counts up */
         .is_compare = false,                /* Don't use compare mode */
-        .is_continuous = true,              /* Do not run timer indefinitely */
+        .is_continuous = true,              /* Run timer indefinitely */
         .value = 0                          /* Initial value of counter */
     };
     /* Initialize the timer object. Does not use pin output ('pin' is NC) and
@@ -58,8 +56,8 @@ void time_init(void) {
     cyhal_timer_init(&psoc6_timer, NC, NULL);
     /* Apply timer configuration such as period, count direction, run mode, etc. */
     cyhal_timer_configure(&psoc6_timer, &timer_cfg);
-    /* Set the frequency of timer to 10000 counts in a second or 10000 Hz */
-    cyhal_timer_set_frequency(&psoc6_timer, 1500);
+    /* Set the frequency of timer to 1 MHz */
+    cyhal_timer_set_frequency(&psoc6_timer, 1000000);
     /* Start the timer with the configured settings */
     cyhal_timer_start(&psoc6_timer);
 }

@@ -16,14 +16,10 @@ extern __attribute__((weak)) int _write(int fd, const char *ptr, int len);
 uint64_t mp_hal_time_ns(void);
 mp_uint_t mp_hal_ticks_us(void);
 mp_uint_t mp_hal_ticks_ms(void);
+mp_uint_t mp_hal_ticks_cpu(void);
 void mp_hal_delay_us(mp_uint_t us);
 void mp_hal_delay_ms(mp_uint_t ms);
 
-
-static inline mp_uint_t mp_hal_ticks_cpu(void) {
-    mp_raise_NotImplementedError(MP_ERROR_TEXT("mp_hal_ticks_cpu not implemented !"));
-    return 0;
-}
 
 uintptr_t mp_hal_stdio_poll(uintptr_t poll_flags);
 
