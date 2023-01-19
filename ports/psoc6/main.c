@@ -128,12 +128,8 @@ soft_reset:
     #endif
 
     // Execute user scripts.
-    #if MICROPY_ENABLE_EXT_QSPI_FLASH
-    int ret = pyexec_file_if_exists("qspi_flash/boot.py");
-    #else
     int ret = pyexec_file_if_exists("flash/boot.py");
-    #endif
-
+    
     if (ret & PYEXEC_FORCED_EXIT) {
         goto soft_reset;
     }

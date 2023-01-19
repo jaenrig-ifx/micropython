@@ -7,12 +7,12 @@ bdev = psoc6.QSPI_Flash()
 
 try:
     vfs = os.VfsFat(bdev)
-    os.mount(vfs, "/qspi_flash")
+    os.mount(vfs, "/flash")
 except:
     os.VfsFat.mkfs(bdev)
     vfs = os.VfsFat(bdev)
-    os.mount(vfs, "/qspi_flash")
+    os.mount(vfs, "/flash")
 
-print("FAT filesystem mounted at /qspi_flash\n")
+print("FAT filesystem mounted at /flash\n")
 
 del machine, os, psoc6, bdev, vfs
