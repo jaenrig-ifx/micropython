@@ -107,11 +107,11 @@ STATIC int machine_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t le
 
     machine_i2c_obj_t *self = MP_OBJ_TO_PTR(self_in);
     cy_rslt_t result = CY_RSLT_SUCCESS;
-    bool stop = (flags & MP_MACHINE_I2C_FLAG_STOP)? true : false;
+    bool send_stop = (flags & MP_MACHINE_I2C_FLAG_STOP)? true : false;
     // start I2C transaction
     if ((flags & MP_MACHINE_I2C_FLAG_WRITE1) == MP_MACHINE_I2C_FLAG_WRITE1) {
         // buf[0] is the memory address
-        result = cyhal_i2c_master_write(self->i2c_obj, addr, &buf[0], 1, 0, send_stop);
+        result = cyhal_i2c_master_write(&self->i2c_obj, addr, &buf[0], 1, 0, send_stop);
 
         if (result != CY_RSLT_SUCCESS) {
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code 0x%lx !"), result);
@@ -119,7 +119,7 @@ STATIC int machine_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t le
 
         if ((flags & MP_MACHINE_I2C_FLAG_READ) == MP_MACHINE_I2C_FLAG_READ) {
             // Data starts at buf[1]
-            result = cyhal_i2c_master_read(self->i2c_obj, addr, &buf[1], len - 1, 0, send_stop);
+            result = cyhal_i2c_master_read(&self->i2c_obj, addr, &buf[1], len - 1, 0, send_stop);
 
             if (result != CY_RSLT_SUCCESS) {
                 mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_read failed with return code 0x%lx !"), result);
@@ -127,7 +127,7 @@ STATIC int machine_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t le
         }
     } else {
         if ((flags & MP_MACHINE_I2C_FLAG_READ) == MP_MACHINE_I2C_FLAG_READ) {
-            result = cyhal_i2c_master_read(self->i2c_obj, addr, buf, len, 0, send_stop);
+            result = cyhal_i2c_master_read(&self->i2c_obj, addr, buf, len, 0, send_stop);
 
             if (result != CY_RSLT_SUCCESS) {
                 mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_read failed with return code 0x%lx !"), result);
@@ -135,7 +135,7 @@ STATIC int machine_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t le
         } else {
             // handle scan type bus checks
             if (buf == NULL) {
-                result = cyhal_i2c_master_write(self->i2c_obj, addr, buf, len, 50, send_stop);
+                result = cyhal_i2c_master_write(&self->i2c_obj, addr, buf, len, 50, send_stop);
 
                 if ((result != CY_RSLT_SUCCESS)) {
                     if (result != 0xaa2004) {
@@ -147,7 +147,7 @@ STATIC int machine_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t le
 
                 return CY_RSLT_SUCCESS;
             } else {
-                result = cyhal_i2c_master_write(self->i2c_obj, addr, buf, len, 0, send_stop);
+                result = cyhal_i2c_master_write(&self->i2c_obj, addr, buf, len, 0, send_stop);
             }
 
             if (result != CY_RSLT_SUCCESS) {
@@ -201,11 +201,6 @@ int mp_machine_i2c_transfer_adaptor_psoc6(mp_obj_base_t *self, uint16_t addr, si
     }
 
     return ret;
-}
-
-STATIC void machine_i2c_init(mp_obj_base_t *obj, size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    mp_raise_NotImplementedError(MP_ERROR_TEXT("init is not supported."));
-    return;
 }
 
 
