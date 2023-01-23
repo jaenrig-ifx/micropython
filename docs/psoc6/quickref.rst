@@ -125,3 +125,60 @@ The following constants are used to configure the pin objects in addition to the
           Pin.STATE_HIGH
           
     Selects the pin value.
+
+Software I2C bus
+-------------
+Software I2C (using bit-banging) works on all output-capable pins, and is
+accessed via the :ref:`machine.SoftI2C <machine.SoftI2C>` class::
+
+    from machine import Pin, SoftI2C
+
+    i2c = SoftI2C(scl='P5_0', sda='P5_1', freq=100000)
+
+    i2c.scan()              # scan for devices
+
+    i2c.readfrom(0x3a, 4)   # read 4 bytes from device with address 0x3a
+    i2c.writeto(0x3a, '12') # write '12' to device with address 0x3a
+
+    buf = bytearray(10)     # create a buffer with 10 bytes
+    i2c.writeto(0x3a, buf)  # write the given buffer to the peripheral
+
+
+Hardware I2C bus
+--------------
+Hardware I2C works on the following listed pair of I2C pins
+
+=====  ===========  ============
+\      I2C(0)       
+=====  ===========  ============
+scl    P6_0           P9_0
+sda    P6_1           P9_1
+=====  ===========  ============
+
+
+The driver is accesses via the :ref:`machine.I2C <machine.I2C>` class::
+
+The constructor
+^^^^^^^^^^^^^^^
+The constructor can be called in different flavors and configurations based on the number of arguments (parameters) 
+passed. 
+
+An instance of the :mod:`machine.I2C` class can be created by invoking the constructor with all the 
+necessary parameters to fully configure the ``I2C``. By invoking the constructor I2C peripheral is initilaised 
+and configured to work in master mode.
+
+i2c = I2C(0,scl='P6_0',sda='P6_1',freq=4000000)
+
+Here i2c_id,scl and sda parameters should be passed mandatorily.
+
+: :
+
+    from machine import Pin,I2C
+    i2c = I2C(0,scl='P6_0',sda='P6_1',freq=4000000)
+
+Methods
+^^^^^^^
+All the methods(functions) given in :ref:`machine.I2C <machine.I2C>` class:: have been implemented in this port except
+
+..method:: I2C.Init()
+..method:: I2C.deinit()
