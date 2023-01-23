@@ -22,7 +22,8 @@ typedef struct _machine_i2c_obj_t {
 } machine_i2c_obj_t;
 
 cy_rslt_t i2c_init(cyhal_i2c_t *i2c_obj, cyhal_gpio_t scl, cyhal_gpio_t sda, uint32_t freq);
-cy_rslt_t i2c_read(cyhal_i2c_t i2c_obj, uint16_t addr, size_t len, uint8_t *buf, bool stop);
-cy_rslt_t i2c_write(cyhal_i2c_t i2c_obj, uint16_t addr, size_t len, uint8_t *buf, bool stop);
+
+cy_rslt_t i2c_read(cyhal_i2c_t *i2c_obj, uint16_t addr, uint8_t *buf, size_t len, uint32_t timeout, bool send_stop);
+cy_rslt_t i2c_write(cyhal_i2c_t *i2c_obj, uint16_t addr, uint8_t *buf, size_t len, uint32_t timeout, bool send_stop);
 
 #endif // MICROPY_INCLUDED_PSOC6_I2C_H
