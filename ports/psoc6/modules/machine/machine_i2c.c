@@ -111,13 +111,15 @@ STATIC int machine_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t le
     if (flags & MP_MACHINE_I2C_FLAG_READ) {
         result = i2c_read(self->i2c_obj, addr, len, buf, stop);
         if (result != CY_RSLT_SUCCESS) {
-            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_read failed with return code 0x%lx !"), result);
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_read failed with return code 0x%x !"), result);
         }
 
     } else {
         result = i2c_write(self->i2c_obj, addr, len, buf, stop);
         if (result != CY_RSLT_SUCCESS) {
-            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code 0x%lx !"), result);
+            if (result != 0xaa2004) {
+                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code 0x%x !"), result);
+            }
         }
     }
     return result;
