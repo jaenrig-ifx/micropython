@@ -125,7 +125,7 @@ STATIC mp_obj_t machine_rtc_datetime_helper(mp_uint_t n_args, const mp_obj_t *ar
         cy_rslt_t result = cyhal_rtc_write(&psoc6_rtc, &current_date_time);
 
         if (CY_RSLT_SUCCESS != result) {
-            mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_write failed ! Check if field values enetered are within the specified range."));
+            mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_write failed ! Check if field values entered are within the specified range."));
         }
     }
     return mp_const_none;
@@ -165,7 +165,7 @@ STATIC mp_obj_t machine_rtc_deinit(mp_obj_t self_in) {
     };
     cy_rslt_t result = cyhal_rtc_write(&psoc6_rtc, &reset_date_time);
     if (CY_RSLT_SUCCESS != result) {
-        mp_raise_ValueError(MP_ERROR_TEXT("Deinit failed!"));
+        mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_write failed during RTC deinitialization!"));
     }
     return mp_const_none;
 }
