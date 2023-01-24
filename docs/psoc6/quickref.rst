@@ -46,7 +46,18 @@ The :mod:`machine` module::
 Delay and timing
 ----------------
 
-*Feature unavailable. Placeholder. To be completed.*
+Use the :mod:`time <time>` module::
+
+    import time
+
+    time.sleep(1)           # sleep for 1 second
+    time.sleep_ms(500)      # sleep for 500 milliseconds
+    time.sleep_us(10)       # sleep for 10 microseconds
+    start = time.ticks_ms() # get millisecond counter
+    delta = time.ticks_diff(time.ticks_ms(), start) # compute time difference
+    start = time.ticks_us() # get microsecond counter
+    delta = time.ticks_diff(time.ticks_us(), start) # compute time difference
+
 
 Timers
 ------
@@ -126,3 +137,23 @@ The following constants are used to configure the pin objects in addition to the
           Pin.STATE_HIGH
           
     Selects the pin value.
+
+Real time clock (RTC)
+---------------------
+
+See :ref:`machine.RTC <machine.RTC>` ::
+
+    from machine import RTC
+
+    rtc = RTC()
+    rtc.init((2023, 1, 1, 0, 0, 0, 0, 0)) # initialize rtc with specific date and time,
+                                          # eg. 2023/1/1 00:00:00
+    rtc.datetime((2017, 8, 23, 2, 12, 48, 0, 0)) # set a specific date and
+                                                 # time, eg. 2017/8/23 1:12:48
+    rtc.datetime() # get date and time
+    rtc.now() # get current date and time
+
+.. note::
+    Setting a random week day in 'wday' field is not valid. The underlying library implements the logic to always
+    calculate the right weekday based on the year, date and month passed. However, datetime() will not raise an error 
+    for this, but rather re-write the field with last calculated actual value.

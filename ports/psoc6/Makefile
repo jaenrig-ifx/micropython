@@ -114,7 +114,7 @@ SRC_C = \
 	modules/machine/modmachine.c \
 	modules/machine/machine_pin.c \
 	modules/machine/pins.c \
-	modules/machine/rtc.c \
+	modules/machine/machine_rtc.c \
 	\
 	modules/psoc6/modpsoc6.c \
 	modules/psoc6/psoc6_fatfs.c \
@@ -134,7 +134,7 @@ SRC_CXX   =
 SRC_QSTR += $(MPY_SRC_C) $(SRC_USERMOD) $(SRC_EXTMOD_C)
 SRC_QSTR += modules/machine/modmachine.c \
             modules/machine/machine_pin.c \
-			modules/machine/rtc.c \
+			modules/machine/machine_rtc.c \
             \
             modules/os/moduos.c \
 			\
