@@ -161,7 +161,7 @@ Similarly, to transfer files from the MicroPython filesystem to the host filesys
     $ mpremote.py cp :/flash/main.py <path_to_script_on_host>/main.py
 
 
-The tool can also be used to execute scripts on the target board, without utilizing the target's filesystem. In this case, the script is sent over to the target over the UART interface and is executed on the REPL, where it is interpreted. An example is given below:
+The tool can also be used to execute scripts on the target board, without utilizing the target's filesystem. In this case, the script is sent to the target over the UART interface and is executed on the REPL, where it is interpreted. Due to the bottleneck of the transmission, execution times may be longer. An example is given below:
 
 .. code-block:: bash
 

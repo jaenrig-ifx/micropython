@@ -168,12 +168,8 @@ STATIC mp_obj_t psoc6_qspi_flash_readblocks(size_t n_args, const mp_obj_t *args)
         mplogger_print("Error code: %u\n", CY_RSLT_GET_CODE(result));
         mp_raise_ValueError(MP_ERROR_TEXT("QSPI Flash Read failed !"));
     }
-    MICROPY_END_ATOMIC_SECTION(atomic_state);
-    ;                                          // end atomic section
-
-    // TODO: or simply do it like this ?
-    // memcpy(bufinfo.buf, (void *)(self->flash_base + offset), bufinfo.len);
-
+    MICROPY_END_ATOMIC_SECTION(atomic_state); // end atomic section
+    ;
     return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(psoc6_qspi_flash_readblocks_obj, 3, 4, psoc6_qspi_flash_readblocks);
@@ -191,8 +187,7 @@ STATIC mp_obj_t psoc6_qspi_flash_writeblocks(size_t n_args, const mp_obj_t *args
         // TODO: that function implements the atomic_state hash logic.
         // TODO: that function must be made non-static first.
         // TODO: or, reimplement MICROPY_BEGIN_ATOMIC_SECTION() as a simple macro
-        // mp_uint_t atomic_state = MICROPY_BEGIN_ATOMIC_SECTION();
-        mp_uint_t atomic_state = MICROPY_BEGIN_ATOMIC_SECTION();
+        mp_uint_t atomic_state = MICROPY_BEGIN_ATOMIC_SECTION(); // begin atomic section
         uint32_t numSectors = bufinfo.len / FLASH_SECTOR_SIZE;
 
         for (uint32_t i = 0; i <= numSectors; ++i) {
@@ -206,7 +201,7 @@ STATIC mp_obj_t psoc6_qspi_flash_writeblocks(size_t n_args, const mp_obj_t *args
             }
         }
 
-        MICROPY_END_ATOMIC_SECTION(atomic_state);
+        MICROPY_END_ATOMIC_SECTION(atomic_state); // end atomic section
     } else {
         offset += mp_obj_get_int(args[3]);
     }
@@ -243,6 +238,7 @@ STATIC mp_obj_t psoc6_qspi_flash_ioctl(mp_obj_t self_in, mp_obj_t cmd_in, mp_obj
                 cy_serial_flash_qspi_init(smifMemConfigs[MEM_SLOT_NUM], CYBSP_QSPI_D0, CYBSP_QSPI_D1,
                     CYBSP_QSPI_D2, CYBSP_QSPI_D3, NC, NC, NC, NC, CYBSP_QSPI_SCK,
                     CYBSP_QSPI_SS, QSPI_BUS_FREQUENCY_HZ);
+                qspi_flash_init = 1;
             }
             return MP_OBJ_NEW_SMALL_INT(0);
         case MP_BLOCKDEV_IOCTL_DEINIT:
@@ -259,13 +255,13 @@ STATIC mp_obj_t psoc6_qspi_flash_ioctl(mp_obj_t self_in, mp_obj_t cmd_in, mp_obj
         case MP_BLOCKDEV_IOCTL_BLOCK_ERASE: {
             uint32_t offset = mp_obj_get_int(arg_in) * BLOCK_SIZE_BYTES;
             // Flash erase/program must run in an atomic section.
-            mp_uint_t atomic_state = MICROPY_BEGIN_ATOMIC_SECTION();
+            mp_uint_t atomic_state = MICROPY_BEGIN_ATOMIC_SECTION(); // begin atomic section
             cy_rslt_t result = cy_serial_flash_qspi_erase(self->flash_base + offset, cy_serial_flash_qspi_get_erase_size(self->flash_base + offset));
 
             if (CY_RSLT_SUCCESS != result) {
                 mp_raise_ValueError(MP_ERROR_TEXT("QSPI Flash Erase failed !"));
             }
-            MICROPY_END_ATOMIC_SECTION(atomic_state);
+            MICROPY_END_ATOMIC_SECTION(atomic_state); // end atomic section
             return MP_OBJ_NEW_SMALL_INT(0);
         }
         default:
