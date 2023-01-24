@@ -51,8 +51,8 @@
 /* The values are reflected to match MPY reset values*/
 #define RTC_INIT_YEAR       2015
 #define RTC_INIT_MONTH      1   /* January */
-#define RTC_INIT_DATE       1
-#define RTC_INIT_WEEKDAY    4   /* Thursday */
+#define RTC_INIT_MDAY       1
+#define RTC_INIT_WDAY       4   /* Thursday */
 #define RTC_INIT_HOUR       0
 #define RTC_INIT_MINUTE     0
 #define RTC_INIT_SECOND     0
@@ -156,8 +156,8 @@ STATIC mp_obj_t machine_rtc_deinit(mp_obj_t self_in) {
     struct tm reset_date_time = {
         .tm_year = RTC_INIT_YEAR - TM_YEAR_BASE,
         .tm_mon = RTC_INIT_MONTH - 1,
-        .tm_mday = RTC_INIT_DATE,
-        .tm_wday = RTC_INIT_WEEKDAY,
+        .tm_mday = RTC_INIT_MDAY,
+        .tm_wday = RTC_INIT_WDAY,
         .tm_hour = RTC_INIT_HOUR,
         .tm_min = RTC_INIT_MINUTE,
         .tm_sec = RTC_INIT_SECOND,
