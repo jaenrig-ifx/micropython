@@ -57,7 +57,7 @@ mp_obj_t machine_i2c_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
     int i2c_id = mp_obj_get_int(args[ARG_id].u_obj);
 
     if (i2c_id != PSOC_I2C_MASTER_MODE) {
-        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("I2C_id(%d) doesn't exist"), i2c_id);
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("I2C id '%d' not supported !"), i2c_id);
     }
 
     // Get peripheral object
@@ -69,11 +69,14 @@ mp_obj_t machine_i2c_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
     if (args[ARG_scl].u_obj != mp_const_none) {
         int scl = mp_hal_get_pin_obj(args[ARG_scl].u_obj);
 
-        if (self->sda == -1) {
+        if (self->scl == -1) {
             size_t slen;
-            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("SCL pin (%s) not found !"), mp_obj_str_get_data(args[ARG_sda].u_obj, &slen));
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("SCL pin (%s) not found !"), mp_obj_str_get_data(args[ARG_scl].u_obj, &slen));
         }
+
         self->scl = scl;
+    } else {
+        self->scl = MICROPY_HW_I2C_SCL;
     }
 
 
@@ -85,17 +88,17 @@ mp_obj_t machine_i2c_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("SDA pin (%s) not found !"), mp_obj_str_get_data(args[ARG_sda].u_obj, &slen));
         }
         self->sda = sda;
+    } else {
+        self->sda = MICROPY_HW_I2C_SDA;
     }
 
     self->freq = args[ARG_freq].u_int;
 
     // initilaise I2C Peripheral and configure as master
-    cy_rslt_t result;
-
-    result = i2c_init(&self->i2c_obj, self->scl, self->sda, self->freq);
+    cy_rslt_t result = i2c_init(&self->i2c_obj, self->scl, self->sda, self->freq);
 
     if (result != CY_RSLT_SUCCESS) {
-        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("I2C initilisation failed with return code 0x%lx !"), result);
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("I2C initialisation failed with return code %lx !"), result);
     }
     return MP_OBJ_FROM_PTR(self);
 }
@@ -115,7 +118,7 @@ STATIC int machine_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t le
         result = i2c_write(&self->i2c_obj, addr, &buf[0], 1, timeout, send_stop);
 
         if (result != CY_RSLT_SUCCESS) {
-            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code 0x%lx !"), result);
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code %lx !"), result);
         }
 
         if ((flags & MP_MACHINE_I2C_FLAG_READ) == MP_MACHINE_I2C_FLAG_READ) {
@@ -123,7 +126,7 @@ STATIC int machine_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t le
             result = i2c_read(&self->i2c_obj, addr, &buf[1], len - 1, timeout, send_stop);
 
             if (result != CY_RSLT_SUCCESS) {
-                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_read failed with return code 0x%lx !"), result);
+                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_read failed with return code %lx !"), result);
             }
         }
     } else {
@@ -131,7 +134,7 @@ STATIC int machine_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t le
             result = i2c_read(&self->i2c_obj, addr, buf, len, timeout, send_stop);
 
             if (result != CY_RSLT_SUCCESS) {
-                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_read failed with return code 0x%lx !"), result);
+                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_read failed with return code %lx !"), result);
             }
         } else {
             // handle scan type bus checks
@@ -141,7 +144,7 @@ STATIC int machine_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t le
 
                 if ((result != CY_RSLT_SUCCESS)) {
                     if (result != 0xaa2004) {
-                        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code 0x%lx !"), result);
+                        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code %lx !"), result);
                     }
 
                     return 1;
@@ -153,7 +156,7 @@ STATIC int machine_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t le
             }
 
             if (result != CY_RSLT_SUCCESS) {
-                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code 0x%lx !"), result);
+                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code %lx !"), result);
             }
         }
     }
