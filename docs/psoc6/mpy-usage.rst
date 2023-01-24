@@ -136,7 +136,7 @@ And entries can be removed::
 
 Also, entries can be renamed::
 
-    >>> os.rename('old_filename.txt','new_filename')
+    >>> os.rename('data.txt','data_new.txt')  # os.rename('old_filepath','new_filepath')
     
 Start up scripts
 ~~~~~~~~~~~~~~~~
@@ -144,13 +144,38 @@ Start up scripts
 As mentioned above, there are two files that are treated specially by the port when it starts up:
 ``boot.py`` and ``main.py``. The user can create these files and populate them with the code that can run at startup.
 
+Using MicroPython remote control (mpremote) for filesystem operations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The :ref:`mpremote <mpremote>` tool can be used to transfer files located on the user's host filesystem into the MicroPython filesystem using the command shown below:
+
+.. code-block:: bash
+
+    $ mpremote.py cp <path_to_script_on_host>/main.py :/flash/main.py
+
+
+Similarly, to transfer files from the MicroPython filesystem to the host filesystem, the arguments have to be flipped, as shown:
+
+.. code-block:: bash
+
+    $ mpremote.py cp :/flash/main.py <path_to_script_on_host>/main.py
+
+
+The tool can also be used to execute scripts on the target board, without utilizing the target's filesystem. In this case, the script is sent over to the target over the UART interface and is executed on the REPL, where it is interpreted. An example is given below:
+
+.. code-block:: bash
+
+    $ mpremote.py run <path_to_script_on_host>/main.py
+
+
+
 Using third-party IDEs for filesystem operations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Thonny
 ^^^^^^
 
-The Micropython port for PSoC6™ can be detected by the `Thonny IDE <https://thonny.org/>`_ when the ``Micropython (Generic)`` option is selected at the bottom right corner, as shown. Additionally, the filesystem is detected by the IDE, as shown in the lower left column. Using the GUI, file operations can be carried out, such as creating a new file, adding contents to it and then saving it to the filesystem on the Micropython device, with a given name.
+The MicroPython port for PSoC6™ can be detected by the `Thonny IDE <https://thonny.org/>`_ when the ``MicroPython (generic)`` option is selected at the bottom right corner, as shown. Additionally, the filesystem is detected by the IDE, as shown in the lower left column. Using the GUI, file operations can be carried out, such as creating a new file, adding contents to it and then saving it to the filesystem on the MicroPython device, with a given name.
 
 .. image:: img/mpy-thonny-filesystem.jpg
     :alt: Filesystem operation using Thonny IDE 
