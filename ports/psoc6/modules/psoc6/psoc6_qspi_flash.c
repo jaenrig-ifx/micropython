@@ -44,7 +44,7 @@
 #include "cycfg_qspi_memslot.h"
 
 #define FLASH_BASE        (0x00)  // absolute address of xip/qspi flash. Does not depend on ld file values since xip isnt used
-#define FLASH_SIZE        (0x4000000)  // qspi flash is 512 Mb/ 64 MB in size
+#define FLASH_SIZE        (0x4000000)  // qspi flash is 512 Mb / 64 MB in size
 
 #define FLASH_SECTOR_SIZE (0x40000) // 256 KB sector size uniform (depends on cfg register). See Table 46 of https://www.infineon.com/dgdl/Infineon-S25HS256T_S25HS512T_S25HS01GT_S25HL256T_S25HL512T_S25HL01GT_256-Mb_(32-MB)_512-Mb_(64-MB)_1-Gb_(128-MB)_HS-T_(1.8-V)_HL-T_(3.0-V)_Semper_Flash_with_Quad_SPI-DataSheet-v02_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0ee674b86ee3&da=t
 // However, tests reveal that all sectors are in fact 256 KB deep. The factory settings must have been overwritten at some point.
@@ -161,14 +161,15 @@ STATIC mp_obj_t psoc6_qspi_flash_readblocks(size_t n_args, const mp_obj_t *args)
     }
     mplogger_print("Address in hex:%04X, Length:%u\n", self->flash_base + offset, bufinfo.len);
 
-    __disable_irq(); // begin atomic section
+    mp_uint_t atomic_state = MICROPY_BEGIN_ATOMIC_SECTION(); // begin atomic section
     cy_rslt_t result = cy_serial_flash_qspi_read(self->flash_base + offset, bufinfo.len, bufinfo.buf);
 
     if (CY_RSLT_SUCCESS != result) {
         mplogger_print("Error code: %u\n", CY_RSLT_GET_CODE(result));
         mp_raise_ValueError(MP_ERROR_TEXT("QSPI Flash Read failed !"));
     }
-    __enable_irq(); // end atomic section
+    MICROPY_END_ATOMIC_SECTION(atomic_state);
+    ;                                          // end atomic section
 
     // TODO: or simply do it like this ?
     // memcpy(bufinfo.buf, (void *)(self->flash_base + offset), bufinfo.len);
@@ -186,11 +187,12 @@ STATIC mp_obj_t psoc6_qspi_flash_writeblocks(size_t n_args, const mp_obj_t *args
 
     if (n_args == 3) {
         // Flash erase/program must run in an atomic section.
-        // TODO: replace with implemented global disable irq function.
+        // TODO: replace with implemented machine.disable_irq() in machine module.
+        // TODO: that function implements the atomic_state hash logic.
         // TODO: that function must be made non-static first.
         // TODO: or, reimplement MICROPY_BEGIN_ATOMIC_SECTION() as a simple macro
         // mp_uint_t atomic_state = MICROPY_BEGIN_ATOMIC_SECTION();
-        __disable_irq();
+        mp_uint_t atomic_state = MICROPY_BEGIN_ATOMIC_SECTION();
         uint32_t numSectors = bufinfo.len / FLASH_SECTOR_SIZE;
 
         for (uint32_t i = 0; i <= numSectors; ++i) {
@@ -204,17 +206,14 @@ STATIC mp_obj_t psoc6_qspi_flash_writeblocks(size_t n_args, const mp_obj_t *args
             }
         }
 
-        __enable_irq();
-        // MICROPY_END_ATOMIC_SECTION(atomic_state);
-        // TODO: check return value
+        MICROPY_END_ATOMIC_SECTION(atomic_state);
     } else {
         offset += mp_obj_get_int(args[3]);
     }
 
 
     // Flash erase/program must run in an atomic section.
-    // mp_uint_t atomic_state = MICROPY_BEGIN_ATOMIC_SECTION();
-    __disable_irq();
+    mp_uint_t atomic_state = MICROPY_BEGIN_ATOMIC_SECTION();
     uint32_t numPages = bufinfo.len / FLASH_PAGE_SIZE;
 
     for (uint32_t i = 0; i <= numPages; ++i) {
@@ -226,9 +225,7 @@ STATIC mp_obj_t psoc6_qspi_flash_writeblocks(size_t n_args, const mp_obj_t *args
             mp_raise_ValueError(MP_ERROR_TEXT("QSPI Flash Write failed !")); // TODO: replace with proper exception message. also few instances above and below.
         }
     }
-    __enable_irq();
-    // MICROPY_END_ATOMIC_SECTION(atomic_state);
-    // TODO: check return value
+    MICROPY_END_ATOMIC_SECTION(atomic_state);
     return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(psoc6_qspi_flash_writeblocks_obj, 3, 4, psoc6_qspi_flash_writeblocks);
@@ -262,14 +259,13 @@ STATIC mp_obj_t psoc6_qspi_flash_ioctl(mp_obj_t self_in, mp_obj_t cmd_in, mp_obj
         case MP_BLOCKDEV_IOCTL_BLOCK_ERASE: {
             uint32_t offset = mp_obj_get_int(arg_in) * BLOCK_SIZE_BYTES;
             // Flash erase/program must run in an atomic section.
-            __disable_irq();
+            mp_uint_t atomic_state = MICROPY_BEGIN_ATOMIC_SECTION();
             cy_rslt_t result = cy_serial_flash_qspi_erase(self->flash_base + offset, cy_serial_flash_qspi_get_erase_size(self->flash_base + offset));
 
             if (CY_RSLT_SUCCESS != result) {
                 mp_raise_ValueError(MP_ERROR_TEXT("QSPI Flash Erase failed !"));
             }
-            __enable_irq();
-            // TODO: check return value
+            MICROPY_END_ATOMIC_SECTION(atomic_state);
             return MP_OBJ_NEW_SMALL_INT(0);
         }
         default:

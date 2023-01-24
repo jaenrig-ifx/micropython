@@ -118,10 +118,10 @@ soft_reset:
     #elif MICROPY_VFS_LFS2
     pyexec_frozen_module("vfs_lfs2.py");
     #endif
-    
+
     // Execute user scripts.
     int ret = pyexec_file_if_exists("flash/boot.py");
-    
+
     if (ret & PYEXEC_FORCED_EXIT) {
         goto soft_reset;
     }

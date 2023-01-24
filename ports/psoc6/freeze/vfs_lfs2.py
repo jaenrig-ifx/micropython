@@ -11,9 +11,9 @@ bdev = psoc6.QSPI_Flash() if "QSPI_Flash" in dir(psoc6) else psoc6.Flash()
 
 # sector size 4 KB for external flash
 # sector size 512 B for internal flash
-read_size = 0x1000  if "QSPI_Flash" in dir(psoc6) else 0x200
+read_size = 0x1000 if "QSPI_Flash" in dir(psoc6) else 0x200
 # page size 512 B for both flashes
-write_size = 0x200  
+write_size = 0x200
 
 
 try:
