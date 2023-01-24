@@ -9,6 +9,7 @@ os.umount("/flash")
 test_string = "This is a test string."
 print(test_string)
 
+# first priority is always LFS2 filesystem as it is the default
 if "VfsLfs2" in dir(os):
     # sector size 4 KB for external flash
     # sector size 512 B for internal flash

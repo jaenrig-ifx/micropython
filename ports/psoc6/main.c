@@ -113,23 +113,15 @@ soft_reset:
     readline_init0();
     machine_init();
 
-    #if MICROPY_ENABLE_EXT_QSPI_FLASH
-    #if MICROPY_VFS_FAT
-    pyexec_frozen_module("vfs_fat_qspi_flash.py");
-    #elif MICROPY_VFS_LFS2
-    pyexec_frozen_module("vfs_lfs2_qspi_flash.py");
-    #endif
-    #else
     #if MICROPY_VFS_FAT
     pyexec_frozen_module("vfs_fat.py");
     #elif MICROPY_VFS_LFS2
     pyexec_frozen_module("vfs_lfs2.py");
     #endif
-    #endif
-
+    
     // Execute user scripts.
     int ret = pyexec_file_if_exists("flash/boot.py");
-
+    
     if (ret & PYEXEC_FORCED_EXIT) {
         goto soft_reset;
     }
