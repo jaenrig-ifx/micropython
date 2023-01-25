@@ -4,7 +4,7 @@
 #include "pins.h"
 
 // Function definitions
-int pin_find(mp_obj_t pin, const machine_pin_obj_t machine_pin_obj[], int table_size) {
+int pin_find(mp_obj_t pin) {
     int wanted_pin = -1;
     if (mp_obj_is_small_int(pin)) {
         // Pin defined by the index of pin table
@@ -13,9 +13,9 @@ int pin_find(mp_obj_t pin, const machine_pin_obj_t machine_pin_obj[], int table_
         // Search by name
         size_t slen;
         const char *s = mp_obj_str_get_data(pin, &slen);
-        for (wanted_pin = 0; wanted_pin < table_size; wanted_pin++) {
-            if (slen == strlen(machine_pin_obj[wanted_pin].pin_name) &&
-                strncmp(s, machine_pin_obj[wanted_pin].pin_name, slen) == 0) {
+        for (int i = 0; i < MP_ARRAY_SIZE(machine_pin_obj); i++) {
+            if (slen == strlen(machine_pin_obj[i].pin_name) && strncmp(s, machine_pin_obj[i].pin_name, slen) == 0) {
+                wanted_pin = i;
                 break;
             }
         }
