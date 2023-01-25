@@ -38,8 +38,6 @@
 // MTB includes
 #include "cyhal.h"
 
-
-
 #define FLASH_BASE_TRUE        (0x10000000)
 
 #define FLASH_BASE        (0x101A0000)
