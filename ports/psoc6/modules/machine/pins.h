@@ -132,7 +132,8 @@ typedef struct _machine_pin_obj_t {
 } machine_pin_obj_t;
 
 // Function Prototypes to support interaction between c<->py
-int pin_find(mp_obj_t obj, const machine_pin_obj_t *pin_obj, int num);
+int pin_find(mp_obj_t obj);
+int pin_addr_by_name(mp_obj_t obj);
 
 /* TODO: to auto-generate the pin instances in the pin_obj array
 and thereby capture the obj count. It cannot be declared without a defined size,

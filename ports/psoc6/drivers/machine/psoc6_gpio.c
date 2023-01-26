@@ -2,10 +2,16 @@
 
 // std includes
 #include <stdbool.h>
+#include "py/runtime.h"
 
 #include "psoc6_gpio.h"
 
 gpio_init_rslt gpio_init(cyhal_gpio_t pin, cyhal_gpio_direction_t direction, cyhal_gpio_drive_mode_t drive_mode, bool init_val) {
+    // Free up the cy gpio obj
+    // this function checks if the pin is init'd before and only frees it if so.
+    // else does nothing
+    cyhal_gpio_free(pin);
+    // Then do actual gpio init (or reinit)
     return cyhal_gpio_init(pin, direction, drive_mode, init_val);
 }
 
@@ -21,9 +27,14 @@ uint32_t gpio_get_drive(uint32_t pin) {
 }
 
 // function to check if pin is in mode Pin.OPEN_DRAIN.
-// drive comparisons done with PDL drive modes since function is from PDL (not HAL)
+// drive comparisons done with PDL drive modes since wrapped function is from PDL (not HAL)
+// Note: MPY only allows OPEN DRAIN and DRIVE LOW (0/Z) mode to be set from the machine.Pin class methods, as per ts documentations, -
+// but in some applications (such as i2c etc), the application internally might also set OPEN DRAIN and DRIVE HIGH (1/Z) mode. Hence both the modes -
+// must be checked for, while checking for open drain.
+// Additionally, open drain can be implemented with the GPIO INPUT BUFFER on or off, hence both of those cases must be checked too.
+// More info on pg. 245 of PSoC_6_MCU_PSoC_62_Architecture_Technical_Reference_Manual_v8_EN
 bool gpio_is_open_drain(uint32_t pin) {
-    if (gpio_get_drive(pin) == CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW) {
+    if (gpio_get_drive(pin) == CY_GPIO_DM_OD_DRIVESLOW || gpio_get_drive(pin) == CY_GPIO_DM_OD_DRIVESHIGH || gpio_get_drive(pin) == CY_GPIO_DM_OD_DRIVESLOW_IN_OFF || gpio_get_drive(pin) == CY_GPIO_DM_OD_DRIVESHIGH_IN_OFF) {
         return true;
     } else {
         return false;
