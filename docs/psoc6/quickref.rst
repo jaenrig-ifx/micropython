@@ -20,6 +20,17 @@ working with this port it may be useful to get an overview of the microcontrolle
    installation.rst
    mpy-usage.rst
 
+.. warning::
+
+    The PSoC6™ port is still in a early stage of development. It is expected that any MicroPython built-in
+    library to be supported, but not all libraries, modules and features have been yet evaluated.
+    For those modules relying on platform and hardware dependencies, only the listed and documented in this
+    quick reference are certainyly supported. 
+    
+    Please, consider opening an `issue <https://github.com/jaenrig-ifx/micropython/issues>`_ or
+    `discussion <https://github.com/jaenrig-ifx/micropython/discussionsh>`_ on GitHub for any clarification
+    required on available features or requests for missing ones. 
+
 General board control
 ---------------------
 
