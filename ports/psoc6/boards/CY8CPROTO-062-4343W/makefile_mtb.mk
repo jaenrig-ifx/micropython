@@ -51,8 +51,8 @@ mpy_mtb_build:
 
 mpy_mtb_clean:
 	$(info )
-	$(info Cleaning $(MPY_MTB_BOARD_BUILD_DIR) ...)
-	-$(Q) cd $(BOARD_DIR); $(MAKE) clean
+	$(info Removing $(MPY_MTB_BOARD_BUILD_DIR) ...)
+	-$(Q) rm -rf $(MPY_MTB_BOARD_BUILD_DIR)
 
 
 # get variables set for includes, objects, etc. and add to mpy makefile variables
