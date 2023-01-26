@@ -138,8 +138,9 @@ The following constants are used to configure the pin objects in addition to the
           
     Selects the pin value.
 
+
 Software I2C bus
--------------
+----------------
 Software I2C (using bit-banging) works on all output-capable pins, and is
 accessed via the :ref:`machine.SoftI2C <machine.SoftI2C>` class::
 
@@ -155,8 +156,9 @@ accessed via the :ref:`machine.SoftI2C <machine.SoftI2C>` class::
     buf = bytearray(10)     # create a buffer with 10 bytes
     i2c.writeto(0x3a, buf)  # write the given buffer to the peripheral
 
+
 Hardware I2C bus
---------------
+----------------
 Hardware I2C works on the following listed pair of I2C pins
 
 =====  ===========  ============
@@ -194,6 +196,8 @@ Methods
 All the methods(functions) given in :ref:`machine.I2C <machine.I2C>` class:: have been implemented in this port except
 
 ..method:: I2C.init()
+
+
 Real time clock (RTC)
 ---------------------
 
