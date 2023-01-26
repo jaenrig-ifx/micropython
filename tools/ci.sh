@@ -260,9 +260,10 @@ function ci_psoc6_setup {
 }
 
 function ci_psoc6_build {
+    board=$1
     docker exec mtb-ci make mpy_mtb_init
     docker exec mtb-ci make submodules
-    docker exec mtb-ci make
+    docker exec mtb-ci make BOARD=${board}
 }
 
 function ci_psoc6_deploy {

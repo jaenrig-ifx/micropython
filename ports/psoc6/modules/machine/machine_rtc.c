@@ -48,7 +48,16 @@
 // port-specific includes
 #include "modmachine.h"
 
-
+/* The values are reflected to match MPY reset values*/
+#define RTC_INIT_YEAR       2015
+#define RTC_INIT_MONTH      1   /* January */
+#define RTC_INIT_MDAY       1
+#define RTC_INIT_WDAY       4   /* Thursday */
+#define RTC_INIT_HOUR       0
+#define RTC_INIT_MINUTE     0
+#define RTC_INIT_SECOND     0
+#define RTC_INIT_DST        0
+#define TM_YEAR_BASE        (1900u)
 cyhal_rtc_t psoc6_rtc;
 
 
@@ -60,54 +69,35 @@ typedef struct _machine_rtc_obj_t {
 // singleton RTC object
 STATIC const machine_rtc_obj_t machine_rtc_obj = {{&machine_rtc_type}};
 
-
+/* This function is run from main.c to init the RTC at boot time. This will set the RTC to PSoC default time: 1st Jan 2000*/
 void rtc_init(void) {
     cy_rslt_t result = cyhal_rtc_init(&psoc6_rtc);
 
     if (CY_RSLT_SUCCESS != result) {
         mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_init failed !"));
     }
-
-    struct tm current_date_time = { .tm_mon = 1, .tm_mday = 1 };
-    result = cyhal_rtc_write(&psoc6_rtc, &current_date_time);
-
-    if (CY_RSLT_SUCCESS != result) {
-        mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_write failed !"));
-    }
 }
 
-
-void rtc_deinit(void) {
-
-}
-
-
+// Machine RTC methods - port-specific definitions
+// RTC constructor
 STATIC mp_obj_t machine_rtc_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *args) {
     mp_arg_check_num(n_args, n_kw, 0, 0, false);
-    bool r = cyhal_rtc_is_enabled(&psoc6_rtc);
-
-    if (!r) {
-        // This shouldn't happen as rtc_init() is already called in main so
-        // it's here just in case
-        rtc_init();
-    }
-
     // return constant object
     return (mp_obj_t)&machine_rtc_obj;
 }
 
-STATIC mp_obj_t machine_rtc_datetime(mp_uint_t n_args, const mp_obj_t *args) {
+// Helper function to set/get datetime
+STATIC mp_obj_t machine_rtc_datetime_helper(mp_uint_t n_args, const mp_obj_t *args) {
     if (n_args == 1) {
         struct tm current_date_time = {0};
         cy_rslt_t result = cyhal_rtc_read(&psoc6_rtc, &current_date_time);
-
         if (CY_RSLT_SUCCESS != result) {
             mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_read failed !"));
         }
 
         mp_obj_t tuple[8] = {
-            mp_obj_new_int(current_date_time.tm_year),
-            mp_obj_new_int(current_date_time.tm_mon),
+            mp_obj_new_int(current_date_time.tm_year + TM_YEAR_BASE),
+            mp_obj_new_int(current_date_time.tm_mon + 1),
             mp_obj_new_int(current_date_time.tm_mday),
             mp_obj_new_int(current_date_time.tm_wday),
             mp_obj_new_int(current_date_time.tm_hour),
@@ -115,7 +105,6 @@ STATIC mp_obj_t machine_rtc_datetime(mp_uint_t n_args, const mp_obj_t *args) {
             mp_obj_new_int(current_date_time.tm_sec),
             mp_obj_new_int(0)
         };
-
         return mp_obj_new_tuple(8, tuple);
     } else {
         mp_obj_t *items;
@@ -124,34 +113,77 @@ STATIC mp_obj_t machine_rtc_datetime(mp_uint_t n_args, const mp_obj_t *args) {
 
         struct tm current_date_time =
         {
-            .tm_year = mp_obj_get_int(items[0]),
-            .tm_mon = mp_obj_get_int(items[1]),
+            .tm_year = mp_obj_get_int(items[0]) - TM_YEAR_BASE,
+            .tm_mon = mp_obj_get_int(items[1]) - 1,
             .tm_mday = mp_obj_get_int(items[2]),
+            .tm_wday = mp_obj_get_int(items[3]),
             .tm_hour = mp_obj_get_int(items[4]),
             .tm_min = mp_obj_get_int(items[5]),
             .tm_sec = mp_obj_get_int(items[6]),
         };
 
-        // Deliberately ignore the weekday argument and compute the proper value
-        current_date_time.tm_wday = timeutils_calc_weekday(current_date_time.tm_year, current_date_time.tm_mon, current_date_time.tm_mday);
-
         cy_rslt_t result = cyhal_rtc_write(&psoc6_rtc, &current_date_time);
 
         if (CY_RSLT_SUCCESS != result) {
-            mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_write failed !"));
+            mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_write failed ! Check if field values entered are within the specified range."));
         }
-
     }
     return mp_const_none;
 }
+
+// RTC.datetime([datetime])
+STATIC mp_obj_t machine_rtc_datetime(mp_uint_t n_args, const mp_obj_t *args) {
+    return machine_rtc_datetime_helper(n_args, args);
+}
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(machine_rtc_datetime_obj, 1, 2, machine_rtc_datetime);
 
+// RTC.init(datetime)
+STATIC mp_obj_t machine_rtc_init(mp_obj_t self_in, mp_obj_t date) {
+    mp_obj_t args[2] = {self_in, date};
+    // Check if RTC is correctly initialized already through main
+    bool r = cyhal_rtc_is_enabled(&psoc6_rtc);
+    if (!r) {
+        rtc_init();
+    }
+    machine_rtc_datetime_helper(2, args);
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_2(machine_rtc_init_obj, machine_rtc_init);
+
+// RTC.deinit()
+STATIC mp_obj_t machine_rtc_deinit(mp_obj_t self_in) {
+    /* Resets RTC to 1st Jan' 2015 as mentioned in MPY guide*/
+    struct tm reset_date_time = {
+        .tm_year = RTC_INIT_YEAR - TM_YEAR_BASE,
+        .tm_mon = RTC_INIT_MONTH - 1,
+        .tm_mday = RTC_INIT_MDAY,
+        .tm_wday = RTC_INIT_WDAY,
+        .tm_hour = RTC_INIT_HOUR,
+        .tm_min = RTC_INIT_MINUTE,
+        .tm_sec = RTC_INIT_SECOND,
+        .tm_isdst = RTC_INIT_DST
+    };
+    cy_rslt_t result = cyhal_rtc_write(&psoc6_rtc, &reset_date_time);
+    if (CY_RSLT_SUCCESS != result) {
+        mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_write failed during RTC deinitialization!"));
+    }
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_rtc_deinit_obj, machine_rtc_deinit);
+
+// RTC.now()
+STATIC mp_obj_t machine_rtc_now(mp_obj_t self_in) {
+    return machine_rtc_datetime_helper(1, NULL);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_rtc_now_obj, machine_rtc_now);
 
 STATIC const mp_rom_map_elem_t machine_rtc_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&machine_rtc_init_obj) },
+    { MP_ROM_QSTR(MP_QSTR_deinit), MP_ROM_PTR(&machine_rtc_deinit_obj) },
     { MP_ROM_QSTR(MP_QSTR_datetime), MP_ROM_PTR(&machine_rtc_datetime_obj) },
+    { MP_ROM_QSTR(MP_QSTR_now), MP_ROM_PTR(&machine_rtc_now_obj) },
 };
 STATIC MP_DEFINE_CONST_DICT(machine_rtc_locals_dict, machine_rtc_locals_dict_table);
-
 
 MP_DEFINE_CONST_OBJ_TYPE(
     machine_rtc_type,

@@ -68,7 +68,7 @@ mpy_define_mtb_vars: mpy_mtb_build
 #	$(info CFLAGS : $(CFLAGS))
 	$(eval CXXFLAGS += $(CFLAGS))
 #	$(info CXXFLAGS : $(CXXFLAGS))
-	$(eval LDFLAGS += -mcpu=cortex-m4 --specs=nano.specs -mfloat-abi=softfp -mfpu=fpv4-sp-d16 -mthumb -ffunction-sections -fdata-sections -ffat-lto-objects -g -Wall -pipe -Wl,--gc-sections -T$(MPY_DIR_OF_MTB_ADAPTER_MAKEFILE)/bsps/TARGET_APP_CY8CPROTO-062-4343W/COMPONENT_CM4/TOOLCHAIN_GCC_ARM/linker.ld -Wl,-Map,$(BUILD)/firmware.map -Wl,--start-group -Wl,--end-group )
+	$(eval LDFLAGS += -mcpu=cortex-m4 --specs=nano.specs -mfloat-abi=softfp -mfpu=fpv4-sp-d16 -mthumb -ffunction-sections -fdata-sections -ffat-lto-objects -g -Wall -pipe -Wl,--gc-sections -T$(MPY_DIR_OF_MTB_ADAPTER_MAKEFILE)/bsps/TARGET_APP_CY8CPROTO-062-4343W/COMPONENT_CM4/TOOLCHAIN_GCC_ARM/linker.ld -Wl,-Map,$(BUILD)/firmware.map -Wl,--start-group -Wl,--end-group -Wl,--print-memory-usage)
 #	$(info LDFLAGS : $(LDFLAGS))
 	$(eval QSTR_GEN_CFLAGS += $(INC))
 	touch mpy_define_mtb_vars

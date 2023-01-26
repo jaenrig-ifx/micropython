@@ -19,6 +19,7 @@
 
 
 extern cyhal_rtc_t psoc6_rtc;
+extern cyhal_timer_t psoc6_timer;
 
 
 void mp_hal_delay_ms(mp_uint_t ms) {
@@ -46,15 +47,17 @@ uint64_t mp_hal_time_ns(void) {
 
 
 mp_uint_t mp_hal_ticks_ms(void) {
-//     mp_raise_NotImplementedError(MP_ERROR_TEXT("mp_hal_ticks_ms not implemented !"));
-    return 0UL;
+    return cyhal_timer_read(&psoc6_timer) / 1000;
 }
 
 
 mp_uint_t mp_hal_ticks_us(void) {
-//     mp_raise_NotImplementedError(MP_ERROR_TEXT("mp_hal_ticks_us not implemented !"));
-    return 0UL;
-//    return time_us_32();
+    return cyhal_timer_read(&psoc6_timer);
+}
+
+
+mp_uint_t mp_hal_ticks_cpu(void) {
+    return cyhal_timer_read(&psoc6_timer);
 }
 
 
@@ -73,6 +76,42 @@ int mp_hal_stdin_rx_chr(void) {
 }
 
 
+void mp_hal_pin_od_low(mp_hal_pin_obj_t pin) {
+    gpio_clear_value(pin);
+}
+
+
+void mp_hal_pin_od_high(mp_hal_pin_obj_t pin) {
+    gpio_set_value(pin);
+}
+
+
+int mp_hal_pin_read(mp_hal_pin_obj_t pin) {
+    return gpio_get_value(pin);
+}
+
+
+void mp_hal_pin_open_drain(mp_hal_pin_obj_t pin) {
+    cyhal_gpio_configure(pin, CYHAL_GPIO_DIR_INPUT,  CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW);
+
+    // printf("2 SDA is CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW ? %ld\n", gpio_get_drive(CYBSP_I2C_SDA));
+    // printf("2 SCL is CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW ? %ld\n", gpio_get_drive(CYBSP_I2C_SCL));
+
+    // printf("SDA is CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW ? %d\n", (gpio_get_drive(CYBSP_I2C_SDA) & 0xFFFFFFF7) == CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW);
+    // printf("SCL is CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW ? %d\n", (gpio_get_drive(CYBSP_I2C_SCL) & 0xFFFFFFF7) == CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW);
+}
+
+
+uint8_t mp_hal_pin_name(mp_hal_pin_obj_t pin) {
+    return pin;
+}
+
+
+mp_hal_pin_obj_t mp_hal_get_pin_obj(mp_obj_t obj) {
+    return pin_addr_by_name(obj);
+}
+
+
 // TODO: move to another file or define as macro in mpconfigport.h
 mp_uint_t begin_atomic_section() {
     __disable_irq();
@@ -82,46 +121,4 @@ mp_uint_t begin_atomic_section() {
 
 void end_atomic_section(mp_uint_t state) {
     __enable_irq();
-}
-
-
-
-void mp_hal_delay_us_fast(mp_uint_t us) {
-    mp_hal_delay_us(us);
-}
-
-void mp_hal_pin_od_low(mp_hal_pin_obj_t pin) {
-    gpio_clear_value(pin);
-}
-
-void mp_hal_pin_od_high(mp_hal_pin_obj_t pin) {
-    gpio_set_value(pin);
-}
-
-int mp_hal_pin_read(mp_hal_pin_obj_t pin) {
-    return gpio_get_value(pin);
-}
-
-void mp_hal_pin_open_drain(mp_hal_pin_obj_t pin) {
-    // cyhal_gpio_configure(pin, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW);
-    cyhal_gpio_configure(pin, CYHAL_GPIO_DIR_INPUT,  CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW);
-
-    // printf("2 SDA is CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW ? %ld\n", gpio_get_drive(CYBSP_I2C_SDA));
-    // printf("2 SCL is CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW ? %ld\n", gpio_get_drive(CYBSP_I2C_SCL));
-
-/*
-    printf("SDA is CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW ? %d\n", (gpio_get_drive(CYBSP_I2C_SDA) & 0xFFFFFFF7) == CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW);
-    printf("SCL is CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW ? %d\n", (gpio_get_drive(CYBSP_I2C_SCL) & 0xFFFFFFF7) == CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW);
-*/
-}
-
-uint8_t mp_hal_pin_name(mp_hal_pin_obj_t pin) {
-    return pin;
-}
-
-
-
-
-mp_hal_pin_obj_t mp_hal_get_pin_obj(mp_obj_t obj) {
-    return pin_find(obj, (const machine_pin_obj_t *)machine_pin_obj, MP_ARRAY_SIZE(machine_pin_obj));
 }

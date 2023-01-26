@@ -4,9 +4,9 @@
 #include "pins.h"
 
 // Function definitions
-int pin_find(mp_obj_t pin, const machine_pin_obj_t machine_pin_obj[], int table_size) {
+// helper function to translate pin_name(string) into machine_pin_obj_t index.
+int pin_find(mp_obj_t pin) {
     int wanted_pin = -1;
-
     if (mp_obj_is_small_int(pin)) {
         // Pin defined by the index of pin table
         wanted_pin = mp_obj_get_int(pin);
@@ -14,16 +14,23 @@ int pin_find(mp_obj_t pin, const machine_pin_obj_t machine_pin_obj[], int table_
         // Search by name
         size_t slen;
         const char *s = mp_obj_str_get_data(pin, &slen);
-
-        for (int i = 0; i < table_size; ++i) {
+        for (int i = 0; i < MP_ARRAY_SIZE(machine_pin_obj); i++) {
             if (slen == strlen(machine_pin_obj[i].pin_name) && strncmp(s, machine_pin_obj[i].pin_name, slen) == 0) {
-                wanted_pin = machine_pin_obj[i].pin_addr;
+                wanted_pin = i;
                 break;
             }
         }
     }
-
     return wanted_pin;
+}
+
+// helper function to translate pin_name(string) into machine_pin_obj_t->pin_addr
+int pin_addr_by_name(mp_obj_t pin) {
+    if (mp_obj_is_str(pin)) {
+        return machine_pin_obj[pin_find(pin)].pin_addr;
+    } else {
+        return -1; // expecting a str as input
+    }
 }
 
 

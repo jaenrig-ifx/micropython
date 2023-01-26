@@ -9,19 +9,16 @@ Quick reference for the PSoC6™
 
 The CY8CPROTO-062-4343W PSoC6™ Board.
 
-Below is a quick reference for PSoC6-based boards.  If it is your first time
-working with this board it may be useful to get an overview of the microcontroller:
+Below is a quick reference for PSoC6™ boards. If it is your first time
+working with this port it may be useful to get an overview of the microcontroller:
 
 .. toctree::
    :maxdepth: 1
 
    general.rst
-   tutorial/index.rst
-
-Installing MicroPython
-----------------------
-
-See the corresponding section of tutorial: :ref:`psoc6_intro`.
+   intro.rst
+   installation.rst
+   mpy-usage.rst
 
 General board control
 ---------------------
@@ -49,8 +46,23 @@ The :mod:`machine` module::
 Delay and timing
 ----------------
 
+Use the :mod:`time <time>` module::
+
+    import time
+
+    time.sleep(1)           # sleep for 1 second
+    time.sleep_ms(500)      # sleep for 500 milliseconds
+    time.sleep_us(10)       # sleep for 10 microseconds
+    start = time.ticks_ms() # get millisecond counter
+    delta = time.ticks_diff(time.ticks_ms(), start) # compute time difference
+    start = time.ticks_us() # get microsecond counter
+    delta = time.ticks_diff(time.ticks_us(), start) # compute time difference
+
+
 Timers
 ------
+
+*Feature unavailable. Placeholder. To be completed.*
 
 Pins and GPIO
 -------------
@@ -182,3 +194,22 @@ Methods
 All the methods(functions) given in :ref:`machine.I2C <machine.I2C>` class:: have been implemented in this port except
 
 ..method:: I2C.init()
+Real time clock (RTC)
+---------------------
+
+See :ref:`machine.RTC <machine.RTC>` ::
+
+    from machine import RTC
+
+    rtc = RTC()
+    rtc.init((2023, 1, 1, 0, 0, 0, 0, 0)) # initialize rtc with specific date and time,
+                                          # eg. 2023/1/1 00:00:00
+    rtc.datetime((2017, 8, 23, 2, 12, 48, 0, 0)) # set a specific date and
+                                                 # time, eg. 2017/8/23 1:12:48
+    rtc.datetime() # get date and time
+    rtc.now() # get current date and time
+
+.. note::
+    Setting a random week day in 'wday' field is not valid. The underlying library implements the logic to always
+    calculate the right weekday based on the year, date and month passed. However, datetime() will not raise an error 
+    for this, but rather re-write the field with last calculated actual value.

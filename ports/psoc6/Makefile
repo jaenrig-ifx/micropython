@@ -124,11 +124,12 @@ SRC_C = \
 	modules/machine/machine_i2c.c \
 	modules/machine/machine_pin.c \
 	modules/machine/pins.c \
-	modules/machine/rtc.c \
+	modules/machine/machine_rtc.c \
 	\
 	modules/psoc6/modpsoc6.c \
 	modules/psoc6/psoc6_fatfs.c \
 	modules/psoc6/psoc6_flash.c \
+	modules/psoc6/psoc6_qspi_flash.c \
 	\
 	modules/time/modutime.c \
 	\
@@ -145,11 +146,11 @@ SRC_QSTR += $(MPY_SRC_C) $(SRC_USERMOD) $(SRC_EXTMOD_C)
 SRC_QSTR += modules/machine/modmachine.c \
             modules/machine/machine_i2c.c \
             modules/machine/machine_pin.c \
-			modules/machine/rtc.c \
+			modules/machine/machine_rtc.c \
             \
             modules/os/moduos.c \
 			\
-            modules/psoc6/modpsoc6.c modules/psoc6/psoc6_fatfs.c modules/psoc6/psoc6_flash.c \
+            modules/psoc6/modpsoc6.c modules/psoc6/psoc6_fatfs.c modules/psoc6/psoc6_flash.c modules/psoc6/psoc6_qspi_flash.c \
 			\
 			modules/time/modutime.c
 
@@ -172,7 +173,7 @@ $(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ) $(MPY_MTB_LIBRARI
 	$(info Linking $@ ...)
 	$(Q)$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 	$(info Linking $@ done.)
-	$(Q)$(SIZE) $@
+	$(Q)$(SIZE) $@ -A
 	$(info )
 
 
