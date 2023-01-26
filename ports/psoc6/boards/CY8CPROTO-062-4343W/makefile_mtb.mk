@@ -7,7 +7,7 @@ MPY_DIR_OF_MTB_ADAPTER_MAKEFILE  := $(dir $(MPY_PATH_TO_MTB_ADAPTER_MAKEFILE))
 # get variable definitions from main makefile
 MPY_MTB_MAIN_MAKEFILE := $(MPY_DIR_OF_MTB_ADAPTER_MAKEFILE)/Makefile
 MPY_MTB_TARGET        := $(shell egrep '^ *TARGET' $(MPY_MTB_MAIN_MAKEFILE) | sed 's/^.*= *//g')
-MPY_MTB_CONFIG        := $(shell egrep '^ *CONFIG' $(MPY_MTB_MAIN_MAKEFILE) | sed 's/^.*= *//g')
+MPY_MTB_CONFIG        ?= $(shell egrep '^ *CONFIG' $(MPY_MTB_MAIN_MAKEFILE) | sed 's/^.*= *//g')
 
 MPY_MTB_BOARD_BUILD_DIR        := $(MPY_DIR_OF_MTB_ADAPTER_MAKEFILE)/$(BUILD)
 MPY_MTB_BOARD_BUILD_OUTPUT_DIR := $(MPY_MTB_BOARD_BUILD_DIR)/$(MPY_MTB_TARGET)/$(MPY_MTB_CONFIG)
@@ -24,13 +24,6 @@ OPENOCD_HOME     ?= $(MTB_HOME)/tools_3.0/openocd
 OPENOCD_WIN_HOME ?= $(MTB_WIN_HOME)/tools_3.0/openocd
 
 
-ifdef FORCE_MTB_BUILD
-  MPY_REMOVE_MTB_BUILD_DIR := rm -rf $(MPY_MTB_BOARD_BUILD_DIR) ;
-else
-  MPY_REMOVE_MTB_BUILD_DIR :=
-endif
-
-
 $(info MPY_DIR_OF_MTB_ADAPTER_MAKEFILE  : $(MPY_DIR_OF_MTB_ADAPTER_MAKEFILE))
 
 $(info MPY_MTB_MAIN_MAKEFILE            : $(MPY_MTB_MAIN_MAKEFILE))
@@ -40,7 +33,6 @@ $(info MTB_LIB_NAME                     : $(MPY_MTB_LIB_NAME))
 
 $(info MPY_MTB_BOARD_BUILD_DIR          : $(MPY_MTB_BOARD_BUILD_DIR))
 $(info MPY_MTB_BOARD_BUILD_OUTPUT_DIR   : $(MPY_MTB_BOARD_BUILD_OUTPUT_DIR))
-$(info MPY_REMOVE_MTB_BUILD_DIR         : $(MPY_REMOVE_MTB_BUILD_DIR))
 
 
 # init MTB project
@@ -54,7 +46,13 @@ mpy_mtb_init:
 mpy_mtb_build:
 	$(info )
 	$(info Building $(BOARD) using MTB ...)
-	-$(Q) cd $(BOARD_DIR); $(MPY_REMOVE_MTB_BUILD_DIR) $(MAKE) build
+	-$(Q) cd $(BOARD_DIR); $(MAKE) CONFIG=$(MPY_MTB_CONFIG) build
+
+
+mpy_mtb_clean:
+	$(info )
+	$(info Cleaning $(MPY_MTB_BOARD_BUILD_DIR) ...)
+	-$(Q) cd $(BOARD_DIR); $(MAKE) clean
 
 
 # get variables set for includes, objects, etc. and add to mpy makefile variables

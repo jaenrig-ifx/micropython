@@ -64,11 +64,16 @@ LDFLAGS = -Wl,--cref -Wl,--gc-sections
 
 # Tune for Debugging or Optimization
 ifeq ($(DEBUG), 1)
-  CFLAGS += -O0 -ggdb
+  CFLAGS         += -O0 -ggdb
+  MPY_MTB_CONFIG  = Debug
 else
-  CFLAGS += -Os -DNDEBUG
-  CFLAGS += -fdata-sections -ffunction-sections
+  CFLAGS         += -O3 -Os -DNDEBUG
+  CFLAGS         += -fdata-sections -ffunction-sections
+  MPY_MTB_CONFIG  = Release
 endif
+
+
+$(info Compiling in $(MPY_MTB_CONFIG) mode !)
 
 
 # Flags for optional C++ source code
@@ -182,4 +187,6 @@ include $(BOARD_DIR)/makefile_mtb.mk
 include $(TOP)/py/mkrules.mk
 
 
-all: $(MPY_MAIN_BUILD_DIR)/firmware.hex
+all: $(MPY_MAIN_BUILD_DIR)/firmware.hex $(MPY_PATH_TO_MAIN_MAKEFILE)
+
+rebuild: clean mpy_mtb_clean all

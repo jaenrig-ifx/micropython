@@ -108,7 +108,7 @@
 // #define MICROPY_PY_MACHINE_PWM_INCLUDEFILE      "ports/psoc6/modules/machine/machine_pwm.c"
 #define MICROPY_PY_MACHINE_I2C                  (1)
 #define MICROPY_PY_MACHINE_SOFTI2C              (1)
-#define MICROPY_PY_MACHINE_I2C_TRANSFER_WRITE1  (1)
+#define MICROPY_PY_MACHINE_I2C_TRANSFER_WRITE1  (0)
 
 #define MICROPY_PY_MACHINE_SPI                  (0)
 // #define MICROPY_PY_MACHINE_SPI_MSB              (SPI_MSB_FIRST)

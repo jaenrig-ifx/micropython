@@ -26,6 +26,7 @@
 #define MICROPY_HW_I2C_SDA   (CYBSP_I2C_SDA)
 #define PSOC_I2C_MASTER_MODE (CYHAL_I2C_MODE_MASTER)
 
+
 extern mp_hal_pin_obj_t mp_hal_get_pin_obj(mp_obj_t obj);
 
 
@@ -61,6 +62,7 @@ mp_obj_t machine_i2c_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
     }
 
     // Get peripheral object
+    // TODO: an individual machine_i2c_obj_t::i2c_obj is required per I2C bus !
     machine_i2c_obj_t *self = (machine_i2c_obj_t *)&machine_i2c_obj;
     self->base.type = &machine_i2c_type;
     self->i2c_id = i2c_id;
@@ -94,8 +96,8 @@ mp_obj_t machine_i2c_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
 
     self->freq = args[ARG_freq].u_int;
 
-    // initilaise I2C Peripheral and configure as master
-    cy_rslt_t result = i2c_init(&self->i2c_obj, self->scl, self->sda, self->freq);
+    // initialise I2C Peripheral and configure as master
+    cy_rslt_t result = i2c_init(self);
 
     if (result != CY_RSLT_SUCCESS) {
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("I2C initialisation failed with return code %lx !"), result);
@@ -104,116 +106,52 @@ mp_obj_t machine_i2c_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
 }
 
 
-// TODO: Assuming addrsize to be 8 bits.
 STATIC int machine_i2c_transfer(mp_obj_base_t *self_in, uint16_t addr, size_t len, uint8_t *buf, unsigned int flags) {
-
     machine_i2c_obj_t *self = MP_OBJ_TO_PTR(self_in);
     cy_rslt_t result = CY_RSLT_SUCCESS;
-    bool send_stop = (flags & MP_MACHINE_I2C_FLAG_STOP)? true : false;
+    bool send_stop = (flags & MP_MACHINE_I2C_FLAG_STOP) ? true : false;
     uint32_t timeout = 0;
 
-    // start I2C transaction
-    if ((flags & MP_MACHINE_I2C_FLAG_WRITE1) == MP_MACHINE_I2C_FLAG_WRITE1) {
-        // buf[0] is the memory address
-        result = i2c_write(&self->i2c_obj, addr, &buf[0], 1, timeout, send_stop);
+    if ((flags & MP_MACHINE_I2C_FLAG_READ) == MP_MACHINE_I2C_FLAG_READ) {
+        result = i2c_read(&self->i2c_obj, addr, buf, len, timeout, send_stop);
 
         if (result != CY_RSLT_SUCCESS) {
-            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code %lx !"), result);
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_read failed with return code %lx !"), result);
         }
 
-        if ((flags & MP_MACHINE_I2C_FLAG_READ) == MP_MACHINE_I2C_FLAG_READ) {
-            // Data starts at buf[1]
-            result = i2c_read(&self->i2c_obj, addr, &buf[1], len - 1, timeout, send_stop);
-
-            if (result != CY_RSLT_SUCCESS) {
-                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_read failed with return code %lx !"), result);
-            }
-        }
+        return len;
     } else {
-        if ((flags & MP_MACHINE_I2C_FLAG_READ) == MP_MACHINE_I2C_FLAG_READ) {
-            result = i2c_read(&self->i2c_obj, addr, buf, len, timeout, send_stop);
+        // handle scan type bus checks and send stop
+        if (buf == NULL) {
+            result = i2c_write(&self->i2c_obj, addr, buf, 0, 50, send_stop);
 
-            if (result != CY_RSLT_SUCCESS) {
-                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_read failed with return code %lx !"), result);
-            }
-        } else {
-            // handle scan type bus checks
-            if (buf == NULL) {
-                uint8_t buf[1] = { 0x00 };
-                result = i2c_write(&self->i2c_obj, addr, buf, 1, 50, send_stop);
-
-                if ((result != CY_RSLT_SUCCESS)) {
-                    if (result != 0xaa2004) {
-                        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code %lx !"), result);
-                    }
-
-                    return 1;
+            if ((result != CY_RSLT_SUCCESS)) {
+                // these 2 errors occur if nothing is attached to sda/scl, but they are pulled-up (0xaa2004) or not pulled-up (0xaa2003).
+                // In the latter case, due to not reaction at all the timeout has to expire. Latency is therefore high.
+                if (result != 0xaa2004 && result != 0xaa2003) {
+                    mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code %lx !"), result);
                 }
 
-                return CY_RSLT_SUCCESS;
-            } else {
-                result = i2c_write(&self->i2c_obj, addr, buf, len, timeout, send_stop);
+                return 1;
             }
+
+            return len;
+        } else {
+            result = i2c_write(&self->i2c_obj, addr, buf, len, timeout, send_stop);
 
             if (result != CY_RSLT_SUCCESS) {
                 mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("cyhal_i2c_master_write failed with return code %lx !"), result);
             }
         }
+
+        return len;
     }
-
-    return result;
-}
-
-
-// TODO: uint8_t addrsize is unknown at this stage, therefore a fixed addrsize has to be assumed. machine_i2c_transfer assumes 8 bits.
-// For use by ports that require a single buffer of data for a read/write transfer
-int mp_machine_i2c_transfer_adaptor_psoc6(mp_obj_base_t *self, uint16_t addr, size_t n, mp_machine_i2c_buf_t *bufs, unsigned int flags) {
-    size_t len;
-    uint8_t *buf;
-
-    if (n == 1) {
-        // Use given single buffer
-        len = bufs[0].len;
-        buf = bufs[0].buf;
-    } else {
-        // Combine buffers into a single one
-        len = 0;
-        for (size_t i = 0; i < n; ++i) {
-            len += bufs[i].len;
-        }
-        buf = m_new(uint8_t, len);
-        if (!(flags & MP_MACHINE_I2C_FLAG_READ) || (flags & MP_MACHINE_I2C_FLAG_WRITE1)) {
-            len = 0;
-            for (size_t i = 0; i < n; ++i) {
-                memcpy(buf + len, bufs[i].buf, bufs[i].len);
-                len += bufs[i].len;
-            }
-        }
-    }
-
-    mp_machine_i2c_p_t *i2c_p = (mp_machine_i2c_p_t *)MP_OBJ_TYPE_GET_SLOT(self->type, protocol);
-    int ret = i2c_p->transfer_single(self, addr, len, buf, flags);
-
-    if (n > 1) {
-        if (flags & MP_MACHINE_I2C_FLAG_READ) {
-            // Copy data from single buffer to individual ones
-            len = 0;
-            for (size_t i = 0; i < n; ++i) {
-                memcpy(bufs[i].buf, buf + len, bufs[i].len);
-                len += bufs[i].len;
-            }
-        }
-        m_del(uint8_t, buf, len);
-    }
-
-    return ret;
 }
 
 
 STATIC const mp_machine_i2c_p_t machine_i2c_p = {
-    .transfer_supports_write1 = true,
     .transfer_single = machine_i2c_transfer,
-    .transfer = mp_machine_i2c_transfer_adaptor_psoc6
+    .transfer = mp_machine_i2c_transfer_adaptor
 };
 
 

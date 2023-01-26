@@ -6,6 +6,11 @@
 #include "psoc6_gpio.h"
 
 gpio_init_rslt gpio_init(cyhal_gpio_t pin, cyhal_gpio_direction_t direction, cyhal_gpio_drive_mode_t drive_mode, bool init_val) {
+    // Free up the cy gpio obj
+    // this function checks if the pin is init'd before and only frees it if so.
+    // else does nothing
+    cyhal_gpio_free(pin);
+    // Then do actual gpio init (or reinit)
     return cyhal_gpio_init(pin, direction, drive_mode, init_val);
 }
 
