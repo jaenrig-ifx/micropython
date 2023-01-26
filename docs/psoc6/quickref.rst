@@ -22,7 +22,7 @@ working with this port it may be useful to get an overview of the microcontrolle
 
 .. warning::
 
-    The PSoC6™ port is still in a early stage of development. It is expected that any MicroPython built-in
+    The PSoC6™ port is still in an early stage of development. It is expected any MicroPython built-in
     library to be supported, but not all libraries, modules and features have been yet evaluated.
     For those modules relying on platform and hardware dependencies, only the listed and documented in this
     quick reference are certainyly supported. 
