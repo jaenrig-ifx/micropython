@@ -142,7 +142,7 @@ The following constants are used to configure the pin objects in addition to the
 Software I2C bus
 ----------------
 Software I2C (using bit-banging) works on all output-capable pins, and is
-accessed via the :ref:`machine.SoftI2C <machine.SoftI2C>` class::
+accessed via :ref:`machine.SoftI2C <machine.SoftI2C>` ::
 
     from machine import Pin, SoftI2C
 
@@ -169,7 +169,7 @@ sda    P6_1           P9_1
 =====  ===========  ============
 
 
-The driver is accesses via the :ref:`machine.I2C <machine.I2C>` class::
+The driver is accessed via :ref:`machine.I2C <machine.I2C>`
 
 The constructor
 ^^^^^^^^^^^^^^^
