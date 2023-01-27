@@ -179,7 +179,7 @@ initialized and configured to work in master mode.
 
 i2c = I2C(0,scl='P6_0',sda='P6_1',freq=4000000)
 
-Here i2c_id=0 should be passed mandatorily which selects the master mode operation.
+Here id=0 should be passed mandatorily which selects the master mode operation.
 
 ::
 
@@ -197,7 +197,7 @@ All the methods(functions) given in :ref:`machine.I2C <machine.I2C>` class:: hav
 
 ..method:: I2C.init()
 
-All the initialization & configurations are handled by the constructor.
+All the initialization & configurations are handled by the constructor.Hence init() is not required
 
 
 Real time clock (RTC)
