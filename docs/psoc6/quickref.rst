@@ -195,7 +195,7 @@ Methods
 ^^^^^^^
 All the methods(functions) given in :ref:`machine.I2C <machine.I2C>` class:: have been implemented in this port except
 
-..method:: I2C.init()
+.. method:: I2C.init()
 
 All the initialization & configurations are handled by the constructor.Hence init() is not required
 
