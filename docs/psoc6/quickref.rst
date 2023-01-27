@@ -175,18 +175,18 @@ The constructor
 ^^^^^^^^^^^^^^^
 An instance of the :mod:`machine.I2C` class can be created by invoking the constructor with all the 
 necessary parameters to fully configure the ``I2C``. By invoking the constructor I2C peripheral is 
-initialized and configured to work in master mode.
+initialized and configured to work in master mode. 
 
 i2c = I2C(0,scl='P6_0',sda='P6_1',freq=4000000)
 
 Here i2c_id=0 should be passed mandatorily which selects the master mode operation.
 
-: :
+::
 
     from machine import Pin,I2C
     i2c = I2C(0)                  #I2C is initialized & configured with default scl, sda pin & frequency
 
-: :
+::
 
     from machine import Pin,I2C
     i2c = I2C(0,scl='P9_0',sda='P9_1',freq=4000000)   #I2C is initialised & configured with given scl,sda pins & frequency
@@ -196,6 +196,8 @@ Methods
 All the methods(functions) given in :ref:`machine.I2C <machine.I2C>` class:: have been implemented in this port except
 
 ..method:: I2C.init()
+
+All the initialization & configurations are handled by the constructor.
 
 
 Real time clock (RTC)
