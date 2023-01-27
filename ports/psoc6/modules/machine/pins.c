@@ -1,6 +1,9 @@
 // std includes
 #include <stdlib.h>
 
+// mpy include
+#include "py/runtime.h"
+
 #include "pins.h"
 
 // Function definitions
@@ -21,6 +24,11 @@ int pin_find(mp_obj_t pin) {
             }
         }
     }
+
+    if (!(0 <= wanted_pin && wanted_pin < MP_ARRAY_SIZE(machine_pin_obj))) {
+        mp_raise_ValueError(MP_ERROR_TEXT("invalid pin: Pin not defined!"));
+    }
+
     return wanted_pin;
 }
 
