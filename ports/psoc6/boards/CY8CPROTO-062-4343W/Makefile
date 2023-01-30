@@ -46,9 +46,10 @@ TARGET=APP_CY8CPROTO-062-4343W
 
 # Name of application (used to derive name of final linked file).
 #
-# If APPNAME is edited, ensure to update or regenerate launch
+# If APPNAME / LIBNAME is edited, ensure to update or regenerate launch
 # configurations for your IDE.
-APPNAME=mtb-example-hal-hello-world
+#APPNAME=mtb
+LIBNAME=libmtb
 
 # Name of toolchain to use. Options include:
 #

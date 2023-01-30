@@ -53,19 +53,27 @@ LD               = arm-none-eabi-gcc
 CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingle-precision-constant -Wdouble-promotion -Wfloat-conversion -UMICROPY_USE_INTERNAL_PRINTF
 
 
-# used for HelloWorld MTB
-CFLAGS  = $(INC) -Wall -Werror $(CFLAGS_CORTEX_M4) $(COPT) -std=c11
+# c11 : provides "static_assert" (not available in c99) 
+# -D_XOPEN_SOURCE=700 : makes sure the setenv/unsetenv headers are included
+#CFLAGS  = $(INC) -Wall $(CFLAGS_CORTEX_M4) $(COPT) -std=c11 -D_XOPEN_SOURCE=700
+CFLAGS  = $(INC) -Wall -Werror $(CFLAGS_CORTEX_M4) $(COPT) -std=c11 -D_XOPEN_SOURCE=700 -Wno-error=double-promotion -Wno-error=overflow
+
 #CFLAGS  = $(INC) -Wall -Werror -std=c99 $(CFLAGS_CORTEX_M4) $(COPT)
 LDFLAGS = -Wl,--cref -Wl,--gc-sections
 
 
 # Tune for Debugging or Optimization
 ifeq ($(DEBUG), 1)
-  CFLAGS += -O0 -ggdb
+  CFLAGS         += -O0 -ggdb
+  MPY_MTB_CONFIG  = Debug
 else
-  CFLAGS += -Os -DNDEBUG
-  CFLAGS += -fdata-sections -ffunction-sections
+  CFLAGS         += -O3 -Os -DNDEBUG
+  CFLAGS         += -fdata-sections -ffunction-sections
+  MPY_MTB_CONFIG  = Release
 endif
+
+
+$(info Compiling in $(MPY_MTB_CONFIG) mode !)
 
 
 # Flags for optional C++ source code
@@ -97,7 +105,7 @@ MPY_SRC_C += lib/littlefs/lfs1.c lib/littlefs/lfs1_util.c lib/littlefs/lfs2.c li
 			 shared/runtime/sys_stdio_mphal.c 
 
 
-SRC_ASM = shared/runtime/gchelper_m0.s
+SRC_ASM = shared/runtime/gchelper_thumb1.s
 
 
 SRC_C = \
@@ -106,12 +114,14 @@ SRC_C = \
 	help.c \
 	mphalport.c \
 	\
-    drivers/machine/psoc6_system.c  \
     drivers/machine/psoc6_gpio.c \
+    drivers/machine/psoc6_i2c.c \
+    drivers/machine/psoc6_system.c  \
 	\
 	modules/gc/modgc.c \
 	\
 	modules/machine/modmachine.c \
+	modules/machine/machine_i2c.c \
 	modules/machine/machine_pin.c \
 	modules/machine/pins.c \
 	modules/machine/machine_rtc.c \
@@ -134,6 +144,7 @@ SRC_CXX   =
 
 SRC_QSTR += $(MPY_SRC_C) $(SRC_USERMOD) $(SRC_EXTMOD_C)
 SRC_QSTR += modules/machine/modmachine.c \
+            modules/machine/machine_i2c.c \
             modules/machine/machine_pin.c \
 			modules/machine/machine_rtc.c \
             \
@@ -157,10 +168,10 @@ ifeq ($(MP_LOGGER_DEBUG), 1)
 endif
 
 
-$(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ)
+$(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ) $(MPY_MTB_LIBRARIES) $(LIBS)
 	$(info )
 	$(info Linking $@ ...)
-	$(Q)$(LD) $(LDFLAGS) -o $@ $^ 
+	$(Q)$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 	$(info Linking $@ done.)
 	$(Q)$(SIZE) $@ -A
 	$(info )
@@ -177,4 +188,6 @@ include $(BOARD_DIR)/makefile_mtb.mk
 include $(TOP)/py/mkrules.mk
 
 
-all: $(MPY_MAIN_BUILD_DIR)/firmware.hex
+all: $(MPY_MAIN_BUILD_DIR)/firmware.hex $(MPY_PATH_TO_MAIN_MAKEFILE)
+
+rebuild: clean mpy_mtb_clean all

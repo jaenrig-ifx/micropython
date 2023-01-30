@@ -1,4 +1,5 @@
 // micropython includes
+#include "py/mphal.h"
 #include "py/runtime.h"
 
 
@@ -28,7 +29,7 @@ enum {ARG_mode, ARG_pull, ARG_value, ARG_drive, ARG_alt};
 static const mp_arg_t allowed_args[] = {
     {MP_QSTR_mode,  MP_ARG_OBJ,                     {.u_rom_obj = MP_ROM_NONE}},
     {MP_QSTR_pull,  MP_ARG_OBJ,                     {.u_rom_obj = MP_ROM_NONE}},
-    {MP_QSTR_value, MP_ARG_KW_ONLY | MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
+    {MP_QSTR_valu, MP_ARG_KW_ONLY | MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
     {MP_QSTR_drive, MP_ARG_KW_ONLY | MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
     {MP_QSTR_alt,   MP_ARG_KW_ONLY | MP_ARG_INT,    {.u_int = HSIOM_GPIO_FUNC}},  // default value of HSIOM set to GPIO mode of pin.
 };
@@ -219,12 +220,9 @@ mp_obj_t mp_pin_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, 
     // object ptr for the class obj instantiated
     const machine_pin_obj_t *self = NULL;
 
-    // get the wanted pin object
+    // get the wanted pin index
     int wanted_pin = pin_find(args[0]);
 
-    if (!(0 <= wanted_pin && wanted_pin < MP_ARRAY_SIZE(machine_pin_obj))) {
-        mp_raise_ValueError(MP_ERROR_TEXT("invalid pin: Pin not defined!"));
-    }
     // Note: we have different init args based on the type of pin. so Pin("LED", Pin.OUT) may not always make sense
     // assign machine_pin obj to obj pointer
     self = &machine_pin_obj[wanted_pin];

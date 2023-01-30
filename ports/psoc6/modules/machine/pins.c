@@ -1,6 +1,9 @@
 // std includes
 #include <stdlib.h>
 
+// mpy include
+#include "py/runtime.h"
+
 #include "pins.h"
 
 // Function definitions
@@ -21,6 +24,11 @@ int pin_find(mp_obj_t pin) {
             }
         }
     }
+
+    if (!(0 <= wanted_pin && wanted_pin < MP_ARRAY_SIZE(machine_pin_obj))) {
+        mp_raise_ValueError(MP_ERROR_TEXT("invalid pin: Pin not defined!"));
+    }
+
     return wanted_pin;
 }
 
@@ -32,6 +40,7 @@ int pin_addr_by_name(mp_obj_t pin) {
         return -1; // expecting a str as input
     }
 }
+
 
 // Pin object instantiations on the basis of selected board (chip package)
 // Generated manually w.r.t cyhal_gpio_psoc6_02_124_bga_t enum for the package present in the CYPROTO-062-4343 target
