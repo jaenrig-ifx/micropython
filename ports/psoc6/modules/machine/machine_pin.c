@@ -220,12 +220,9 @@ mp_obj_t mp_pin_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, 
     // object ptr for the class obj instantiated
     const machine_pin_obj_t *self = NULL;
 
-    // get the wanted pin object
+    // get the wanted pin index
     int wanted_pin = pin_find(args[0]);
 
-    if (!(0 <= wanted_pin && wanted_pin < MP_ARRAY_SIZE(machine_pin_obj))) {
-        mp_raise_ValueError(MP_ERROR_TEXT("invalid pin: Pin not defined!"));
-    }
     // Note: we have different init args based on the type of pin. so Pin("LED", Pin.OUT) may not always make sense
     // assign machine_pin obj to obj pointer
     self = &machine_pin_obj[wanted_pin];
