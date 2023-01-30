@@ -1,6 +1,9 @@
 // std includes
 #include <stdlib.h>
 
+// mpy include
+#include "py/runtime.h"
+
 #include "pins.h"
 
 // Function definitions

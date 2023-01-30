@@ -5,11 +5,13 @@
 // port-specific includes
 #include "modmachine.h"
 
+
 // cy includes
 #include "cyhal.h"
 
+
 // mpy include
-#include "py/runtime.h"
+
 
 /* Include Pin definitions to make it visible at py side*/
 // Generated manually w.r.t cyhal_gpio_psoc6_02_124_bga_t enum for the package present in the CYPROTO-062-4343 target
