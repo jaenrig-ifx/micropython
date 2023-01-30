@@ -105,7 +105,7 @@ MPY_SRC_C += lib/littlefs/lfs1.c lib/littlefs/lfs1_util.c lib/littlefs/lfs2.c li
 			 shared/runtime/sys_stdio_mphal.c 
 
 
-SRC_ASM = shared/runtime/gchelper_m0.s
+SRC_ASM = shared/runtime/gchelper_thumb1.s
 
 
 SRC_C = \
