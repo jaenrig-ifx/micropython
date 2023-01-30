@@ -93,12 +93,6 @@ int mp_hal_pin_read(mp_hal_pin_obj_t pin) {
 
 void mp_hal_pin_open_drain(mp_hal_pin_obj_t pin) {
     cyhal_gpio_configure(pin, CYHAL_GPIO_DIR_INPUT,  CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW);
-
-    // printf("2 SDA is CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW ? %ld\n", gpio_get_drive(CYBSP_I2C_SDA));
-    // printf("2 SCL is CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW ? %ld\n", gpio_get_drive(CYBSP_I2C_SCL));
-
-    // printf("SDA is CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW ? %d\n", (gpio_get_drive(CYBSP_I2C_SDA) & 0xFFFFFFF7) == CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW);
-    // printf("SCL is CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW ? %d\n", (gpio_get_drive(CYBSP_I2C_SCL) & 0xFFFFFFF7) == CYHAL_GPIO_DRIVE_OPENDRAINDRIVESLOW);
 }
 
 

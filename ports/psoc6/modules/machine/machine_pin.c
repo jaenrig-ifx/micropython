@@ -29,7 +29,7 @@ enum {ARG_mode, ARG_pull, ARG_value, ARG_drive, ARG_alt};
 static const mp_arg_t allowed_args[] = {
     {MP_QSTR_mode,  MP_ARG_OBJ,                     {.u_rom_obj = MP_ROM_NONE}},
     {MP_QSTR_pull,  MP_ARG_OBJ,                     {.u_rom_obj = MP_ROM_NONE}},
-    {MP_QSTR_valu, MP_ARG_KW_ONLY | MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
+    {MP_QSTR_value, MP_ARG_KW_ONLY | MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
     {MP_QSTR_drive, MP_ARG_KW_ONLY | MP_ARG_OBJ,    {.u_rom_obj = MP_ROM_NONE}},
     {MP_QSTR_alt,   MP_ARG_KW_ONLY | MP_ARG_INT,    {.u_int = HSIOM_GPIO_FUNC}},  // default value of HSIOM set to GPIO mode of pin.
 };
