@@ -90,9 +90,9 @@ An instance of the :mod:`machine.Pin` class can be created by invoking the const
 
     from machine import Pin
 
-    p0 = Pin('P13_7', Pin.OUT, Pin.PULL_DOWN, value=STATE_LOW)   # create output pin on pin P13_7, 
-                                                                 # with pull-down resistor enabled,
-                                                                 # with initial value 0 (STATE_LOW)     
+    p0 = Pin('P13_7', Pin.OUT, Pin.PULL_DOWN, value=Pin.STATE_LOW)   # create output pin on pin P13_7, 
+                                                                     # with pull-down resistor enabled,
+                                                                     # with initial value 0 (STATE_LOW)     
 
 
 Additionally, with any combination of parameters (except the Pin number or ``id`` which should be passed mandatorily), a :mod:`machine.Pin` object with various configuration levels can be instantiated. In these cases, the :meth:`Pin.init` function has to be called proactively to set the other necessary configurations, as needed.
@@ -105,7 +105,7 @@ Moreover, a pre-configured pin object can be repurposed by calling the :meth:`Pi
     from machine import Pin
 
     p0 = Pin('P13_7')                    # create pin object for pin P13_7. 
-    p0.init(p0.OUT, p0.PULL_DOWN)        # set pin as output and enable pull-down resistor.
+    p0.init(Pin.OUT, Pin.PULL_DOWN)      # set pin as output and enable pull-down resistor.
     p0.low()                             # set value low.     
 
 
@@ -118,14 +118,14 @@ Similar to CPython, the parameters can be passed in any order if keywords are us
 
     from machine import Pin
 
-    p0 = Pin(id='P13_7', value=STATE_LOW, pull=Pin.PULL_DOWN, mode=Pin.OUT)     # create output pin on pin P13_7, 
-                                                                                # with pull-down resistor enabled,
-                                                                                # with initial value 0 (STATE_LOW) 
+    p0 = Pin(id='P13_7', value=Pin.STATE_LOW, pull=Pin.PULL_DOWN, mode=Pin.OUT)     # create output pin on pin P13_7, 
+                                                                                    # with pull-down resistor enabled,
+                                                                                    # with initial value 0 (STATE_LOW) 
 
 
-    p1 = Pin('P0_0', Pin.OUT, None, value=STATE_HIGH)                           # create output pin on pin P0_0, 
-                                                                                # with pull as NONE,
-                                                                                # with initial value 1 (STATE_HIGH)                                                                       
+    p1 = Pin('P0_0', Pin.OUT, None, value=Pin.STATE_HIGH)                           # create output pin on pin P0_0, 
+                                                                                    # with pull as NONE,
+                                                                                    # with initial value 1 (STATE_HIGH)                                                                       
 
 Note that the parameters such as ``value`` can only be passed as keyword arguments.  
 
@@ -189,6 +189,7 @@ necessary parameters to fully configure the ``I2C``. By invoking the constructor
 initialized and configured to work in master mode. 
 
 ::
+    
     from machine import I2C
     i2c = I2C(0,scl='P6_0',sda='P6_1',freq=4000000)
 
