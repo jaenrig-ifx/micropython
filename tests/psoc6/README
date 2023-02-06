@@ -206,7 +206,7 @@ run-tests.py         : run tests from host platform
 
 
 
-### tests skipped by run-tests.py and potentially to be enabled in mpconfigport.h
+### tests skipped by run-tests.py and potentially to be enabled in "mpconfigport.h"
 - basics/builtin_next_arg2.py
 - basics/builtin_range_binop.py
 - basics/class_inplace_op2.py
