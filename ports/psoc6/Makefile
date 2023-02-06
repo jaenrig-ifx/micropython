@@ -26,7 +26,7 @@ MICROPY_QSTR_EXTRA_POOL = mp_qstr_frozen_const_pool
 
 
 CROSS_COMPILE ?= arm-none-eabi-
-
+CONFIG        ?= Debug
 
 # include py core make definitions
 include ../../py/mkenv.mk
@@ -43,6 +43,7 @@ MPY_MAIN_BUILD_DIR := $(dir $(MPY_DIR_OF_MAIN_MAKEFILE))/$(BUILD)
 $(info MPY_PATH_TO_MAIN_MAKEFILE        : $(MPY_PATH_TO_MAIN_MAKEFILE))
 $(info MPY_DIR_OF_MAIN_MAKEFILE         : $(MPY_DIR_OF_MAIN_MAKEFILE))
 $(info MPY_MAIN_BUILD_DIR               : $(MPY_MAIN_BUILD_DIR))
+$(info CONFIG                           : $(CONFIG))
 
 
 INC += -I.
@@ -53,16 +54,18 @@ LD               = arm-none-eabi-gcc
 CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingle-precision-constant -Wdouble-promotion -Wfloat-conversion -UMICROPY_USE_INTERNAL_PRINTF
 
 
-# c11 : provides "static_assert" (not available in c99) 
+# std=c11 instead of std=c99 : provides "static_assert" (not available in c99) 
 # -D_XOPEN_SOURCE=700 : makes sure the setenv/unsetenv headers are included
-CFLAGS  = $(INC) -Wall -Werror $(CFLAGS_CORTEX_M4) $(COPT) -std=c11 -D_XOPEN_SOURCE=700 -Wno-error=double-promotion -Wno-error=overflow
+CFLAGS  = $(INC) -Wall -Werror -std=c11 $(CFLAGS_CORTEX_M4) $(COPT) -D_XOPEN_SOURCE=700 -Wno-error=double-promotion -Wno-error=overflow -Wno-error=analyzer-null-dereference
 
 LDFLAGS = -Wl,--cref -Wl,--gc-sections
 
 
 # Tune for Debugging or Optimization
-ifeq ($(DEBUG), 1)
+ifeq ($(CONFIG), Debug)
   CFLAGS         += -O0 -ggdb
+  # -fanalyzer
+  # -fsanitize=leak -fsanitize=bounds -fsanitize=object-size  -fstack-protector -fsanitize=address
   MPY_MTB_CONFIG  = Debug
 else
   CFLAGS         += -O3 -Os -DNDEBUG
@@ -71,7 +74,7 @@ else
 endif
 
 
-$(info Compiling in $(MPY_MTB_CONFIG) mode !)
+$(info Compiling in $(CONFIG) mode !)
 
 
 # Flags for optional C++ source code
@@ -81,17 +84,18 @@ CXXFLAGS += $(CXXFLAGS_MOD)
 
 # Flags for user C modules
 CFLAGS  += $(CFLAGS_MOD)
-CFLAGS  += -DFFCONF_H=\"lib/oofatfs/ffconf.h\" -DLFS1_NO_MALLOC -DLFS1_NO_DEBUG -DLFS1_NO_WARN -DLFS1_NO_ERROR -DLFS1_NO_ASSERT -DLFS2_NO_MALLOC -DLFS2_NO_DEBUG -DLFS2_NO_WARN -DLFS2_NO_ERROR -DLFS2_NO_ASSERT
+
+# Flags from extmod
+CFLAGS  += $(CFLAGS_THIRDPARTY)
+# $(CFLAGS_EXTMOD)
+
 
 LDFLAGS += $(LDFLAGS_MOD)
 
 LIBS =
 
 
-MPY_SRC_C += lib/littlefs/lfs1.c lib/littlefs/lfs1_util.c lib/littlefs/lfs2.c lib/littlefs/lfs2_util.c \
-		 	 lib/oofatfs/ff.c lib/oofatfs/ffunicode.c \
-		 	 \
-		 	 shared/readline/readline.c \
+MPY_SRC_C += shared/readline/readline.c \
 			 \
 			 shared/runtime/gchelper_native.c \
 			 shared/runtime/interrupt_char.c \
@@ -100,8 +104,9 @@ MPY_SRC_C += lib/littlefs/lfs1.c lib/littlefs/lfs1_util.c lib/littlefs/lfs2.c li
 			 \
 		 	 shared/timeutils/timeutils.c \
 		     \
-			 shared/runtime/sys_stdio_mphal.c 
-
+			 shared/runtime/sys_stdio_mphal.c \
+			 $(SRC_THIRDPARTY)
+		 	 
 
 SRC_ASM = shared/runtime/gchelper_thumb1.s
 

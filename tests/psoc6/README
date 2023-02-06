@@ -1,0 +1,333 @@
+
+Micropython is based on a certain version of Python (currently 3.4), so certain Python features may not be present at all, depending on the version used as reference. 
+Other features may simply yield different results as compared to CPython, depending on the version CPyton is based on. And then there are certain features that are simply 
+implemented differently in order to gain speed or smaller memory footprint. Please refer to :
+
+        https://docs.micropython.org/en/latest/genrst/index.html
+
+
+
+A description of limitations and differences of builtin features wrt CPython can be found here :
+
+        https://docs.micropython.org/en/latest/genrst/builtin_types.html
+
+
+### the following test directories and files are currently available
+
+# generic tests for all tools
+basics
+cmdline        : Only works with command line Python, e.g. Unix
+cpydiff        : tests with known discrepancies to CPython, therefore to be omitted
+extmod
+feature_check
+float
+frozen
+import
+inlineasm
+internal_bench : run by run-internalbench.py; some need “ticks” function or will fail; also require module bench.py which must be on the local flash
+io             : need files in local flash (io/data/*), but those are not copied by default
+jni            : tests to be run in environment with JAVA available, ie Unix, Windows, ...
+micropython
+misc
+multi_bluetooth
+multi_net
+net_hosted
+net_inet
+perf_bench     : used with run-perfbench.py for benchmarking
+stress
+thread
+unicode
+unix           : exclude mod_os.py, but use time.py for psoc6; in general to be run only on Unix platform !
+
+
+
+# tool specific tests
+esp32
+psoc6
+pyb
+qemu-arm
+renesas-ra
+wipy
+
+
+
+### tests excluded in psoc6 test suite
+
+# tests with known discrepancies to CPython, therefore to be omitted
+cpydiff
+
+# tests to be run in environment with JAVA available, ie Unix, Windows, ...
+jni
+
+# test which cannot be compared to Python because MPY specific features are use
+- perf_bench :
+        - core_import_mpy_multi.py
+        - core_import_mpy_single.py
+        - viper_call*.py
+
+# tests that need data files on board in a certain directory => requires a change of the directory name in order
+# to match our file system root directory
+-io :
+        - file_iter.py
+        - file_long_read.py
+        - file_long_read2.py
+        - file_long_read3.py
+        - file_readinto.py
+        - file_readinto_len.py
+        - file_seek.py
+        - file_with.py
+        - open_append.py
+        - open_plus.py
+
+####
+
+
+### TODO: clarify how to be solved
+
+# strange error in time module
+- extmod :
+        - utime_res.py
+
+# Would require proper ns count from epoch of clock the source (see also "extmod/vfs_lfs.c", function "lfs_get_mtime" and "mphalport.c", function "mp_hal_time_ns")
+# Maybe also inconsistently set in "mpconfigport.h" and time constructor wrt to epoch as 2015 and 1970
+- extmod :
+        - vfs_lfs_mtime.py
+
+# only differ in standard output message by MPY => to be skipped ?
+- feature_check :
+        - async_check.py
+        - bytearray.py
+        - byteorder.py
+        - complex.py
+        - const.py
+        - coverage.py
+        - float.py
+        - native_check.py
+
+# emacs features not enabled in port config
+- feature_check :
+        - repl_emacs_check.py
+        - repl_words_move_check.py
+        - set_check.py
+        - slice.py
+        - uio_module.py
+
+# tests that require double precision (64 bits), ie double, to be set in mpconfigport.h for macro "MICROPY_FLOAT_IMPL"
+# clashes with misc/rge_sm.py
+- feature_check :
+        - float.py
+
+# 
+- float
+        - math_domain_special.py
+
+# 
+- import :
+        - gen_context.py
+        - import1a.py
+        - import2a.py
+        - import3a.py
+        - import_file.py
+        - import_long_dyn.py
+        - import_override.py
+        - import_pkg1.py
+        - import_pkg2.py
+        - import_pkg3.py
+        - import_pkg4.py
+        - import_pkg5.py
+        - import_pkg6.py
+        - import_pkg7.py
+        - import_pkg8.py
+        - module_dict.py
+        - try_module.py
+
+
+# 
+- io :
+        - argv.py
+        - file1.py
+        - file_readinto.py
+        - file_readline.py
+        - file_stdio.py
+
+
+# strange error in output of message not consistent with text in source code => wrong mapping of internal qstrings ?
+- micropython :
+        - import_mpy_invalid.py
+        - import_mpy_native.py
+        - viper_error.py
+
+
+# tests that require single precision (32 bits), ie float, to be set in mpconfigport.h for macro "MICROPY_FLOAT_IMPL"
+# clashes with feature_check/float.py
+misc/rge_sm.py
+
+
+# tests that fail in run-test.py but not when invoking python3 on the commandline, because data files need to be available on the board file system
+# with paths matching our mount point
+- unicode :
+        - file1.py
+        - file2.py
+        - file_invalid.py
+
+####
+
+
+
+### directory filled with test results for failling tests
+results
+
+
+
+# test executables and other files
+README.md
+
+run-internalbench.py : run internal benchmarks 
+
+run-multitests.py    : run tests between 2 MCU instances
+
+run-natmodtests.py
+
+run-perfbench.py     : run tests in perfbench
+./run-perfbench.py --pyboard 100 256
+
+run-tests-exp.py     : run tests in MCU session
+
+run-tests-exp.sh
+
+run-tests.py         : run tests from host platform
+
+
+### rp2 only executes 
+./run-tests.py  --target psoc6 --device /dev/ttyACM0 -d basics micropython misc extmod float stress inlineasm
+
+
+
+
+
+
+### tests skipped and potentially to be enabled in mpconfigport.h
+- basics/builtin_next_arg2.py
+- basics/builtin_range_binop.py
+- basics/class_inplace_op2.py
+- basics/exception_chain.py
+- basics/io_buffered_writer.py
+- basics/memoryview_itemsize.py
+- basics/namedtuple_asdict.py
+- basics/nanbox_smallint.py
+- basics/subclass_native_call.py
+- basics/sys_getsizeof.py
+- basics/sys_path.py
+- basics/sys_tracebacklimit.py
+
+- extmod/btree1.py
+- extmod/btree_error.py
+- extmod/btree_gc.py
+
+- extmod/machine1.py
+- extmod/machine_i2s_rate.py
+- extmod/machine_pinbase.py
+- extmod/machine_pulse.py
+- extmod/machine_signal.py
+- extmod/machine_timer.py
+
+- extmod/uasyncio_await_return.py
+- extmod/uasyncio_basic.py
+- extmod/uasyncio_basic2.py
+- extmod/uasyncio_cancel_fair.py
+- extmod/uasyncio_cancel_fair2.py
+- extmod/uasyncio_cancel_self.py
+- extmod/uasyncio_cancel_task.py
+- extmod/uasyncio_cancel_wait_on_finished.py
+- extmod/uasyncio_current_task.py
+- extmod/uasyncio_event.py
+- extmod/uasyncio_event_fair.py
+- extmod/uasyncio_exception.py
+- extmod/uasyncio_fair.py
+- extmod/uasyncio_gather.py
+- extmod/uasyncio_gather_notimpl.py
+- extmod/uasyncio_get_event_loop.py
+- extmod/uasyncio_heaplock.py
+- extmod/uasyncio_lock.py
+- extmod/uasyncio_lock_cancel.py
+- extmod/uasyncio_loop_stop.py
+- extmod/uasyncio_micropython.py
+- extmod/uasyncio_new_event_loop.py
+- extmod/uasyncio_set_exception_handler.py
+- extmod/uasyncio_task_done.py
+- extmod/uasyncio_threadsafeflag.py
+- extmod/uasyncio_wait_for.py
+- extmod/uasyncio_wait_for_fwd.py
+- extmod/uasyncio_wait_task.py
+
+- extmod/ucryptolib_aes128_cbc.py
+- extmod/ucryptolib_aes128_ctr.py
+- extmod/ucryptolib_aes128_ecb.py
+- extmod/ucryptolib_aes128_ecb_enc.py
+- extmod/ucryptolib_aes128_ecb_inpl.py
+- extmod/ucryptolib_aes128_ecb_into.py
+- extmod/ucryptolib_aes256_cbc.py
+- extmod/ucryptolib_aes256_ecb.py
+
+- extmod/uhashlib_md5.py
+- extmod/uhashlib_sha1.py
+
+- extmod/urandom_seed_default.py
+- extmod/ure_debug.py
+
+- extmod/uselect_poll_basic.py
+- extmod/uselect_poll_udp.py
+
+- extmod/usocket_tcp_basic.py
+- extmod/usocket_udp_nonblock.py
+
+- extmod/ussl_basic.py
+- extmod/ussl_keycert.py
+- extmod/ussl_poll.py
+
+- extmod/utimeq1.py
+- extmod/utimeq_stable.py
+
+- extmod/vfs_blockdev.py
+- extmod/vfs_fat_fileio1.py
+- extmod/vfs_fat_fileio2.py
+- extmod/vfs_fat_finaliser.py
+- extmod/vfs_fat_ilistdir_del.py
+- extmod/vfs_fat_more.py
+- extmod/vfs_fat_mtime.py
+- extmod/vfs_fat_oldproto.py
+- extmod/vfs_fat_ramdisk.py
+- extmod/vfs_fat_ramdisklarge.py
+- extmod/vfs_lfs.py
+- extmod/vfs_lfs_corrupt.py
+- extmod/vfs_lfs_error.py
+- extmod/vfs_lfs_file.py
+- extmod/vfs_lfs_mount.py
+- extmod/vfs_posix.py
+- extmod/vfs_posix_ilistdir_del.py
+
+- extmod/websocket_basic.py
+
+- float/float2int_doubleprec_intbig.py
+- float/float_divmod.py
+- float/float_format_ints_doubleprec.py
+- float/float_parse_doubleprec.py
+
+- micropython/heap_locked.py
+- micropython/heapalloc_bytesio2.py
+- micropython/meminfo.py
+- micropython/memstats.py
+
+- misc/cexample_class.py
+- misc/cexample_module.py
+- misc/sys_atexit.py
+- misc/sys_exc_info.py
+- misc/sys_settrace_features.py
+- misc/sys_settrace_generator.py
+- misc/sys_settrace_loop.py
+
+- stress/bytecode_limit.py
+
+
+
+

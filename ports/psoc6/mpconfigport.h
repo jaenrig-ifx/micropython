@@ -57,9 +57,10 @@
 // MicroPython emitters
 #define MICROPY_PERSISTENT_CODE_LOAD            (1)
 #define MICROPY_EMIT_THUMB                      (1)
-#define MICROPY_EMIT_THUMB_ARMV7M               (0)
+#define MICROPY_EMIT_THUMB_ARMV7M               (1)
 #define MICROPY_EMIT_INLINE_THUMB               (1)
-#define MICROPY_EMIT_INLINE_THUMB_FLOAT         (0)
+#define MICROPY_EMIT_INLINE_THUMB_FLOAT         (1)
+#define MICROPY_EMIT_ARM                        (0)
 
 // Optimisations
 // #define MICROPY_OPT_COMPUTED_GOTO               (1)
@@ -69,9 +70,11 @@
 #define MICROPY_READER_VFS                      (1)
 #define MICROPY_ENABLE_GC                       (1)
 #define MICROPY_ENABLE_EMERGENCY_EXCEPTION_BUF  (1)
+
 #define MICROPY_LONGINT_IMPL                    (MICROPY_LONGINT_IMPL_MPZ)
-// #define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_FLOAT)
-#define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_DOUBLE)
+#define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_FLOAT)
+//#define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_DOUBLE)
+
 #define MICROPY_SCHEDULER_DEPTH                 (8)
 #define MICROPY_SCHEDULER_STATIC_NODES          (1)
 
@@ -287,3 +290,6 @@ typedef intptr_t mp_off_t;
 
 
 #include "shared/runtime/interrupt_char.h"
+
+
+#define MICROPY_OBJ_REPR (MICROPY_OBJ_REPR_A)

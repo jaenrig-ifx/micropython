@@ -32,17 +32,20 @@ void mp_hal_delay_us(mp_uint_t us) {
 }
 
 
+// issues may arise if time is incremented only each second, but also if ticks are used instead of time.
 uint64_t mp_hal_time_ns(void) {
-    struct tm current_date_time = {0};
-    cy_rslt_t result = cyhal_rtc_read(&psoc6_rtc, &current_date_time);
+    // struct tm current_date_time = {0};
+    // cy_rslt_t result = cyhal_rtc_read(&psoc6_rtc, &current_date_time);
 
-    if (CY_RSLT_SUCCESS != result) {
-        mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_read failed !"));
-    }
+    // if (CY_RSLT_SUCCESS != result) {
+    //     mp_raise_ValueError(MP_ERROR_TEXT("cyhal_rtc_read failed !"));
+    // }
 
-    uint64_t s = timeutils_seconds_since_epoch(current_date_time.tm_year, current_date_time.tm_mon, current_date_time.tm_mday,
-        current_date_time.tm_hour, current_date_time.tm_min, current_date_time.tm_sec);
-    return s * 1000000000ULL;
+    // uint64_t s = timeutils_seconds_since_epoch(current_date_time.tm_year, current_date_time.tm_mon, current_date_time.tm_mday,
+    //     current_date_time.tm_hour, current_date_time.tm_min, current_date_time.tm_sec);
+    // return s * 1000000000ULL;
+
+    return cyhal_timer_read(&psoc6_timer) * 1000;
 }
 
 
