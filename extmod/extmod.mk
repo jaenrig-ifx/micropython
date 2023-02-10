@@ -36,6 +36,7 @@ SRC_EXTMOD_C += \
 	extmod/moduwebsocket.c \
 	extmod/moduzlib.c \
 	extmod/modwebrepl.c \
+	extmod/network_ifx_whd.c \
 	extmod/network_cyw43.c \
 	extmod/network_ninaw10.c \
 	extmod/network_wiznet5k.c \
@@ -303,6 +304,10 @@ ifeq ($(MICROPY_PY_NETWORK_CYW43),1)
 CFLAGS_EXTMOD += -DMICROPY_PY_NETWORK_CYW43=1
 DRIVERS_SRC_C += drivers/cyw43/cyw43_ctrl.c drivers/cyw43/cyw43_lwip.c
 LIBS += $(TOP)/drivers/cyw43/libcyw43.a
+endif
+
+ifeq ($(MICROPY_PY_NETWORK_IFX_WHD),1)
+CFLAGS_EXTMOD += -DMICROPY_PY_NETWORK_IFX_WHD=1
 endif
 
 ifneq ($(MICROPY_PY_NETWORK_WIZNET5K),)
