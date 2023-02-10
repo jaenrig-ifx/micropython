@@ -141,7 +141,7 @@
 #define MICROPY_BOARD_ENTER_BOOTLOADER(nargs, args)
 #endif
 
-// By default networking should include sockets, ssl, websockets, webrepl, dupterm.
+// By default networking should include sockets, ssl, websockets, webrepl
 #if MICROPY_PY_NETWORK
 
 #ifndef MICROPY_PY_USOCKET
@@ -157,56 +157,24 @@
 #endif
 
 #ifndef MICROPY_PY_UHASHLIB_SHA1
-#define MICROPY_PY_UHASHLIB_SHA1        (1)
+#define MICROPY_PY_UHASHLIB_SHA1        (0)
 #endif
 
 #ifndef MICROPY_PY_WEBREPL
 #define MICROPY_PY_WEBREPL              (1)
 #endif
 
-#ifndef MICROPY_PY_OS_DUPTERM
-#define MICROPY_PY_OS_DUPTERM           (1)
+#ifndef MICROPY_PY_WEBREPL
+#define MICROPY_PY_WEBREPL              (1)
 #endif
 
+extern const struct _mp_obj_type_t mp_network_ifx_whd_type;
+#define MICROPY_HW_NIC_IFX_WHD  \
+    { MP_ROM_QSTR(MP_QSTR_WLAN), MP_ROM_PTR(&mp_network_ifx_whd_type) },
+
+#define MICROPY_PORT_NETWORK_INTERFACES \
+    MICROPY_HW_NIC_IFX_WHD
 #endif
-
-// #if MICROPY_PY_NETWORK_CYW43
-
-// extern const struct _mp_obj_type_t mp_network_cyw43_type;
-// #define MICROPY_HW_NIC_CYW43
-//     { MP_ROM_QSTR(MP_QSTR_WLAN), MP_ROM_PTR(&mp_network_cyw43_type) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_IDLE), MP_ROM_INT(CYW43_LINK_DOWN) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_CONNECTING), MP_ROM_INT(CYW43_LINK_JOIN) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_WRONG_PASSWORD), MP_ROM_INT(CYW43_LINK_BADAUTH) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_NO_AP_FOUND), MP_ROM_INT(CYW43_LINK_NONET) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_CONNECT_FAIL), MP_ROM_INT(CYW43_LINK_FAIL) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_GOT_IP), MP_ROM_INT(CYW43_LINK_UP) },
-
-// #else
-
-// #define MICROPY_HW_NIC_CYW43
-
-// #endif
-
-// #if MICROPY_PY_NETWORK_NINAW10
-// // This Network interface requires the extended socket state.
-// #ifndef MICROPY_PY_USOCKET_EXTENDED_STATE
-// #define MICROPY_PY_USOCKET_EXTENDED_STATE   (1)
-// #endif
-// extern const struct _mod_network_nic_type_t mod_network_nic_type_nina;
-// #define MICROPY_HW_NIC_NINAW10              { MP_ROM_QSTR(MP_QSTR_WLAN), MP_ROM_PTR(&mod_network_nic_type_nina) },
-// #else
-// #define MICROPY_HW_NIC_NINAW10
-// #endif
-
-// #ifndef MICROPY_BOARD_NETWORK_INTERFACES
-// #define MICROPY_BOARD_NETWORK_INTERFACES
-// #endif
-
-// #define MICROPY_PORT_NETWORK_INTERFACES
-//     MICROPY_HW_NIC_CYW43
-//     MICROPY_HW_NIC_NINAW10
-//     MICROPY_BOARD_NETWORK_INTERFACES
 
 #define MP_STATE_PORT MP_STATE_VM
 

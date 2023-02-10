@@ -1,1 +1,2 @@
 FROZEN_MANIFEST ?= boards/manifest.py
+MICROPY_PY_NETWORK_IFX_WHD = 1

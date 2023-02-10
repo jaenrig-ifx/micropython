@@ -32,10 +32,8 @@ CROSS_COMPILE ?= arm-none-eabi-
 include ../../py/mkenv.mk
 -include mpconfigport.mk
 include $(TOP)/py/py.mk
-include $(TOP)/extmod/extmod.mk
-
 include $(BOARD_DIR)/mpconfigboard.mk
-
+include $(TOP)/extmod/extmod.mk
 
 # get path to this file
 MPY_MAIN_BUILD_DIR := $(dir $(MPY_DIR_OF_MAIN_MAKEFILE))/$(BUILD)
@@ -91,6 +89,8 @@ LIBS =
 MPY_SRC_C += lib/littlefs/lfs1.c lib/littlefs/lfs1_util.c lib/littlefs/lfs2.c lib/littlefs/lfs2_util.c \
 		 	 lib/oofatfs/ff.c lib/oofatfs/ffunicode.c \
 		 	 \
+			 shared/netutils/netutils.c \
+			 \
 		 	 shared/readline/readline.c \
 			 \
 			 shared/runtime/gchelper_native.c \
@@ -136,7 +136,7 @@ SRC_C = \
 	$(BUILD)/frozen_content.c
 
 
-SRC_C    += $(SRC_USERMOD)
+SRC_C    += $(SRC_USERMOD) $(SRC_EXTMOD_C)
 SRC_CXX   = 
 
 
