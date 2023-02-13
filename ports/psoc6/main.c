@@ -9,6 +9,7 @@
 #include "py/stackctrl.h"
 #include "shared/readline/readline.h"
 #include "shared/runtime/pyexec.h"
+#include "extmod/modnetwork.h"
 
 
 // MTB includes
@@ -113,6 +114,10 @@ soft_reset:
     readline_init0();
     machine_init();
 
+    #if MICROPY_PY_NETWORK
+    mod_network_init();
+    #endif
+
     #if MICROPY_VFS_FAT
     pyexec_frozen_module("vfs_fat.py");
     #elif MICROPY_VFS_LFS2
@@ -151,6 +156,11 @@ soft_reset:
     mp_printf(&mp_plat_print, "MPY: soft reboot\n");
 
     // Deinitialize modules
+
+    #if MICROPY_PY_NETWORK
+    mod_network_deinit();
+    #endif
+
     machine_deinit();
 
     gc_sweep_all();

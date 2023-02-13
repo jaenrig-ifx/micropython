@@ -140,7 +140,7 @@ SRC_C    += $(SRC_USERMOD) $(SRC_EXTMOD_C)
 SRC_CXX   = 
 
 
-SRC_QSTR += $(MPY_SRC_C) $(SRC_USERMOD) $(SRC_EXTMOD_C)
+SRC_QSTR += $(MPY_SRC_C) $(SRC_USERMOD)
 SRC_QSTR += modules/machine/modmachine.c \
             modules/machine/machine_i2c.c \
             modules/machine/machine_pin.c \
