@@ -308,6 +308,45 @@ endif
 
 ifeq ($(MICROPY_PY_NETWORK_IFX_WHD),1)
 CFLAGS_EXTMOD += -DMICROPY_PY_NETWORK_IFX_WHD=1
+GIT_SUBMODULES += lib/wifi-host-driver
+IFX_WHD_DIR=lib/wifi-host-driver/WiFi_Host_Driver
+INC += $(addprefix -I$(TOP)/$(IFX_WHD_DIR)/, \
+	inc \
+	src/bus_protocols \
+	src/include \
+	src \
+	)
+INC += $(addprefix -I$(TOP)/lib/wifi-host-driver/, \
+	External/rtos \
+	)
+SRC_THIRDPARTY_C += $(addprefix $(IFX_WHD_DIR)/src/bus_protocols/, \
+	whd_bus_common.c \
+	whd_bus_m2m_protocol.c \
+	whd_bus_sdio_protocol.c \
+	whd_bus_spi_protocol.c \
+	whd_bus.c \
+	)
+SRC_THIRDPARTY_C += $(addprefix $(IFX_WHD_DIR)/src/, \
+	whd_ap.c \
+	whd_buffer_api.c \
+	whd_cdc_bdc.c \
+	whd_chip_constants.c \
+	whd_chip.c \
+	whd_clm.c \
+	whd_debug.c \
+	whd_events.c \
+	whd_logging.c \
+	whd_management.c \
+	whd_network_if.c \
+	whd_resource_if.c \
+	whd_sdpcm.c \
+	whd_thread.c \
+	whd_utils.c \
+	whd_wifi_api.c \
+	whd_wifi_p2p.c \
+	whd_wifi.c \
+	)
+CFLAGS_THIRDPARTY += -Wno-stringop-truncation
 endif
 
 ifneq ($(MICROPY_PY_NETWORK_WIZNET5K),)

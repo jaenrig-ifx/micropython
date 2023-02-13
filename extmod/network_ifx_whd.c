@@ -33,6 +33,7 @@
 #if MICROPY_PY_NETWORK_IFX_WHD
 
 // #include "lwip/netif.h"
+#include "whd.h"
 #include "extmod/network_ifx_whd.h"
 #include "modnetwork.h"
 
