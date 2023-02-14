@@ -62,7 +62,7 @@
 
 #define MICROPY_LONGINT_IMPL                    (MICROPY_LONGINT_IMPL_MPZ)
 #define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_FLOAT)
-//#define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_DOUBLE)
+// #define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_DOUBLE)
 
 #define MICROPY_SCHEDULER_DEPTH                 (8)
 #define MICROPY_SCHEDULER_STATIC_NODES          (1)
@@ -287,7 +287,8 @@ typedef intptr_t mp_off_t;
     do { \
         MICROPY_EVENT_POLL_HOOK_FAST; \
     } while (0);
-        // best_effort_wfe_or_timeout(make_timeout_time_ms(1));
+
+// best_effort_wfe_or_timeout(make_timeout_time_ms(1));
 
 
 
