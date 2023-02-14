@@ -105,7 +105,6 @@ soft_reset:
     mp_printf(&mp_plat_print, "\nUse Ctrl-D to exit, Ctrl-E for paste mode\n");
 
     mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash));
-    mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash_slash_lib));
 
     // indicate in REPL console when debug mode is selected
     mplogger_print("\n...LOGGER DEBUG MODE...\n\n");

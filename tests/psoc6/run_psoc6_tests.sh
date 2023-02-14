@@ -1,15 +1,14 @@
-#/usr/bin/sh
+#!/usr/bin/sh
 
 #
-# psoc6/run_psoc6_tests.sh -h
+# psoc6/run_psoc6_tests.sh -ci
 #
 
 
 echo "executing $0 $* ..."
 
-
 usage() {
-  echo "Usage: $0 -a <run all test> -c <clean results directory and file before running tests> -d <device to be used> -f <run failing tests only> -i <run implemented tests only> -n <run not yet implemented tests only>" 1>&2;
+  echo "Usage: $0 -a <run all meaningful test by directory without excluding any> -c <clean results directory and file before running tests> -d <device to be used> -f <run failing tests only> -i <run implemented tests only and exclude known failing tests> -n <run not yet implemented tests only>" 1>&2;
   exit 1;
 }
 
@@ -90,7 +89,7 @@ echo "  fail results file : ${failResultsFile}"
 echo
 
 
-if [ ${cleanResultsDirectoryFirst} == 1 ]; then
+if [ ${cleanResultsDirectoryFirst} -eq 1 ]; then
 
   echo
   echo "  removing results directory and file if existent ..."
@@ -101,58 +100,57 @@ if [ ${cleanResultsDirectoryFirst} == 1 ]; then
 
   fi
 
-  echo "  done ."
+  echo "  done."
   echo
 
 fi
 
 
-if [ ${all} == 1 ]; then
+if [ ${all} -eq 1 ]; then
 
   echo "  running all tests ..."
   echo
 
+  ./run-tests.py --target psoc6 --device ${device} \
+        -d \
+          basics \
+          extmod \
+          feature_check \
+          float \
+          frozen \
+          import \
+          inlineasm \
+          micropython \
+          misc \
+          multi_bluetooth \
+          multi_net \
+          net_hosted \
+          net_inet \
+          perf_bench \
+          psoc6 \
+          stress \
+          thread \
+          unicode \
+    | tee -a ${resultsFile}
+
+  echo
+  echo "  done."
+  echo
+
 fi
 
 
-if [ ${all} == 1 ] || [ ${implemented} == 1 ]; then
+if [ ${implemented} -eq 1 ]; then
 
   echo "  running implemented tests ..."
   echo
-
-### for manual testing of the io and unicode modules, files can be copied this way; still the file path in the io/*.py scripts must be 
-### adapted to our filesystem mount point
-
-  # prepare execution of tests by uploading required files to on-board flash
-  #../tools/mpremote/mpremote.py cp import/.py :/flash/import/.py
-
-  ### io
-  # ../tools/mpremote/mpremote.py mkdir :/flash/io
-  # ../tools/mpremote/mpremote.py mkdir :/flash/io/data
-
-#   ../tools/mpremote/mpremote.py rm :/flash/io/data/bigfile1
-#   ../tools/mpremote/mpremote.py rm :/flash/io/data/file1
-#   ../tools/mpremote/mpremote.py rm :/flash/io/data/file2
-
-#   ../tools/mpremote/mpremote.py cp io/data/bigfile1 :/flash/io/data/bigfile1
-#   ../tools/mpremote/mpremote.py cp io/data/file1 :/flash/io/data/file1
-#   ../tools/mpremote/mpremote.py cp io/data/file2 :/flash/io/data/file2
-
-
-  ### unicode
-  # ../tools/mpremote/mpremote.py mkdir :/flash/unicode
-  # ../tools/mpremote/mpremote.py mkdir :/flash/unicode/data
-
-  # ../tools/mpremote/mpremote.py cp unicode/data/utf-8_1.txt :/flash/unicode/data/utf-8_1.txt
-  # ../tools/mpremote/mpremote.py cp unicode/data/utf-8_2.txt :/flash/unicode/data/utf-8_2.txt
-  # ../tools/mpremote/mpremote.py cp unicode/data/utf-8_invalid.txt :/flash/unicode/data/utf-8_invalid.txt
-
 
   ./run-tests.py --target psoc6 --device ${device} \
           io/builtin_print_file.py \
           unix/time.py \
     | tee -a ${resultsFile}
 
+  echo
 
   ./run-tests.py --target psoc6 --device ${device} \
         -d \
@@ -170,7 +168,6 @@ if [ ${all} == 1 ] || [ ${implemented} == 1 ]; then
           stress \
           unicode \
         \
-        -e extmod/utime_res.py \
         -e extmod/vfs_lfs_mtime.py \
         \
         -e feature_check/async_check.py \
@@ -221,16 +218,12 @@ if [ ${all} == 1 ] || [ ${implemented} == 1 ]; then
     | tee -a ${resultsFile}
 
   echo
-  echo "  done ."
+  echo "  done."
   echo
 
 fi
-
-# rp2 tests="basics/*.py micropython/*.py float/*.py import/*.py io/*.py misc/*.py unicode/*.py extmod/*.py unix/*.py"
-
-
 ### not yet enabled/implemented, therefore failing
-if [ ${all} == 1 ] || [ ${notYetImplemented} == 1 ]; then
+if [ ${notYetImplemented} -eq 1 ]; then
 
   echo "  running not yet implemented tests ..."
   echo
@@ -244,7 +237,7 @@ if [ ${all} == 1 ] || [ ${notYetImplemented} == 1 ]; then
     | tee -a ${resultsFile}
 
   echo
-  echo "  done ."
+  echo "  done."
   echo
 
 fi
@@ -254,12 +247,14 @@ fi
 #
 #             - cpydiff : please refer to documentetion within tests
 #             - cmdline : tests are for command line Python execution and not for embedded MPY
-#             - io      : tests required data files on board flash and a change in the file paths to match the flash mount point
 #             - internal_bench : used for measuring run time of certain operations. Will always fail because runtime of Python and MPY will differ.
+#             - io      : tests required data files on board flash and a change in the file paths to match the flash mount point
+#             - jni     : tests to be run in environment with JAVA available, ie Unix, Windows, ...
+
 # 
 ### therefore have been placed in this category
 ###
-if [ ${all} == 1 ] || [ ${failing} == 1 ]; then
+if [ ${failing} -eq 1 ]; then
 
   echo "  running failing tests ..."
   echo
@@ -278,15 +273,7 @@ if [ ${all} == 1 ] || [ ${failing} == 1 ]; then
     | tee -a ${resultsFile}
 
   echo
-  echo "  done ."
-  echo
-
-fi
-
-
-if [ ${all} == 1 ]; then
-
-  echo "  running all tests done."
+  echo "  done."
   echo
 
 fi
