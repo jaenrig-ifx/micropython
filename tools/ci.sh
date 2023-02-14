@@ -257,6 +257,7 @@ function ci_psoc6_setup {
     # This command prevents the issue "fatal: detected dubious ownership in repository at '/micropython'""
     docker exec mtb-ci /bin/bash -c "git config --global --add safe.directory /micropython"
     docker exec mtb-ci /bin/bash -c "git config --global --add safe.directory /micropython/lib/micropython-lib"
+    docker exec mtb-ci /bin/bash -c "git config --global --add safe.directory /micropython/lib/mbedtls"
 }
 
 function ci_psoc6_build {
