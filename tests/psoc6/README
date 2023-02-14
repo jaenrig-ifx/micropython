@@ -217,9 +217,9 @@ run-tests.py         : run tests from host platform
 
 ###########################################################################
 ### Test results
-842 tests performed (23909 individual testcases)
-839 tests passed
-57  tests skipped
+840 tests performed (23909 individual testcases)
+837 tests passed
+59  tests skipped
 3   tests failed
 
 
