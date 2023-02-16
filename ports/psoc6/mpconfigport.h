@@ -52,7 +52,6 @@
 #define MICROPY_EMIT_ARM                        (0)
 
 // Optimisations
-// #define MICROPY_OPT_COMPUTED_GOTO               (1)
 #define MICROPY_OPT_COMPUTED_GOTO               (0)
 
 // Python internal features
@@ -76,7 +75,6 @@
 #define MICROPY_PY_SYS_PLATFORM                 "psoc6"
 #define MICROPY_PY_THREAD                       (0)
 #define MICROPY_PY_THREAD_GIL                   (0)
-// #define MICROPY_THREAD_YIELD()                  mp_handle_pending(true)
 
 // Extended modules
 #define MICROPY_EPOCH_IS_1970                   (1)
@@ -89,27 +87,21 @@
 #define MICROPY_PY_URE_MATCH_GROUPS             (1)
 #define MICROPY_PY_URE_MATCH_SPAN_START_END     (1)
 #define MICROPY_PY_UTIME_MP_HAL                 (1)
-// #define MICROPY_PY_URANDOM_SEED_INIT_FUNC       (random_u32())
 #define MICROPY_PY_MACHINE                      (1)
 #define MICROPY_PY_MACHINE_PIN_MAKE_NEW         mp_pin_make_new
 #define MICROPY_PY_MACHINE_BITSTREAM            (0)
 #define MICROPY_PY_MACHINE_PULSE                (0)
 #define MICROPY_PY_MACHINE_PWM                  (0)
 #define MICROPY_PY_MACHINE_PWM_DUTY_U16_NS      (0)
-// #define MICROPY_PY_MACHINE_PWM_INCLUDEFILE      "ports/psoc6/modules/machine/machine_pwm.c"
 #define MICROPY_PY_MACHINE_I2C                  (1)
 #define MICROPY_PY_MACHINE_SOFTI2C              (1)
 #define MICROPY_PY_MACHINE_I2C_TRANSFER_WRITE1  (0)
 
 #define MICROPY_PY_MACHINE_SPI                  (0)
-// #define MICROPY_PY_MACHINE_SPI_MSB              (SPI_MSB_FIRST)
-// #define MICROPY_PY_MACHINE_SPI_LSB              (SPI_LSB_FIRST)
 #define MICROPY_PY_MACHINE_SOFTSPI              (0)
 #define MICROPY_PY_ONEWIRE                      (0)
 #define MICROPY_VFS                             (1)
 
-// MICROPY_VFS_LFS2 set in mpconfigport.mk
-// #define MICROPY_VFS_LFS2                        (1)
 #define MICROPY_VFS_FAT                         (0)
 
 // fatfs configuration
@@ -157,8 +149,6 @@
 #endif
 
 
-// MICROPY_PY_USSL set in mpconfigport.mk
-// MICROPY_SSL_MBEDTLS set in mpconfigport.mk
 #define MICROPY_TRACKED_ALLOC        (MICROPY_SSL_MBEDTLS)
 
 #define MICROPY_PY_UCRYPTOLIB        (1)
@@ -169,33 +159,6 @@
 #define MICROPY_PY_UHASHLIB_MD5      (1)
 #define MICROPY_PY_UHASHLIB_SHA1     (1)
 #define MICROPY_PY_UHASHLIB_SHA256   (1)
-
-
-// #if MICROPY_PY_NETWORK_CYW43
-
-// extern const struct _mp_obj_type_t mp_network_cyw43_type;
-// #define MICROPY_HW_NIC_CYW43
-//     { MP_ROM_QSTR(MP_QSTR_WLAN), MP_ROM_PTR(&mp_network_cyw43_type) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_IDLE), MP_ROM_INT(CYW43_LINK_DOWN) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_CONNECTING), MP_ROM_INT(CYW43_LINK_JOIN) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_WRONG_PASSWORD), MP_ROM_INT(CYW43_LINK_BADAUTH) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_NO_AP_FOUND), MP_ROM_INT(CYW43_LINK_NONET) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_CONNECT_FAIL), MP_ROM_INT(CYW43_LINK_FAIL) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_GOT_IP), MP_ROM_INT(CYW43_LINK_UP) },
-
-// #else
-
-// #define MICROPY_HW_NIC_CYW43
-
-// #endif
-
-// #ifndef MICROPY_BOARD_NETWORK_INTERFACES
-// #define MICROPY_BOARD_NETWORK_INTERFACES
-// #endif
-
-// #define MICROPY_PORT_NETWORK_INTERFACES
-//     MICROPY_HW_NIC_CYW43
-//     MICROPY_BOARD_NETWORK_INTERFACES
 
 #define MP_STATE_PORT MP_STATE_VM
 
@@ -210,14 +173,6 @@ typedef intptr_t mp_off_t;
 // We need to provide a declaration/definition of alloca()
 #include <alloca.h>
 
-// extern uint32_t cyw43_country_code;
-// extern void cyw43_irq_init(void);
-// extern void cyw43_post_poll_hook(void);
-
-// #define CYW43_POST_POLL_HOOK cyw43_post_poll_hook();
-// #define MICROPY_CYW43_COUNTRY cyw43_country_code
-
-
 
 ////////////////////////////////////////////////////////////////////////
 // TODO: Remove options implicitly set by setting feature level. Must work for all feature levels !
@@ -229,7 +184,6 @@ typedef intptr_t mp_off_t;
 
 
 #define MICROPY_LOGGER_DEBUG              (0)
-// #define MICROPY_MODULE_FROZEN_MPY         (1)
 
 
 #define MICROPY_PY_BUILTINS_HELP          (1)
