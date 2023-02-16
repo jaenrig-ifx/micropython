@@ -2,6 +2,10 @@
 #define MICROPY_INCLUDED_PSOC6_I2C_H
 
 
+// mpy includes
+#include "py/runtime.h"
+
+
 // MTB includes
 #include "cyhal.h"
 

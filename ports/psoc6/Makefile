@@ -23,8 +23,8 @@ FROZEN_MANIFEST              ?= $(MICROPY_FROZEN_MANIFEST)
 
 ifneq ($(FROZEN_MANIFEST),)
   CFLAGS += -DMICROPY_QSTR_EXTRA_POOL=mp_qstr_frozen_const_pool
-  CFLAGS += -DMICROPY_MODULE_FROZEN_MPY
-  CFLAGS += -DMICROPY_MODULE_FROZEN_STR
+  CFLAGS += -DMICROPY_MODULE_FROZEN_MPY=1
+  CFLAGS += -DMICROPY_MODULE_FROZEN_STR=1
 endif
 
 
@@ -54,7 +54,6 @@ $(info CONFIG                           : $(CONFIG))
 INC += -I.
 INC += -I$(TOP)
 INC += -I$(BUILD)
-INC += -I$(TOP)/lib/mbedtls/include
 
 
 ### for testing purposes only
@@ -68,8 +67,8 @@ CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingl
 
 # std=c11 instead of std=c99 : provides "static_assert" (not available in c99) 
 # -D_XOPEN_SOURCE=700 : makes sure the setenv/unsetenv headers are included
-CFLAGS  = $(INC) -Wall -Werror -std=c11 $(CFLAGS_CORTEX_M4) $(COPT) -D_XOPEN_SOURCE=700 -Wno-error=double-promotion -Wno-error=overflow -Wno-error=analyzer-null-dereference -Wno-error=maybe-uninitialized
-LDFLAGS = -Wl,--cref -Wl,--gc-sections
+CFLAGS  += $(INC) -Wall -Werror -std=c11 $(CFLAGS_CORTEX_M4) $(COPT) -D_XOPEN_SOURCE=700 -Wno-error=double-promotion -Wno-error=overflow -Wno-error=analyzer-null-dereference -Wno-error=maybe-uninitialized
+LDFLAGS += -Wl,--cref -Wl,--gc-sections
 
 
 # Tune for Debugging or Optimization
@@ -102,7 +101,7 @@ CFLAGS  += $(CFLAGS_THIRDPARTY) $(CFLAGS_EXTMOD)
 
 LDFLAGS += $(LDFLAGS_MOD)
 
-LIBS =
+LIBS +=
 
 
 MPY_SRC_C = shared/readline/readline.c \
@@ -138,15 +137,14 @@ MPY_SRC_C = shared/readline/readline.c \
 			modules/time/modutime.c \
 			\
 			$(SRC_THIRDPARTY_C) \
-			$(SRC_USERMOD) \
-			$(SRC_EXTMOD_C)
+			$(SRC_USERMOD)
 		 	 
 
-SRC_ASM = shared/runtime/gchelper_thumb1.s
+SRC_ASM += shared/runtime/gchelper_thumb1.s
 
 
-SRC_C    += main.c mphalport.c $(MPY_SRC_C) $(BUILD)/frozen_content.c
-SRC_CXX   = 
+SRC_C    += main.c mphalport.c $(MPY_SRC_C) $(BUILD)/frozen_content.c $(SRC_EXTMOD_C)
+SRC_CXX  += 
 
 
 SRC_QSTR += $(MPY_SRC_C) \
