@@ -10,14 +10,18 @@
 #include "shared/readline/readline.h"
 #include "shared/runtime/pyexec.h"
 
-
 // MTB includes
 #include "cybsp.h"
 #include "cy_retarget_io.h"
 
-
 // port-specific includes
 #include "mplogger.h"
+
+#if MICROPY_PY_LWIP
+#include "lwip/init.h"
+#include "lwip/apps/mdns.h"
+#include "drivers/cyw43/cyw43.h"
+#endif
 
 
 #if MICROPY_ENABLE_GC

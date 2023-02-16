@@ -1,1 +1,4 @@
 FROZEN_MANIFEST ?= boards/manifest.py
+
+MICROPY_PY_LWIP = 1
+MICROPY_PY_NETWORK_CYW43 = 1

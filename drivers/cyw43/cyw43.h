@@ -31,6 +31,7 @@
 #include "shared/netutils/dhcpserver.h"
 #include "drivers/cyw43/cyw43_ll.h"
 
+#define GENERIC_CONFIG 1
 // For trace_flags
 #define CYW43_TRACE_ASYNC_EV    (0x0001)
 #define CYW43_TRACE_ETH_TX      (0x0002)

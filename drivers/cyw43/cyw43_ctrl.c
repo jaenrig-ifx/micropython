@@ -80,6 +80,17 @@ static inline void cyw43_delay_ms(uint32_t ms) {
 // Initialisation and polling
 
 void cyw43_init(cyw43_t *self) {
+    #if(GENERIC_CONFIG)
+    #ifdef cyw43_pin_WL_HOST_WAKE
+    mp_hal_pin_config(cyw43_pin_WL_HOST_WAKE, MP_HAL_PIN_MODE_INPUT, MP_HAL_PIN_PULL_NONE, 0);
+    #endif
+    mp_hal_pin_config(cyw43_pin_WL_REG_ON, MP_HAL_PIN_MODE_OUTPUT, MP_HAL_PIN_PULL_NONE, 0);
+    mp_hal_pin_low(cyw43_pin_WL_REG_ON);
+    #ifdef cyw43_pin_WL_RFSW_VDD
+    mp_hal_pin_config(cyw43_pin_WL_RFSW_VDD, MP_HAL_PIN_MODE_OUTPUT, MP_HAL_PIN_PULL_NONE, 0); // RF-switch power
+    mp_hal_pin_low(cyw43_pin_WL_RFSW_VDD);
+    #endif
+    #else  
     #ifdef pyb_pin_WL_HOST_WAKE
     mp_hal_pin_config(pyb_pin_WL_HOST_WAKE, MP_HAL_PIN_MODE_INPUT, MP_HAL_PIN_PULL_NONE, 0);
     #endif
@@ -89,7 +100,7 @@ void cyw43_init(cyw43_t *self) {
     mp_hal_pin_config(pyb_pin_WL_RFSW_VDD, MP_HAL_PIN_MODE_OUTPUT, MP_HAL_PIN_PULL_NONE, 0); // RF-switch power
     mp_hal_pin_low(pyb_pin_WL_RFSW_VDD);
     #endif
-
+    #endif
     cyw43_ll_init(&self->cyw43_ll, self);
 
     self->itf_state = 0;
@@ -144,10 +155,17 @@ STATIC int cyw43_ensure_up(cyw43_t *self) {
     self->itf_state = 0;
 
     // Reset and power up the WL chip
+    #if(GENERIC_CONFIG)
+    mp_hal_pin_low(cyw43_pin_WL_REG_ON);
+    cyw43_delay_ms(20);
+    mp_hal_pin_high(cyw43_pin_WL_REG_ON);
+    cyw43_delay_ms(50);
+    #else
     mp_hal_pin_low(pyb_pin_WL_REG_ON);
     cyw43_delay_ms(20);
     mp_hal_pin_high(pyb_pin_WL_REG_ON);
     cyw43_delay_ms(50);
+    #endif
 
     // Initialise SDIO bus
     // IRQ priority only needs to be higher than CYW_ENTER/EXIT protection (PENDSV)
@@ -170,7 +188,11 @@ STATIC int cyw43_ensure_up(cyw43_t *self) {
     sdio_enable_irq(true);
     #else
     extern void extint_set(const pin_obj_t *pin, uint32_t mode);
+    #if(GENERIC_CONFIG)
+    extint_set(cyw43_pin_WL_HOST_WAKE, GPIO_MODE_IT_FALLING);
+    #else
     extint_set(pyb_pin_WL_HOST_WAKE, GPIO_MODE_IT_FALLING);
+    #endif
     #endif
 
     CYW_EXIT
@@ -220,10 +242,18 @@ STATIC void cyw43_poll_func(void) {
 // Callback interface to low-level driver
 
 int cyw43_cb_read_host_interrupt_pin(void *cb_data) {
+    #if(GENERIC_CONFIG)
+    #ifdef cyw43_pin_WL_HOST_WAKE
+    return mp_hal_pin_read(cyw43_pin_WL_HOST_WAKE);
+    #else
+    return mp_hal_pin_read(cyw43_pin_WL_SDIO_1);
+    #endif
+    #else
     #ifdef pyb_pin_WL_HOST_WAKE
     return mp_hal_pin_read(pyb_pin_WL_HOST_WAKE);
     #else
     return mp_hal_pin_read(pyb_pin_WL_SDIO_1);
+    #endif
     #endif
 }
 
@@ -406,10 +436,15 @@ STATIC int cyw43_wifi_on(cyw43_t *self, uint32_t country) {
     if (ret) {
         return ret;
     }
-
-    #ifdef pyb_pin_WL_RFSW_VDD
+    #if(GENERIC_CONFIG)
+        #ifdef cyw43_pin_WL_RFSW_VDD
+        mp_hal_pin_high(cyw43_pin_WL_RFSW_VDD);
+        #endif
+    #else
+        #ifdef pyb_pin_WL_RFSW_VDD
     // Turn the RF-switch on
-    mp_hal_pin_high(pyb_pin_WL_RFSW_VDD);
+        mp_hal_pin_high(pyb_pin_WL_RFSW_VDD);
+        #endif
     #endif
 
     CYW_ENTER

@@ -17,6 +17,9 @@
 #include "drivers/machine/psoc6_gpio.h"
 #include "modules/machine/pins.h"
 
+#if MICROPY_PY_NETWORK_CYW43
+#include "lib/cyw43-driver/src/cyw43.h"
+#endif
 
 extern cyhal_rtc_t psoc6_rtc;
 extern cyhal_timer_t psoc6_timer;
@@ -105,6 +108,38 @@ mp_hal_pin_obj_t mp_hal_get_pin_obj(mp_obj_t obj) {
     return pin_addr_by_name(obj);
 }
 
+// Support for Network classes
+// Generate a random locally administered MAC address (LAA)
+void mp_hal_generate_laa_mac(int idx, uint8_t buf[6]) {
+    /*uint8_t *id = (uint8_t *)MP_HAL_UNIQUE_ID_ADDRESS;
+    buf[0] = 0x02; // LAA range
+    buf[1] = (id[11] << 4) | (id[10] & 0xf);
+    buf[2] = (id[9] << 4) | (id[8] & 0xf);
+    buf[3] = (id[7] << 4) | (id[6] & 0xf);
+    buf[4] = id[2];
+    buf[5] = (id[0] << 2) | idx;*/
+}
+
+// A board can override this if needed
+MP_WEAK void mp_hal_get_mac(int idx, uint8_t buf[6]) {
+    #if MICROPY_PY_NETWORK_CYW43
+    // The mac should come from cyw43 otp when CYW43_USE_OTP_MAC is defined
+    // This is loaded into the state after the driver is initialised
+    // cyw43_hal_generate_laa_mac is only called by the driver to generate a mac if otp is not set
+    memcpy(buf, cyw43_state.mac, 6);
+    #else
+    mp_hal_generate_laa_mac(idx, buf);
+    #endif
+}
+
+void mp_hal_get_mac_ascii(int idx, size_t chr_off, size_t chr_len, char *dest) {
+    static const char hexchr[16] = "0123456789ABCDEF";
+    uint8_t mac[6];
+    mp_hal_get_mac(idx, mac);
+    for (; chr_len; ++chr_off, --chr_len) {
+        *dest++ = hexchr[mac[chr_off >> 1] >> (4 * (1 - (chr_off & 1))) & 0xf];
+    }
+}
 
 // TODO: move to another file or define as macro in mpconfigport.h
 mp_uint_t begin_atomic_section() {

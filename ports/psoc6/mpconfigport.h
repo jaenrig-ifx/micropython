@@ -141,11 +141,26 @@
 #define MICROPY_BOARD_ENTER_BOOTLOADER(nargs, args)
 #endif
 
+
+
+// Enable network configuration for port
+#ifndef MICROPY_PY_NETWORK
+#define MICROPY_PY_NETWORK              (1)
+#endif
+
 // By default networking should include sockets, ssl, websockets, webrepl, dupterm.
 #if MICROPY_PY_NETWORK
-
+//#define MICROPY_PY_LWIP (1)
 #ifndef MICROPY_PY_USOCKET
 #define MICROPY_PY_USOCKET              (1)
+#endif
+
+#ifndef MICROPY_PY_UHASHLIB_SHA1
+#define MICROPY_PY_UHASHLIB_SHA1        (0)
+#endif
+
+#ifndef MICROPY_PY_UHASHLIB_SHA256
+#define MICROPY_PY_UHASHLIB_SHA256      (1)
 #endif
 
 #ifndef MICROPY_PY_USSL
@@ -169,6 +184,22 @@
 #endif
 
 #endif
+
+//#define MICROPY_PY_NETWORK_CYW43        (1)
+
+#if MICROPY_PY_NETWORK_CYW43
+extern const struct _mp_obj_type_t mp_network_cyw43_type;
+#define MICROPY_HW_NIC_CYW43                { MP_ROM_QSTR(MP_QSTR_WLAN), MP_ROM_PTR(&mp_network_cyw43_type) },
+#else
+#define MICROPY_HW_NIC_CYW43
+#endif
+
+#ifndef MICROPY_BOARD_NETWORK_INTERFACES
+#define MICROPY_BOARD_NETWORK_INTERFACES
+#endif
+
+#define MICROPY_PORT_NETWORK_INTERFACES \
+    MICROPY_HW_NIC_CYW43
 
 // #if MICROPY_PY_NETWORK_CYW43
 
@@ -226,7 +257,7 @@ typedef intptr_t mp_off_t;
 // extern void cyw43_post_poll_hook(void);
 
 // #define CYW43_POST_POLL_HOOK cyw43_post_poll_hook();
-// #define MICROPY_CYW43_COUNTRY cyw43_country_code
+//#define MICROPY_CYW43_COUNTRY cyw43_country_code
 
 
 
@@ -284,6 +315,23 @@ typedef intptr_t mp_off_t;
 // TODO: helpful to abstract main.c ?
 // #define MICROPY_PORT_INIT_FUNC ??
 // #define MICROPY_PORT_DEINIT_FUNC ??
+//#define MICROPY_PY_NETWORK_CYW43_USE_LIB_DRIVER 1
+// For regular code that wants to prevent "background tasks" from running.
+// These background tasks (LWIP, Bluetooth) run in PENDSV context.
+#define MICROPY_PY_PENDSV_ENTER   uint32_t atomic_state = 0;//raise_irq_pri(IRQ_PRI_PENDSV);
+#define MICROPY_PY_PENDSV_REENTER atomic_state = 0;//raise_irq_pri(IRQ_PRI_PENDSV);
+#define MICROPY_PY_PENDSV_EXIT    restore_irq_pri(atomic_state);
+
+// Prevent the "LWIP task" from running.
+#define MICROPY_PY_LWIP_ENTER   MICROPY_PY_PENDSV_ENTER
+#define MICROPY_PY_LWIP_REENTER MICROPY_PY_PENDSV_REENTER
+#define MICROPY_PY_LWIP_EXIT    MICROPY_PY_PENDSV_EXIT
 
 
+#define MICROPY_EVENT_POLL_HOOK \
+    do { \
+        extern void mp_handle_pending(bool); \
+        mp_handle_pending(true); \
+        __WFI(); \
+    } while (0);
 #include "shared/runtime/interrupt_char.h"

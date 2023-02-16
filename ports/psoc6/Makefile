@@ -31,11 +31,9 @@ CROSS_COMPILE ?= arm-none-eabi-
 # include py core make definitions
 include ../../py/mkenv.mk
 -include mpconfigport.mk
+include $(BOARD_DIR)/mpconfigboard.mk
 include $(TOP)/py/py.mk
 include $(TOP)/extmod/extmod.mk
-
-include $(BOARD_DIR)/mpconfigboard.mk
-
 
 # get path to this file
 MPY_MAIN_BUILD_DIR := $(dir $(MPY_DIR_OF_MAIN_MAKEFILE))/$(BUILD)
@@ -48,6 +46,7 @@ $(info MPY_MAIN_BUILD_DIR               : $(MPY_MAIN_BUILD_DIR))
 INC += -I.
 INC += -I$(TOP)
 INC += -I$(BUILD)
+INC += -Ilwip_inc
 
 LD               = arm-none-eabi-gcc
 CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingle-precision-constant -Wdouble-promotion -Wfloat-conversion -UMICROPY_USE_INTERNAL_PRINTF
@@ -55,7 +54,7 @@ CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingl
 
 # c11 : provides "static_assert" (not available in c99) 
 # -D_XOPEN_SOURCE=700 : makes sure the setenv/unsetenv headers are included
-CFLAGS  = $(INC) -Wall -Werror $(CFLAGS_CORTEX_M4) $(COPT) -std=c11 -D_XOPEN_SOURCE=700 -Wno-error=double-promotion -Wno-error=overflow
+CFLAGS  += $(INC) -Wall -Werror $(CFLAGS_CORTEX_M4) $(COPT) -std=c11 -D_XOPEN_SOURCE=700 -Wno-error=double-promotion -Wno-error=overflow
 
 LDFLAGS = -Wl,--cref -Wl,--gc-sections
 
@@ -85,8 +84,7 @@ CFLAGS  += -DFFCONF_H=\"lib/oofatfs/ffconf.h\" -DLFS1_NO_MALLOC -DLFS1_NO_DEBUG 
 
 LDFLAGS += $(LDFLAGS_MOD)
 
-LIBS =
-
+LIBS +=
 
 MPY_SRC_C += lib/littlefs/lfs1.c lib/littlefs/lfs1_util.c lib/littlefs/lfs2.c lib/littlefs/lfs2_util.c \
 		 	 lib/oofatfs/ff.c lib/oofatfs/ffunicode.c \
@@ -99,6 +97,9 @@ MPY_SRC_C += lib/littlefs/lfs1.c lib/littlefs/lfs1_util.c lib/littlefs/lfs2.c li
 		 	 shared/runtime/stdout_helpers.c \
 			 \
 		 	 shared/timeutils/timeutils.c \
+			 shared/netutils/dhcpserver.c \
+			 shared/netutils/netutils.c \
+			 shared/netutils/trace.c \
 		     \
 			 shared/runtime/sys_stdio_mphal.c 
 
@@ -111,6 +112,9 @@ SRC_C = \
 	\
 	help.c \
 	mphalport.c \
+	mpnetworkport.c \
+	rng.c \
+	sdio.c \
 	\
     drivers/machine/psoc6_gpio.c \
     drivers/machine/psoc6_i2c.c \
@@ -136,11 +140,11 @@ SRC_C = \
 	$(BUILD)/frozen_content.c
 
 
-SRC_C    += $(SRC_USERMOD)
+SRC_C    += $(SRC_USERMOD) $(SRC_EXTMOD_C) $(DRIVERS_SRC_C)
 SRC_CXX   = 
 
 
-SRC_QSTR += $(MPY_SRC_C) $(SRC_USERMOD) $(SRC_EXTMOD_C)
+SRC_QSTR += $(MPY_SRC_C) $(SRC_USERMOD) $(SRC_EXTMOD_C) $(DRIVERS_SRC_C)
 SRC_QSTR += modules/machine/modmachine.c \
             modules/machine/machine_i2c.c \
             modules/machine/machine_pin.c \
@@ -152,10 +156,9 @@ SRC_QSTR += modules/machine/modmachine.c \
 			\
 			modules/time/modutime.c
 
-
 OBJ += $(PY_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o)) $(addprefix $(BUILD)/, $(SRC_ASM:.s=.o))
+OBJ += $(addprefix $(BUILD)/, $(DRIVERS_SRC_C:.c=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_CXX:.cpp=.o))
-
 
 # switch for debug mode, also added to mpconfigport.h
 # TODO: keep the more suitable one, delete the other
@@ -165,11 +168,10 @@ ifeq ($(MP_LOGGER_DEBUG), 1)
   CFLAGS += -DMICROPY_LOGGER_DEBUG=1
 endif
 
-
 $(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ) $(MPY_MTB_LIBRARIES) $(LIBS)
 	$(info )
 	$(info Linking $@ ...)
-	$(Q)$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
+	$(Q)$(LD) $(LDFLAGS) -o $@ $^ $(LDFLAGS_MOD) $(LIBS)
 	$(info Linking $@ done.)
 	$(Q)$(SIZE) $@ -A
 	$(info )
