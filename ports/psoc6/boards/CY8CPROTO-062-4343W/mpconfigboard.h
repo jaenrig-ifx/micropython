@@ -6,4 +6,3 @@
 // #define MICROPY_HW_USB_MSC  (1)
 
 #define MICROPY_PY_NETWORK              (1)
-#define MICROPY_PY_NETWORK_IFX_WHD      (1)

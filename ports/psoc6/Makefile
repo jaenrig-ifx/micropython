@@ -53,7 +53,7 @@ CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingl
 
 # c11 : provides "static_assert" (not available in c99) 
 # -D_XOPEN_SOURCE=700 : makes sure the setenv/unsetenv headers are included
-CFLAGS  = $(INC) -Wall -Werror $(CFLAGS_CORTEX_M4) $(COPT) -std=c11 -D_XOPEN_SOURCE=700 -Wno-error=double-promotion -Wno-error=overflow
+CFLAGS  += $(INC) -Wall -Werror $(CFLAGS_CORTEX_M4) $(COPT) -std=c11 -D_XOPEN_SOURCE=700 -Wno-error=double-promotion -Wno-error=overflow
 
 LDFLAGS = -Wl,--cref -Wl,--gc-sections
 
@@ -111,6 +111,7 @@ SRC_C = \
 	\
 	help.c \
 	mphalport.c \
+	mpnetworkport.c \
 	\
     drivers/machine/psoc6_gpio.c \
     drivers/machine/psoc6_i2c.c \

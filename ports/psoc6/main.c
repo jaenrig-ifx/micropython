@@ -11,6 +11,10 @@
 #include "shared/runtime/pyexec.h"
 #include "extmod/modnetwork.h"
 
+#if MICROPY_PY_NETWORK_IFX_WHD
+#include "whd_wifi_api.h"
+#include "extmod/network_ifx_whd.h"
+#endif
 
 // MTB includes
 #include "cybsp.h"
@@ -19,6 +23,8 @@
 
 // port-specific includes
 #include "mplogger.h"
+
+
 
 
 #if MICROPY_ENABLE_GC
@@ -116,6 +122,9 @@ soft_reset:
 
     #if MICROPY_PY_NETWORK
     mod_network_init();
+    #if MICROPY_PY_NETWORK_IFX_WHD
+    whd_init(&whd, NULL, NULL, NULL, NULL);
+    #endif
     #endif
 
     #if MICROPY_VFS_FAT
@@ -159,6 +168,9 @@ soft_reset:
 
     #if MICROPY_PY_NETWORK
     mod_network_deinit();
+    #if MICROPY_PY_NETWORK_IFX_WHD
+    // whd_init(whd->itf);
+    #endif
     #endif
 
     machine_deinit();
