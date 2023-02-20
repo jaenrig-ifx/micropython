@@ -129,7 +129,7 @@ STATIC mp_obj_t network_ifx_whd_active(size_t n_args, const mp_obj_t *args) {
     whd_interface_t itf = *(self->itf);
 
     if (n_args == 1) {
-        // Is this function the most suitable. There is no whd public
+        // Is this function the most suitable? There is no whd public
         // function to get the link status
         return mp_obj_new_bool(whd_wifi_is_ready_to_transceive(itf));
     } else {
@@ -189,7 +189,7 @@ STATIC mp_obj_t network_ifx_whd_scan(size_t n_args, const mp_obj_t *pos_args, mp
     //     { MP_QSTR_bssid, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
     // };
 
-    // // network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(pos_args[0]);
+    // network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(pos_args[0]);
     // mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     // mp_arg_parse_all(n_args - 1, pos_args + 1, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
@@ -234,83 +234,109 @@ STATIC mp_obj_t network_ifx_whd_scan(size_t n_args, const mp_obj_t *pos_args, mp
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(network_ifx_whd_scan_obj, 1, network_ifx_whd_scan);
 
 STATIC mp_obj_t network_ifx_whd_connect(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    // enum { ARG_ssid, ARG_key, ARG_auth, ARG_security, ARG_bssid, ARG_channel };
-    // static const mp_arg_t allowed_args[] = {
-    //     { MP_QSTR_ssid, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
-    //     { MP_QSTR_key, MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
-    //     { MP_QSTR_auth, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = -1} },
-    //     { MP_QSTR_security, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = -1} },
-    //     { MP_QSTR_bssid, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
-    //     { MP_QSTR_channel, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = -1} },
-    // };
+    enum { ARG_ssid, ARG_key, ARG_auth, ARG_security, ARG_bssid, ARG_channel };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_ssid, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
+        { MP_QSTR_key, MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
+        { MP_QSTR_auth, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = -1} },
+        { MP_QSTR_security, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = -1} },
+        { MP_QSTR_bssid, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
+        { MP_QSTR_channel, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = -1} },
+    };
 
-    // network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(pos_args[0]);
-    // mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    // mp_arg_parse_all(n_args - 1, pos_args + 1, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+    network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(pos_args[0]);
+    whd_interface_t itf = *(self->itf);
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args - 1, pos_args + 1, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-//     // Deprecated kwarg
-//     if (args[ARG_auth].u_int != -1) {
-//         args[ARG_security] = args[ARG_auth];
-//     }
+    // Deprecated kwarg
+    if (args[ARG_auth].u_int != -1) {
+        args[ARG_security] = args[ARG_auth];
+    }
 
-//     // Extract the SSID.
-//     mp_buffer_info_t ssid;
-//     mp_get_buffer_raise(args[ARG_ssid].u_obj, &ssid, MP_BUFFER_READ);
+    // Extract the SSID.
+    mp_buffer_info_t ssid;
+    mp_get_buffer_raise(args[ARG_ssid].u_obj, &ssid, MP_BUFFER_READ);
+    // TODO: Check length cannot be more than 32 bytes. Limited by whd lib. Validate argument!
+    whd_ssid_t whd_ssid = {
+        .length = ssid.len
+    };
+    memcpy(whd_ssid.value, ssid.buf, ssid.len);
 
-//     // Extract the key, if given.
-//     mp_buffer_info_t key;
-//     key.buf = NULL;
-//     if (args[ARG_key].u_obj != mp_const_none) {
-//         mp_get_buffer_raise(args[ARG_key].u_obj, &key, MP_BUFFER_READ);
-//     }
+    // Extract the key, if given.
+    mp_buffer_info_t key;
+    key.buf = NULL;
+    if (args[ARG_key].u_obj != mp_const_none) {
+        mp_get_buffer_raise(args[ARG_key].u_obj, &key, MP_BUFFER_READ);
+    }
 
-//     // Extract the BSSID, if given.
-//     mp_buffer_info_t bssid;
-//     bssid.buf = NULL;
-//     if (args[ARG_bssid].u_obj != mp_const_none) {
-//         mp_get_buffer_raise(args[ARG_bssid].u_obj, &bssid, MP_BUFFER_READ);
-//         if (bssid.len != 6) {
-//             mp_raise_ValueError(NULL);
-//         }
-//     }
+    // Extract the BSSID, if given.
+    mp_buffer_info_t bssid;
+    bssid.buf = NULL;
+    if (args[ARG_bssid].u_obj != mp_const_none) {
+        mp_get_buffer_raise(args[ARG_bssid].u_obj, &bssid, MP_BUFFER_READ);
+        whd_mac_t whd_bssid;
 
-//     // Extract the security type, if given.
-//     uint32_t auth_type;
-//     if (args[ARG_security].u_int == -1) {
-//         if (key.buf == NULL || key.len == 0) {
-//             auth_type = 0; // open security
-//         } else {
-//             #if MICROPY_PY_NETWORK_CYW43_USE_LIB_DRIVER
-//             auth_type = CYW43_AUTH_WPA2_MIXED_PSK;
-//             #else
-//             auth_type = 0x008006; // WPA2_MIXED_PSK
-//             #endif
-//         }
-//     } else {
-//         auth_type = args[ARG_security].u_int;
-//     }
+        // Check if the given bssid matches the interface bssid
+        uint32_t ret = whd_wifi_get_bssid(itf, &whd_bssid);
+        if (ret != WHD_SUCCESS) {
+            mp_raise_OSError(-ret);
+        }
 
-//     // Start the WiFi join procedure.  It will run in the background.
-//     int ret = cyw43_wifi_join(self->cyw, ssid.len, ssid.buf, key.len, key.buf,
-//         auth_type, bssid.buf, args[ARG_channel].u_int);
-//     if (ret != 0) {
-//         mp_raise_OSError(-ret);
-//     }
+        if (bssid.len != 6) {
+            if (strncmp(bssid.buf, (char *)whd_bssid.octet, 6)) {
+                mp_raise_ValueError(NULL);
+            }
+        }
+    }
+
+    // Extract the security type, if given.
+    whd_security_t auth_type;
+    if (args[ARG_security].u_int == -1) {
+        if (key.buf == NULL || key.len == 0) {
+            auth_type = WHD_SECURITY_OPEN;
+        } else {
+            auth_type = WHD_SECURITY_WPA2_MIXED_PSK;
+        }
+    } else {
+        auth_type = args[ARG_security].u_int;
+    }
+
+    // Extract channel, if given.
+    if (args[ARG_channel].u_int == -1) {
+
+        uint32_t ret = whd_wifi_set_channel(itf, args[ARG_channel].u_int);
+        if (ret != WHD_SUCCESS) {
+            mp_raise_OSError(-ret);
+        }
+    }
+
+    // Start the WiFi join procedure.  It will run in the background.
+    uint32_t ret = whd_wifi_join(itf, &whd_ssid, auth_type, key.buf, key.len);
+    if (ret != WHD_SUCCESS) {
+        mp_raise_OSError(-ret);
+    }
     return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(network_ifx_whd_connect_obj, 1, network_ifx_whd_connect);
 
 STATIC mp_obj_t network_ifx_whd_disconnect(mp_obj_t self_in) {
-//     network_cyw43_obj_t *self = MP_OBJ_TO_PTR(self_in);
-//     cyw43_wifi_leave(self->cyw, self->itf);
+    network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    whd_interface_t itf = *(self->itf);
+    uint32_t ret = whd_wifi_leave(itf);
+    if (ret != WHD_SUCCESS) {
+        mp_raise_OSError(-ret);
+    }
     return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(network_ifx_whd_disconnect_obj, network_ifx_whd_disconnect);
 
 STATIC mp_obj_t network_ifx_whd_isconnected(mp_obj_t self_in) {
-//     network_cyw43_obj_t *self = MP_OBJ_TO_PTR(self_in);
-//     return mp_obj_new_bool(cyw43_tcpip_link_status(self->cyw, self->itf) == 3);
-    return mp_const_true;
+    network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    whd_interface_t itf = *(self->itf);
+    // Is this function the most suitable? There is no whd public
+    // function to get the link status
+    return mp_obj_new_bool(whd_wifi_is_ready_to_transceive(itf));
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(network_ifx_whd_isconnected_obj, network_ifx_whd_isconnected);
 
@@ -519,7 +545,7 @@ STATIC const mp_rom_map_elem_t network_ifx_whd_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_send_ethernet), MP_ROM_PTR(&network_ifx_whd_send_ethernet_obj) },
     { MP_ROM_QSTR(MP_QSTR_ioctl), MP_ROM_PTR(&network_ifx_whd_ioctl_obj) },
 
-    { MP_ROM_QSTR(MP_QSTR_deinit), MP_ROM_PTR(&network_ifx_whd_deinit_obj) },
+    { MP_ROM_QSTR(MP_QSTR_deinit), MP_ROM_PTR(&network_ifx_whd_deinit_obj) }, // shall this be part of the module ??
     { MP_ROM_QSTR(MP_QSTR_active), MP_ROM_PTR(&network_ifx_whd_active_obj) },
     { MP_ROM_QSTR(MP_QSTR_scan), MP_ROM_PTR(&network_ifx_whd_scan_obj) },
     { MP_ROM_QSTR(MP_QSTR_connect), MP_ROM_PTR(&network_ifx_whd_connect_obj) },
@@ -528,6 +554,32 @@ STATIC const mp_rom_map_elem_t network_ifx_whd_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_ifconfig), MP_ROM_PTR(&network_ifx_whd_ifconfig_obj) },
     { MP_ROM_QSTR(MP_QSTR_status), MP_ROM_PTR(&network_ifx_whd_status_obj) },
     { MP_ROM_QSTR(MP_QSTR_config), MP_ROM_PTR(&network_ifx_whd_config_obj) },
+
+    // Network WHD constants
+    // Security modes
+    { MP_ROM_QSTR(MP_QSTR_OPEN),                      MP_ROM_INT(WHD_SECURITY_OPEN) },
+    { MP_ROM_QSTR(MP_QSTR_WEP_PSK),                   MP_ROM_INT(WHD_SECURITY_WEP_PSK) },
+    { MP_ROM_QSTR(MP_QSTR_WEP_SHARED),                MP_ROM_INT(WHD_SECURITY_WEP_SHARED) },
+    { MP_ROM_QSTR(MP_QSTR_WPA_TKIP_PSK),              MP_ROM_INT(WHD_SECURITY_WPA_TKIP_PSK) },
+    { MP_ROM_QSTR(MP_QSTR_WPA_AES_PSK),               MP_ROM_INT(WHD_SECURITY_WPA_AES_PSK) },
+    { MP_ROM_QSTR(MP_QSTR_WPA_MIXED_PSK),             MP_ROM_INT(WHD_SECURITY_WPA_MIXED_PSK) },
+    { MP_ROM_QSTR(MP_QSTR_WPA2_AES_PSK),              MP_ROM_INT(WHD_SECURITY_WPA2_AES_PSK) },
+    { MP_ROM_QSTR(MP_QSTR_WPA2_TKIP_PSK),             MP_ROM_INT(WHD_SECURITY_WPA2_TKIP_PSK) },
+    { MP_ROM_QSTR(MP_QSTR_WPA2_MIXED_PSK),            MP_ROM_INT(WHD_SECURITY_WPA2_MIXED_PSK) },
+    { MP_ROM_QSTR(MP_QSTR_WPA2_FBT_PSK),              MP_ROM_INT(WHD_SECURITY_WPA2_FBT_PSK) },
+    { MP_ROM_QSTR(MP_QSTR_WPA3_SAE),                  MP_ROM_INT(WHD_SECURITY_WPA3_SAE) },
+    { MP_ROM_QSTR(MP_QSTR_WPA2_WPA_AES_PSK),          MP_ROM_INT(WHD_SECURITY_WPA2_WPA_AES_PSK) },
+    { MP_ROM_QSTR(MP_QSTR_WPA2_WPA_MIXED_PSK),       MP_ROM_INT(WHD_SECURITY_WPA2_WPA_MIXED_PSK) },
+    { MP_ROM_QSTR(MP_QSTR_WPA3_WPA2_PSK),             MP_ROM_INT(WHD_SECURITY_WPA3_WPA2_PSK) },
+    { MP_ROM_QSTR(MP_QSTR_WPA_TKIP_ENT),              MP_ROM_INT(WHD_SECURITY_WPA_TKIP_ENT) },
+    { MP_ROM_QSTR(MP_QSTR_WPA_MIXED_ENT),             MP_ROM_INT(WHD_SECURITY_WPA_MIXED_ENT) },
+    { MP_ROM_QSTR(MP_QSTR_WPA2_TKIP_ENT),             MP_ROM_INT(WHD_SECURITY_WPA2_TKIP_ENT) },
+    { MP_ROM_QSTR(MP_QSTR_WPA2_MIXED_ENT),            MP_ROM_INT(WHD_SECURITY_WPA2_MIXED_ENT) },
+    { MP_ROM_QSTR(MP_QSTR_WPA2_FBT_ENT),              MP_ROM_INT(WHD_SECURITY_WPA2_FBT_ENT) },
+    { MP_ROM_QSTR(MP_QSTR_WPA2_IBSS_OPEN),            MP_ROM_INT(WHD_SECURITY_IBSS_OPEN) },
+    { MP_ROM_QSTR(MP_QSTR_WPA2_WPS_SECURE),           MP_ROM_INT(WHD_SECURITY_WPS_SECURE) },
+
+    //
 };
 STATIC MP_DEFINE_CONST_DICT(network_ifx_whd_locals_dict, network_ifx_whd_locals_dict_table);
 
