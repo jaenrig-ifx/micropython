@@ -45,7 +45,7 @@ mpy_mtb_init:
 # build MTB project
 mpy_mtb_build:
 	$(info )
-	$(info Building $(BOARD) using MTB ...)
+	$(info Building $(BOARD) in $(CONFIG) mode using MTB ...)
 	-$(Q) cd $(BOARD_DIR); $(MAKE) CONFIG=$(MPY_MTB_CONFIG) build
 
 
