@@ -28,5 +28,8 @@
 #define MICROPY_INCLUDED_EXTMOD_NETWORK_IFX_WHD_H
 
 extern const mp_obj_type_t mp_network_ifx_whd_type;
+extern whd_driver_t whd;
+extern whd_interface_t itf_sta;
+extern whd_interface_t itf_ap;
 
 #endif // MICROPY_INCLUDED_EXTMOD_NETWORK_IFX_WHD_H
