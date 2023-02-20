@@ -27,6 +27,8 @@
 
 #if MICROPY_PY_NETWORK_IFX_WHD
 
+#include "mphalport.h"
+
 /*********************************************** Semaphores **********************************************/
 // Empty implementation of semaphores required by the whd driver.
 // as long as no RTOS support is added to the PSoC6 port.
@@ -46,6 +48,17 @@ cy_rslt_t cy_rtos_set_semaphore(cy_semaphore_t *semaphore, bool in_isr) {
 }
 
 cy_rslt_t cy_rtos_deinit_semaphore(cy_semaphore_t *semaphore) {
+    return CY_RSLT_SUCCESS;
+}
+
+cy_rslt_t cy_rtos_get_time(cy_time_t *tval) {
+    *tval = (cy_time_t)mp_hal_ticks_ms();
+    return CY_RSLT_SUCCESS;
+}
+
+cy_rslt_t cy_rtos_delay_milliseconds(cy_time_t num_ms) {
+
+    mp_hal_delay_ms(num_ms);
     return CY_RSLT_SUCCESS;
 }
 
