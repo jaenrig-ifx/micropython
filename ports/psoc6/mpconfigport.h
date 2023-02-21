@@ -34,17 +34,6 @@
 #define MICROPY_HW_ENABLE_UART_REPL             (0) // useful if there is no USB
 #define MICROPY_HW_ENABLE_USBDEV                (0)
 
-#if MICROPY_HW_ENABLE_USBDEV
-// Enable USB-CDC serial port
-#ifndef MICROPY_HW_USB_CDC
-#define MICROPY_HW_USB_CDC (1)
-#endif
-// Enable USB Mass Storage with FatFS filesystem.
-#ifndef MICROPY_HW_USB_MSC
-#define MICROPY_HW_USB_MSC (1)
-#endif
-#endif
-
 #ifndef MICROPY_CONFIG_ROM_LEVEL
 #define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_FULL_FEATURES)
 #endif
@@ -57,21 +46,23 @@
 // MicroPython emitters
 #define MICROPY_PERSISTENT_CODE_LOAD            (1)
 #define MICROPY_EMIT_THUMB                      (1)
-#define MICROPY_EMIT_THUMB_ARMV7M               (0)
+#define MICROPY_EMIT_THUMB_ARMV7M               (1)
 #define MICROPY_EMIT_INLINE_THUMB               (1)
-#define MICROPY_EMIT_INLINE_THUMB_FLOAT         (0)
+#define MICROPY_EMIT_INLINE_THUMB_FLOAT         (1)
+#define MICROPY_EMIT_ARM                        (0)
 
 // Optimisations
-// #define MICROPY_OPT_COMPUTED_GOTO               (1)
 #define MICROPY_OPT_COMPUTED_GOTO               (0)
 
 // Python internal features
 #define MICROPY_READER_VFS                      (1)
 #define MICROPY_ENABLE_GC                       (1)
 #define MICROPY_ENABLE_EMERGENCY_EXCEPTION_BUF  (1)
+
 #define MICROPY_LONGINT_IMPL                    (MICROPY_LONGINT_IMPL_MPZ)
-// #define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_FLOAT)
-#define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_DOUBLE)
+#define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_FLOAT)
+// #define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_DOUBLE)
+
 #define MICROPY_SCHEDULER_DEPTH                 (8)
 #define MICROPY_SCHEDULER_STATIC_NODES          (1)
 
@@ -84,7 +75,6 @@
 #define MICROPY_PY_SYS_PLATFORM                 "psoc6"
 #define MICROPY_PY_THREAD                       (0)
 #define MICROPY_PY_THREAD_GIL                   (0)
-// #define MICROPY_THREAD_YIELD()                  mp_handle_pending(true)
 
 // Extended modules
 #define MICROPY_EPOCH_IS_1970                   (1)
@@ -96,42 +86,28 @@
 
 #define MICROPY_PY_URE_MATCH_GROUPS             (1)
 #define MICROPY_PY_URE_MATCH_SPAN_START_END     (1)
-#define MICROPY_PY_UCRYPTOLIB                   (0)
 #define MICROPY_PY_UTIME_MP_HAL                 (1)
-// #define MICROPY_PY_URANDOM_SEED_INIT_FUNC       (random_u32())
 #define MICROPY_PY_MACHINE                      (1)
 #define MICROPY_PY_MACHINE_PIN_MAKE_NEW         mp_pin_make_new
 #define MICROPY_PY_MACHINE_BITSTREAM            (0)
 #define MICROPY_PY_MACHINE_PULSE                (0)
 #define MICROPY_PY_MACHINE_PWM                  (0)
 #define MICROPY_PY_MACHINE_PWM_DUTY_U16_NS      (0)
-// #define MICROPY_PY_MACHINE_PWM_INCLUDEFILE      "ports/psoc6/modules/machine/machine_pwm.c"
 #define MICROPY_PY_MACHINE_I2C                  (1)
 #define MICROPY_PY_MACHINE_SOFTI2C              (1)
 #define MICROPY_PY_MACHINE_I2C_TRANSFER_WRITE1  (0)
 
 #define MICROPY_PY_MACHINE_SPI                  (0)
-// #define MICROPY_PY_MACHINE_SPI_MSB              (SPI_MSB_FIRST)
-// #define MICROPY_PY_MACHINE_SPI_LSB              (SPI_LSB_FIRST)
 #define MICROPY_PY_MACHINE_SOFTSPI              (0)
 #define MICROPY_PY_ONEWIRE                      (0)
 #define MICROPY_VFS                             (1)
-#define MICROPY_VFS_LFS2                        (1)
+
 #define MICROPY_VFS_FAT                         (0)
-#define MICROPY_SSL_MBEDTLS                     (0)
 
 // fatfs configuration
 #define MICROPY_FATFS_ENABLE_LFN                (1)
 #define MICROPY_FATFS_LFN_CODE_PAGE             437 /* 1=SFN/ANSI 437=LFN/U.S.(OEM) */
 #define MICROPY_FATFS_RPATH                     (2)
-
-#if MICROPY_HW_USB_MSC
-#define MICROPY_FATFS_USE_LABEL                 (0)
-#define MICROPY_FATFS_MULTI_PARTITION           (0)
-// Set FatFS block size to flash sector size to avoid caching
-// the flash sector in memory to support smaller block sizes.
-#define MICROPY_FATFS_MAX_SS                    (FLASH_SECTOR_SIZE)
-#endif
 
 // set to 1 to enable filesystem to be loaded on external qspi flash
 // if set to 0, filesystem is located in an allotted area of internal flash of PSoC6
@@ -140,6 +116,19 @@
 #ifndef MICROPY_BOARD_ENTER_BOOTLOADER
 #define MICROPY_BOARD_ENTER_BOOTLOADER(nargs, args)
 #endif
+
+#define MICROPY_TRACKED_ALLOC        (MICROPY_SSL_MBEDTLS)
+
+#define MICROPY_PY_UCRYPTOLIB        (1)
+#define MICROPY_PY_UCRYPTOLIB_CTR    (1)
+#define MICROPY_PY_UCRYPTOLIB_CONSTS (1)
+
+#define MICROPY_PY_UHASHLIB          (1)
+#define MICROPY_PY_UHASHLIB_MD5      (1)
+#define MICROPY_PY_UHASHLIB_SHA1     (1)
+#define MICROPY_PY_UHASHLIB_SHA256   (1)
+
+#define MP_STATE_PORT MP_STATE_VM
 
 // By default networking should include sockets, ssl, websockets, webrepl
 #if MICROPY_PY_NETWORK
@@ -176,8 +165,6 @@ extern const struct _mp_obj_type_t mp_network_ifx_whd_type;
     MICROPY_HW_NIC_IFX_WHD
 #endif
 
-#define MP_STATE_PORT MP_STATE_VM
-
 // Miscellaneous settings
 #define MICROPY_MAKE_POINTER_CALLABLE(p) ((void *)((mp_uint_t)(p) | 1))
 
@@ -188,14 +175,6 @@ typedef intptr_t mp_off_t;
 
 // We need to provide a declaration/definition of alloca()
 #include <alloca.h>
-
-// extern uint32_t cyw43_country_code;
-// extern void cyw43_irq_init(void);
-// extern void cyw43_post_poll_hook(void);
-
-// #define CYW43_POST_POLL_HOOK cyw43_post_poll_hook();
-// #define MICROPY_CYW43_COUNTRY cyw43_country_code
-
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -208,7 +187,6 @@ typedef intptr_t mp_off_t;
 
 
 #define MICROPY_LOGGER_DEBUG              (0)
-#define MICROPY_MODULE_FROZEN_MPY         (1)
 
 
 #define MICROPY_PY_BUILTINS_HELP          (1)
@@ -229,11 +207,6 @@ typedef intptr_t mp_off_t;
 #define MICROPY_READER_POSIX              (0)
 
 
-#ifndef MICROPY_PY_SYS_PATH_DEFAULT
-#define MICROPY_PY_SYS_PATH_DEFAULT       "/flash:~/.micropython/lib:/usr/lib/micropython"
-#endif
-
-
 #define MICROPY_REPL_INFO                 (1)
 
 // Set to zero explicitly ! Or mounting the /flash fs must be done inside try/except for both branches !
@@ -245,7 +218,8 @@ typedef intptr_t mp_off_t;
 #define MICROPY_PY_IO_IOBASE              (1)
 
 
-#define MICROPY_PY_USELECT                (0)
+#define MICROPY_PY_USELECT                (1)
+#define MICROPY_PY_USELECT_SELECT         (1)
 
 #define MICROPY_STACK_CHECK               (1)
 
@@ -255,3 +229,30 @@ typedef intptr_t mp_off_t;
 
 
 #include "shared/runtime/interrupt_char.h"
+
+
+#define MICROPY_OBJ_REPR (MICROPY_OBJ_REPR_A)
+
+#define MICROPY_EVENT_POLL_HOOK_FAST \
+    do { \
+        extern void mp_handle_pending(bool); \
+        mp_handle_pending(true); \
+    } while (0)
+
+#define MICROPY_EVENT_POLL_HOOK \
+    do { \
+        MICROPY_EVENT_POLL_HOOK_FAST; \
+    } while (0);
+
+// best_effort_wfe_or_timeout(make_timeout_time_ms(1));
+
+
+
+#define MICROPY_PY_SYS_EXC_INFO      (1)
+
+#define MICROPY_PY_URE_DEBUG                (1)
+#define MICROPY_PY_URE_MATCH_GROUPS         (1)
+#define MICROPY_PY_URE_MATCH_SPAN_START_END (1)
+
+#define MICROPY_MEM_STATS (1)
+#define MICROPY_MALLOC_USES_ALLOCATED_SIZE (1)
