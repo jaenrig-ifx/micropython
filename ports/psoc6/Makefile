@@ -14,7 +14,7 @@ MPY_DIR_OF_MAIN_MAKEFILE  := $(dir $(MPY_PATH_TO_MAIN_MAKEFILE))
 
 # qstr definitions (must come before including py.mk)
 QSTR_DEFS = qstrdefsport.h
-
+QSTR_GLOBAL_DEPENDENCIES += $(BOARD_DIR)/mpconfigboard.h
 
 MICROPY_FROZEN_MANIFEST      ?= boards/manifest.py
 MICROPY_USER_FROZEN_MANIFEST ?= $(MICROPY_FROZEN_MANIFEST)
@@ -33,9 +33,9 @@ CONFIG        ?= Debug
 
 # include py core make definitions
 include ../../py/mkenv.mk
-include $(TOP)/py/py.mk
 include mpconfigport.mk
 include $(BOARD_DIR)/mpconfigboard.mk
+include $(TOP)/py/py.mk
 include $(TOP)/extmod/extmod.mk
 
 
@@ -94,55 +94,56 @@ LDFLAGS += $(LDFLAGS_MOD)
 
 LIBS +=
 
-MPY_SRC_C = shared/netutils/netutils.c \
-			\
-			shared/readline/readline.c \
-			\
-			shared/runtime/gchelper_native.c \
-			shared/runtime/interrupt_char.c \
-		 	shared/runtime/pyexec.c \
-		 	shared/runtime/stdout_helpers.c \
-			shared/runtime/sys_stdio_mphal.c \
-			\
-		 	shared/timeutils/timeutils.c \
-			\
-			help.c \
-			\
-    		drivers/machine/psoc6_gpio.c \
-    		drivers/machine/psoc6_i2c.c \
-    		drivers/machine/psoc6_system.c  \
-			\
-			modules/gc/modgc.c \
-			\
-			modules/machine/modmachine.c \
-			modules/machine/machine_i2c.c \
-			modules/machine/machine_pin.c \
-			modules/machine/machine_rtc.c \
-			modules/machine/pins.c \
-			\
-			modules/psoc6/modpsoc6.c \
-			modules/psoc6/psoc6_fatfs.c \
-			modules/psoc6/psoc6_flash.c \
-			modules/psoc6/psoc6_qspi_flash.c \
-			\
-			modules/time/modutime.c \
-			\
-			$(SRC_THIRDPARTY_C) \
-			$(SRC_USERMOD)
-		 	 
+SHARED_SRC_C += $(addprefix shared/,\
+	netutils/netutils.c \
+	readline/readline.c \
+	runtime/gchelper_native.c \
+	runtime/interrupt_char.c \
+	runtime/pyexec.c \
+	runtime/stdout_helpers.c \
+	runtime/sys_stdio_mphal.c \
+	timeutils/timeutils.c \
+	)
 
+DRIVERS_SRC_C += $(addprefix drivers/,\
+	machine/psoc6_gpio.c \
+	machine/psoc6_i2c.c \
+	machine/psoc6_system.c  \
+	)
+
+MOD_SRC_C += $(addprefix modules/,\
+	gc/modgc.c \
+	\
+	machine/modmachine.c \
+	machine/machine_i2c.c \
+	machine/machine_pin.c \
+	machine/machine_rtc.c \
+	machine/pins.c \
+	\
+	psoc6/modpsoc6.c \
+	psoc6/psoc6_fatfs.c \
+	psoc6/psoc6_flash.c \
+	psoc6/psoc6_qspi_flash.c \
+	\
+	time/modutime.c \
+	)
+
+SRC_C = help.c \
+		main.c \
+		mphalport.c \
+		mpnetworkport.c \
+		$(BUILD)/frozen_content.c 
+	
 SRC_ASM += shared/runtime/gchelper_thumb1.s
 
+SRC_QSTR += $(SHARED_SRC_C) $(MOD_SRC_C)
 
-SRC_C    += main.c mphalport.c 	mpnetworkport.c $(MPY_SRC_C) $(BUILD)/frozen_content.c $(SRC_EXTMOD_C)
-SRC_CXX  += 
-
-
-SRC_QSTR += $(MPY_SRC_C) \
-            \
-            modules/os/moduos.c
-
-OBJ += $(PY_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o)) $(addprefix $(BUILD)/, $(SRC_ASM:.s=.o))
+OBJ += $(PY_O) 
+OBJ += $(addprefix $(BUILD)/, $(SHARED_SRC_C:.c=.o)) 
+OBJ += $(addprefix $(BUILD)/, $(DRIVERS_SRC_C:.c=.o)) 
+OBJ += $(addprefix $(BUILD)/, $(MOD_SRC_C:.c=.o)) 
+OBJ += $(addprefix $(BUILD)/, $(SRC_C:.c=.o)) 
+OBJ += $(addprefix $(BUILD)/, $(SRC_ASM:.s=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_CXX:.cpp=.o))
 
 

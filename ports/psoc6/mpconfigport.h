@@ -83,6 +83,7 @@
 #define MICROPY_PY_UOS_URANDOM                  (0)
 #define MICROPY_PY_UOS_GETENV_PUTENV_UNSETENV   (1)
 #define MICROPY_PY_UOS_SYSTEM                   (1)
+#define MICROPY_PY_UOS_ERRNO                    (1)
 
 #define MICROPY_PY_URE_MATCH_GROUPS             (1)
 #define MICROPY_PY_URE_MATCH_SPAN_START_END     (1)
