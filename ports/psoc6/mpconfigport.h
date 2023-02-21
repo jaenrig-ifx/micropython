@@ -34,16 +34,16 @@
 #define MICROPY_HW_ENABLE_UART_REPL             (0) // useful if there is no USB
 #define MICROPY_HW_ENABLE_USBDEV                (0)
 
-#if MICROPY_HW_ENABLE_USBDEV
-// Enable USB-CDC serial port
-#ifndef MICROPY_HW_USB_CDC
-#define MICROPY_HW_USB_CDC (1)
-#endif
-// Enable USB Mass Storage with FatFS filesystem.
-#ifndef MICROPY_HW_USB_MSC
-#define MICROPY_HW_USB_MSC (1)
-#endif
-#endif
+// #if MICROPY_HW_ENABLE_USBDEV
+// // Enable USB-CDC serial port
+// #ifndef MICROPY_HW_USB_CDC
+// #define MICROPY_HW_USB_CDC (1)
+// #endif
+// // Enable USB Mass Storage with FatFS filesystem.
+// #ifndef MICROPY_HW_USB_MSC
+// #define MICROPY_HW_USB_MSC (1)
+// #endif
+// #endif
 
 #ifndef MICROPY_CONFIG_ROM_LEVEL
 #define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_FULL_FEATURES)
@@ -119,22 +119,22 @@
 #define MICROPY_PY_MACHINE_SOFTSPI              (0)
 #define MICROPY_PY_ONEWIRE                      (0)
 #define MICROPY_VFS                             (1)
-#define MICROPY_VFS_LFS2                        (1)
+// #define MICROPY_VFS_LFS2                        (1)
 #define MICROPY_VFS_FAT                         (0)
-#define MICROPY_SSL_MBEDTLS                     (0)
+// #define MICROPY_SSL_MBEDTLS                     (1)
 
 // fatfs configuration
 #define MICROPY_FATFS_ENABLE_LFN                (1)
 #define MICROPY_FATFS_LFN_CODE_PAGE             437 /* 1=SFN/ANSI 437=LFN/U.S.(OEM) */
 #define MICROPY_FATFS_RPATH                     (2)
 
-#if MICROPY_HW_USB_MSC
-#define MICROPY_FATFS_USE_LABEL                 (0)
-#define MICROPY_FATFS_MULTI_PARTITION           (0)
-// Set FatFS block size to flash sector size to avoid caching
-// the flash sector in memory to support smaller block sizes.
-#define MICROPY_FATFS_MAX_SS                    (FLASH_SECTOR_SIZE)
-#endif
+// #if MICROPY_HW_USB_MSC
+// #define MICROPY_FATFS_USE_LABEL                 (0)
+// #define MICROPY_FATFS_MULTI_PARTITION           (0)
+// // Set FatFS block size to flash sector size to avoid caching
+// // the flash sector in memory to support smaller block sizes.
+// #define MICROPY_FATFS_MAX_SS                    (FLASH_SECTOR_SIZE)
+// #endif
 
 // set to 1 to enable filesystem to be loaded on external qspi flash
 // if set to 0, filesystem is located in an allotted area of internal flash of PSoC6
@@ -143,6 +143,9 @@
 #ifndef MICROPY_BOARD_ENTER_BOOTLOADER
 #define MICROPY_BOARD_ENTER_BOOTLOADER(nargs, args)
 #endif
+
+
+#define MICROPY_PY_NETWORK              (1)
 
 // By default networking should include sockets, ssl, websockets, webrepl, dupterm.
 #if MICROPY_PY_NETWORK
@@ -173,43 +176,35 @@
 
 #endif
 
-// #if MICROPY_PY_NETWORK_CYW43
 
-// extern const struct _mp_obj_type_t mp_network_cyw43_type;
-// #define MICROPY_HW_NIC_CYW43
-//     { MP_ROM_QSTR(MP_QSTR_WLAN), MP_ROM_PTR(&mp_network_cyw43_type) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_IDLE), MP_ROM_INT(CYW43_LINK_DOWN) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_CONNECTING), MP_ROM_INT(CYW43_LINK_JOIN) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_WRONG_PASSWORD), MP_ROM_INT(CYW43_LINK_BADAUTH) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_NO_AP_FOUND), MP_ROM_INT(CYW43_LINK_NONET) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_CONNECT_FAIL), MP_ROM_INT(CYW43_LINK_FAIL) },
-//     { MP_ROM_QSTR(MP_QSTR_STAT_GOT_IP), MP_ROM_INT(CYW43_LINK_UP) },
+// #define MICROPY_PY_NETWORK_CYW43        (1)
+#define MICROPY_PY_NETWORK_CYW43_USE_LIB_DRIVER    (1)
+// #define MICROPY_PY_LWIP                 (1)
 
-// #else
 
-// #define MICROPY_HW_NIC_CYW43
+#if MICROPY_PY_NETWORK_CYW43
 
-// #endif
+extern const struct _mp_obj_type_t mp_network_cyw43_type;
 
-// #if MICROPY_PY_NETWORK_NINAW10
-// // This Network interface requires the extended socket state.
-// #ifndef MICROPY_PY_USOCKET_EXTENDED_STATE
-// #define MICROPY_PY_USOCKET_EXTENDED_STATE   (1)
-// #endif
-// extern const struct _mod_network_nic_type_t mod_network_nic_type_nina;
-// #define MICROPY_HW_NIC_NINAW10              { MP_ROM_QSTR(MP_QSTR_WLAN), MP_ROM_PTR(&mod_network_nic_type_nina) },
-// #else
-// #define MICROPY_HW_NIC_NINAW10
-// #endif
+#define MICROPY_HW_NIC_CYW43 \
+    { MP_ROM_QSTR(MP_QSTR_WLAN), MP_ROM_PTR(&mp_network_cyw43_type) }, \
+    { MP_ROM_QSTR(MP_QSTR_STAT_IDLE), MP_ROM_INT(CYW43_LINK_DOWN) }, \
+    { MP_ROM_QSTR(MP_QSTR_STAT_CONNECTING), MP_ROM_INT(CYW43_LINK_JOIN) }, \
+    { MP_ROM_QSTR(MP_QSTR_STAT_WRONG_PASSWORD), MP_ROM_INT(CYW43_LINK_BADAUTH) }, \
+    { MP_ROM_QSTR(MP_QSTR_STAT_NO_AP_FOUND), MP_ROM_INT(CYW43_LINK_NONET) }, \
+    { MP_ROM_QSTR(MP_QSTR_STAT_CONNECT_FAIL), MP_ROM_INT(CYW43_LINK_FAIL) }, \
+    { MP_ROM_QSTR(MP_QSTR_STAT_GOT_IP), MP_ROM_INT(CYW43_LINK_UP) },
 
-// #ifndef MICROPY_BOARD_NETWORK_INTERFACES
-// #define MICROPY_BOARD_NETWORK_INTERFACES
-// #endif
+#else
 
-// #define MICROPY_PORT_NETWORK_INTERFACES
-//     MICROPY_HW_NIC_CYW43
-//     MICROPY_HW_NIC_NINAW10
-//     MICROPY_BOARD_NETWORK_INTERFACES
+#define MICROPY_HW_NIC_CYW43
+
+#endif
+
+
+#define MICROPY_PORT_NETWORK_INTERFACES \
+    MICROPY_HW_NIC_CYW43
+// MICROPY_BOARD_NETWORK_INTERFACES
 
 #define MP_STATE_PORT MP_STATE_VM
 
@@ -224,14 +219,14 @@ typedef intptr_t mp_off_t;
 // We need to provide a declaration/definition of alloca()
 #include <alloca.h>
 
-// extern uint32_t cyw43_country_code;
-// extern void cyw43_irq_init(void);
-// extern void cyw43_post_poll_hook(void);
+extern uint32_t cyw43_country_code;
+extern void cyw43_irq_init(void);
+extern void cyw43_post_poll_hook(void);
 
-// #define CYW43_POST_POLL_HOOK cyw43_post_poll_hook();
-// #define MICROPY_CYW43_COUNTRY cyw43_country_code
+#define CYW43_POST_POLL_HOOK cyw43_post_poll_hook();
+#define MICROPY_CYW43_COUNTRY cyw43_country_code
 
-
+#define MICROPY_TRACKED_ALLOC        (MICROPY_SSL_MBEDTLS)
 
 ////////////////////////////////////////////////////////////////////////
 // TODO: Remove options implicitly set by setting feature level. Must work for all feature levels !
@@ -293,3 +288,63 @@ typedef intptr_t mp_off_t;
 
 
 #define MICROPY_OBJ_REPR (MICROPY_OBJ_REPR_A)
+
+
+
+
+
+        // if (get_core_num() == 0) { MICROPY_HW_USBDEV_TASK_HOOK } 
+
+#define MICROPY_EVENT_POLL_HOOK_FAST \
+    do { \
+        extern void mp_handle_pending(bool); \
+        mp_handle_pending(true); \
+    } while (0)
+
+#define MICROPY_EVENT_POLL_HOOK \
+    do { \
+        MICROPY_EVENT_POLL_HOOK_FAST; \
+    } while (0);
+//        best_effort_wfe_or_timeout(make_timeout_time_ms(1)); 
+
+
+
+extern void lwip_lock_acquire(void);
+extern void lwip_lock_release(void);
+
+#define MICROPY_PY_LWIP_ENTER   lwip_lock_acquire();
+#define MICROPY_PY_LWIP_REENTER lwip_lock_acquire();
+#define MICROPY_PY_LWIP_EXIT    lwip_lock_release();
+
+
+extern uint32_t cyw43_country_code;
+extern void cyw43_irq_init(void);
+extern void cyw43_post_poll_hook(void);
+
+#define CYW43_POST_POLL_HOOK cyw43_post_poll_hook();
+#define MICROPY_CYW43_COUNTRY cyw43_country_code
+
+
+#include "cybsp.h"
+
+// siehe auch boards/CY8CPROTO-062-4343W/bsps/TARGET_APP_CY8CPROTO-062-4343W/config/GeneratedSource/cycfg_pins.h
+#define CYW43_PIN_WL_REG_ON   (CYBSP_WIFI_WL_REG_ON)
+
+// siehe auch boards/mtb_shared/mtb-pdl-cat1/release-v3.0.0/device-info/personalities/peripheral/connectivity_wifi-1.0.cypersonality
+// #define CYW43_PIN_WL_HOST_WAKE (24)
+
+#define CYW43_PIN_WL_SDIO_1  (10)
+
+
+// #define CYBSP_WIFI_SDIO_D0 (P2_0)
+// #define CYBSP_WIFI_SDIO_D1 (P2_1)
+// #define CYBSP_WIFI_SDIO_D2 (P2_2)
+// #define CYBSP_WIFI_SDIO_D3 (P2_3)
+// #define CYBSP_WIFI_SDIO_CMD (P2_4)
+// #define CYBSP_WIFI_SDIO_CLK (P2_5)
+
+#define CYW43_USE_SPI (0)
+
+
+#define sdio_transfer               cyw43_sdio_transfer
+#define sdio_enable_high_speed_4bit cyw43_sdio_enable_high_speed_4bit

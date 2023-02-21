@@ -47,8 +47,13 @@ $(info CONFIG                           : $(CONFIG))
 
 
 INC += -I.
+INC += -I./lwip_inc
 INC += -I$(TOP)
 INC += -I$(BUILD)
+INC += -I${TOP}/lib/cyw43-driver
+
+#INC += -I$(TOP)/extmod/lwip-include
+
 
 LD               = arm-none-eabi-gcc
 CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingle-precision-constant -Wdouble-promotion -Wfloat-conversion -UMICROPY_USE_INTERNAL_PRINTF
@@ -56,9 +61,9 @@ CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingl
 
 # std=c11 instead of std=c99 : provides "static_assert" (not available in c99) 
 # -D_XOPEN_SOURCE=700 : makes sure the setenv/unsetenv headers are included
-CFLAGS  = $(INC) -Wall -Werror -std=c11 $(CFLAGS_CORTEX_M4) $(COPT) -D_XOPEN_SOURCE=700 -Wno-error=double-promotion -Wno-error=overflow -Wno-error=analyzer-null-dereference
+CFLAGS  += $(INC) -Wall -Werror -std=c11 $(CFLAGS_CORTEX_M4) $(COPT) -D_XOPEN_SOURCE=700 -Wno-error=double-promotion -Wno-error=overflow -Wno-error=analyzer-null-dereference -Wno-error=unused-local-typedefs
 
-LDFLAGS = -Wl,--cref -Wl,--gc-sections
+LDFLAGS += -Wl,--cref -Wl,--gc-sections
 
 
 # Tune for Debugging or Optimization
@@ -92,23 +97,35 @@ CFLAGS  += $(CFLAGS_THIRDPARTY)
 
 LDFLAGS += $(LDFLAGS_MOD)
 
-LIBS =
+LIBS +=
 
 
-MPY_SRC_C += shared/readline/readline.c \
+MPY_SRC_C += shared/netutils/dhcpserver.c \
+             shared/netutils/netutils.c \
+             shared/netutils/trace.c \
+             \
+			 shared/readline/readline.c \
 			 \
 			 shared/runtime/gchelper_native.c \
 			 shared/runtime/interrupt_char.c \
 		 	 shared/runtime/pyexec.c \
 		 	 shared/runtime/stdout_helpers.c \
+			 shared/runtime/sys_stdio_mphal.c \
 			 \
 		 	 shared/timeutils/timeutils.c \
 		     \
-			 shared/runtime/sys_stdio_mphal.c \
-			 $(SRC_THIRDPARTY)
-		 	 
+			 $(SRC_THIRDPARTY_C) \
+			 \
+			 \
+ 		 	 ${TOP}/lib/cyw43-driver/src/cyw43_ctrl.c \
+			 ${TOP}/lib/cyw43-driver/src/cyw43_ll.c \
+			 ${TOP}/lib/cyw43-driver/src/cyw43_lwip.c \
+			 ${TOP}/lib/cyw43-driver/src/cyw43_sdio.c 
 
-SRC_ASM = shared/runtime/gchelper_thumb1.s
+			#  ${TOP}/lib/cyw43-driver/src/cyw43_stats.c 
+ 	 
+
+SRC_ASM += shared/runtime/gchelper_thumb1.s
 
 
 SRC_C = \
@@ -116,6 +133,9 @@ SRC_C = \
 	\
 	help.c \
 	mphalport.c \
+	mpnetworkport.c \
+	pendsv.c \
+	sdio.c \
 	\
     drivers/machine/psoc6_gpio.c \
     drivers/machine/psoc6_i2c.c \
@@ -140,9 +160,11 @@ SRC_C = \
     \
 	$(BUILD)/frozen_content.c
 
+#	whd_rtos.c \
+#	cy_network_buffer.c \
 
 SRC_C    += $(SRC_USERMOD)
-SRC_CXX   = 
+SRC_CXX  += 
 
 
 SRC_QSTR += $(MPY_SRC_C) $(SRC_USERMOD) $(SRC_EXTMOD_C)
@@ -160,6 +182,7 @@ SRC_QSTR += modules/machine/modmachine.c \
 
 OBJ += $(PY_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o)) $(addprefix $(BUILD)/, $(SRC_ASM:.s=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_CXX:.cpp=.o))
+OBJ += cyw43_firmware.o \
 
 
 # switch for debug mode, also added to mpconfigport.h
@@ -174,7 +197,7 @@ endif
 $(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ) $(MPY_MTB_LIBRARIES) $(LIBS)
 	$(info )
 	$(info Linking $@ ...)
-	$(Q)$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
+	$(Q)$(LD) $(LDFLAGS) -o $@ $^ $(LIBS) $(TOP)/lib/mbedtls/library/libmbedtls.a $(TOP)/lib/mbedtls/library/libmbedx509.a $(TOP)/lib/mbedtls/library/libmbedcrypto.a
 	$(info Linking $@ done.)
 	$(Q)$(SIZE) $@ -A
 	$(info )

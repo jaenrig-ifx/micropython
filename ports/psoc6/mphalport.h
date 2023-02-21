@@ -59,3 +59,64 @@ STATIC inline void mp_hal_stdout_tx_strn(const char *str, mp_uint_t len) {
 
 mp_uint_t begin_atomic_section();
 void end_atomic_section(mp_uint_t state);
+
+
+
+
+
+
+// static inline void mp_hal_pin_input(mp_hal_pin_obj_t pin) {
+//     // gpio_set_dir(pin, GPIO_IN);
+//     // machine_pin_open_drain_mask &= ~(1 << pin);
+//     // gpio_set_function(pin, GPIO_FUNC_SIO);
+// }
+
+// static inline void mp_hal_pin_output(mp_hal_pin_obj_t pin) {
+//     // gpio_set_dir(pin, GPIO_OUT);
+//     // machine_pin_open_drain_mask &= ~(1 << pin);
+//     // gpio_set_function(pin, GPIO_FUNC_SIO);
+// }
+
+// // static inline void mp_hal_pin_open_drain_with_value(mp_hal_pin_obj_t pin, int v) {
+// //     if (v) {
+// //         gpio_set_dir(pin, GPIO_IN);
+// //         gpio_put(pin, 0);
+// //     } else {
+// //         gpio_put(pin, 0);
+// //         gpio_set_dir(pin, GPIO_OUT);
+// //     }
+// //     machine_pin_open_drain_mask |= 1 << pin;
+// //     gpio_set_function(pin, GPIO_FUNC_SIO);
+// // }
+
+
+static inline void mp_hal_pin_config(mp_hal_pin_obj_t pin, uint32_t mode, uint32_t pull, uint32_t alt) {
+    printf("mp_hal_pin_config %d\n", pin);
+    // assert((mode == MP_HAL_PIN_MODE_INPUT || mode == MP_HAL_PIN_MODE_OUTPUT) && alt == 0);
+    // gpio_set_dir(pin, mode);
+    // gpio_set_pulls(pin, pull == MP_HAL_PIN_PULL_UP, pull == MP_HAL_PIN_PULL_DOWN);
+}
+
+
+// static inline void mp_hal_pin_write(mp_hal_pin_obj_t pin, int v) {
+//     // gpio_put(pin, v);
+// }
+
+#define MP_HAL_PIN_MODE_INPUT           (CYHAL_GPIO_DIR_INPUT)
+#define MP_HAL_PIN_MODE_OUTPUT          (CYHAL_GPIO_DIR_OUTPUT)
+
+#define MP_HAL_PIN_PULL_NONE            (CYHAL_GPIO_DRIVE_NONE)
+#define MP_HAL_PIN_PULL_UP              (CYHAL_GPIO_DRIVE_PULLUP)
+#define MP_HAL_PIN_PULL_DOWN            (CYHAL_GPIO_DRIVE_PULLDOWN)
+
+
+enum {
+    MP_HAL_MAC_WLAN0 = 0,
+    MP_HAL_MAC_BDADDR,
+    MP_HAL_MAC_ETH0,
+};
+
+
+void mp_hal_get_mac(int idx, uint8_t buf[6]);
+void mp_hal_get_mac_ascii(int idx, size_t chr_off, size_t chr_len, char *dest);
+void mp_hal_generate_laa_mac(int idx, uint8_t buf[6]);

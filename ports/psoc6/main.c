@@ -10,6 +10,19 @@
 #include "shared/readline/readline.h"
 #include "shared/runtime/pyexec.h"
 
+#if MICROPY_PY_LWIP
+#include "lwip/init.h"
+#include "lwip/apps/mdns.h"
+#endif
+#if MICROPY_PY_NETWORK_CYW43
+#include "lib/cyw43-driver/src/cyw43.h"
+#endif
+
+
+// /* Wi-Fi connection manager header files. */
+// #include "cy_wcm.h"
+// #include "cy_wcm_error.h"
+
 
 // MTB includes
 #include "cybsp.h"
@@ -93,12 +106,56 @@ int main(int argc, char **argv) {
     time_init();
 
 
+    #if MICROPY_PY_LWIP
+    // lwIP doesn't allow to reinitialise itself by subsequent calls to this function
+    // because the system timeout list (next_timeout) is only ever reset by BSS clearing.
+    // So for now we only init the lwIP stack once on power-up.
+    lwip_init();
+    #if LWIP_MDNS_RESPONDER
+    mdns_resp_init();
+    #endif
+    #endif
+
+#include <stdbool.h>
+bool network = false;
+    #if MICROPY_PY_NETWORK_CYW43
+    {
+        cyw43_init(&cyw43_state);
+        cyw43_irq_init();
+        cyw43_post_poll_hook(); // enable the irq
+        uint8_t buf[8];
+        memcpy(&buf[0], "PSoC", 4);
+
+        // MAC isn't loaded from OTP yet, so use unique id to generate the default AP ssid.
+        // const char hexchr[16] = "0123456789ABCDEF";
+        // pico_unique_board_id_t pid;
+        // pico_get_unique_board_id(&pid);
+        // buf[4] = hexchr[pid.id[7] >> 4];
+        // buf[5] = hexchr[pid.id[6] & 0xf];
+        // buf[6] = hexchr[pid.id[5] >> 4];
+        // buf[7] = hexchr[pid.id[4] & 0xf];
+        cyw43_wifi_ap_set_ssid(&cyw43_state, 8, buf);
+        cyw43_wifi_ap_set_auth(&cyw43_state, CYW43_AUTH_WPA2_AES_PSK);
+        cyw43_wifi_ap_set_password(&cyw43_state, 8, (const uint8_t *)"psoc6--");
+
+        printf("Network init done\n");
+        network = true;
+    }
+    #endif
+
+
+//     uint8_t           security_key[] = {0, 1, 2, 3};
+//     // char              ssidString[] = "AP SSID";
+//     whd_ssid_t        ssid; // = { .length = strlen(ssidString), .value = 0 };
+
+
+
 soft_reset:
 
     mp_init();
 
     // ANSI ESC sequence for clear screen. Refer to  https://stackoverflow.com/questions/517970/how-to-clear-the-interpreter-console
-    mp_printf(&mp_plat_print, "\033[H\033[2J");
+    // mp_printf(&mp_plat_print, "\033[H\033[2J");
 
     mp_printf(&mp_plat_print, MICROPY_BANNER_NAME_AND_VERSION);
     mp_printf(&mp_plat_print, "; " MICROPY_BANNER_MACHINE);
@@ -106,12 +163,13 @@ soft_reset:
 
     mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash));
     mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash_slash_lib));
-
+printf("network init %d\n", network);
     // indicate in REPL console when debug mode is selected
     mplogger_print("\n...LOGGER DEBUG MODE...\n\n");
 
     readline_init0();
     machine_init();
+
 
     #if MICROPY_VFS_FAT
     pyexec_frozen_module("vfs_fat.py");
@@ -172,4 +230,27 @@ void nlr_jump_fail(void *val) {
     for (;;) {
         __BKPT(0);
     }
+}
+
+
+
+
+
+#define POLY (0xD5)
+
+uint8_t rosc_random_u8(size_t cycles) {
+    static uint8_t r;
+    // for (size_t i = 0; i < cycles; ++i) {
+    //     r = ((r << 1) | rosc_hw->randombit) ^ (r & 0x80 ? POLY : 0);
+    //     mp_hal_delay_us_fast(1);
+    // }
+    return r;
+}
+
+uint32_t rosc_random_u32(void) {
+    uint32_t value = 0;
+    for (size_t i = 0; i < 4; ++i) {
+        value = value << 8 | rosc_random_u8(32);
+    }
+    return value;
 }
