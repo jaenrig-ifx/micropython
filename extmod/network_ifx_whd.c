@@ -147,44 +147,52 @@ STATIC whd_scan_result_t whd_scan_result;
 STATIC volatile whd_scan_status_t whd_scan_status;
 
 STATIC void network_ifx_whd_scan_cb(whd_scan_result_t **result_ptr, void *user_data, whd_scan_status_t status) {
+    mp_obj_t list = MP_OBJ_FROM_PTR(user_data);
 
+
+    // Scan info tuple
+    // 0 - ssid
+    // 1 - bssid
+    // 2 - channel
+    // 3 - rssi
+    // 4 - auth mode
+    // 5 - hidden
+    // 6 - Number of result appareances
+
+    whd_scan_result_t *scan_result_ptr = *result_ptr;
+    // Search for existing BSSID to remove duplicates
+    bool found = false;
+    size_t len;
+    mp_obj_t *items;
+    mp_obj_get_array(list, &len, &items);
+    for (size_t i = 0; i < len; ++i) {
+        mp_obj_tuple_t *t = MP_OBJ_TO_PTR(items[i]);
+        if (memcmp(scan_result_ptr->BSSID.octet, ((mp_obj_str_t *)MP_OBJ_TO_PTR(t->items[1]))->data, sizeof(scan_result_ptr->BSSID.octet)) == 0) {
+            if (scan_result_ptr->signal_strength > MP_OBJ_SMALL_INT_VALUE(t->items[3])) {
+                t->items[3] = MP_OBJ_NEW_SMALL_INT(scan_result_ptr->signal_strength);
+            }
+            t->items[5] = MP_OBJ_NEW_SMALL_INT(MP_OBJ_SMALL_INT_VALUE(t->items[5]) + 1);
+            found = true;
+            break;
+        }
+    }
+
+    // Add to list of results if wanted
+    if (!found) {
+        mp_obj_t tuple[6] = {
+            mp_obj_new_bytes(scan_result_ptr->SSID.value, scan_result_ptr->SSID.length),
+            mp_obj_new_bytes(scan_result_ptr->BSSID.octet, sizeof(scan_result_ptr->BSSID.octet)),
+            MP_OBJ_NEW_SMALL_INT(scan_result_ptr->channel),
+            MP_OBJ_NEW_SMALL_INT(scan_result_ptr->signal_strength),
+            MP_OBJ_NEW_SMALL_INT(scan_result_ptr->security),
+            MP_OBJ_NEW_SMALL_INT(1) // N
+        };
+        mp_obj_list_append(list, mp_obj_new_tuple(6, tuple));
+    }
+
+    // Update scan status
+    whd_scan_status = status;
 }
-// STATIC int network_ifx_whd_scan_cb(void *env, const ifx_whd_ev_scan_result_t *res) {
-//     mp_obj_t list = MP_OBJ_FROM_PTR(env);
-
-//     // Search for existing BSSID to remove duplicates
-//     bool found = false;
-//     size_t len;
-//     mp_obj_t *items;
-//     mp_obj_get_array(list, &len, &items);
-//     for (size_t i = 0; i < len; ++i) {
-//         mp_obj_tuple_t *t = MP_OBJ_TO_PTR(items[i]);
-//         if (memcmp(res->bssid, ((mp_obj_str_t *)MP_OBJ_TO_PTR(t->items[1]))->data, sizeof(res->bssid)) == 0) {
-//             if (res->rssi > MP_OBJ_SMALL_INT_VALUE(t->items[3])) {
-//                 t->items[3] = MP_OBJ_NEW_SMALL_INT(res->rssi);
-//             }
-//             t->items[5] = MP_OBJ_NEW_SMALL_INT(MP_OBJ_SMALL_INT_VALUE(t->items[5]) + 1);
-//             found = true;
-//             break;
-//         }
-//     }
-
-//     // Add to list of results if wanted
-//     if (!found) {
-//         mp_obj_t tuple[6] = {
-//             mp_obj_new_bytes(res->ssid, res->ssid_len),
-//             mp_obj_new_bytes(res->bssid, sizeof(res->bssid)),
-//             MP_OBJ_NEW_SMALL_INT(res->channel),
-//             MP_OBJ_NEW_SMALL_INT(res->rssi),
-//             MP_OBJ_NEW_SMALL_INT(res->auth_mode),
-//             // mp_const_false, // hidden
-//             MP_OBJ_NEW_SMALL_INT(1), // N
-//         };
-//         mp_obj_list_append(list, mp_obj_new_tuple(6, tuple));
-//     }
-
-//     return 0; // continue scan
-// }
 
 STATIC mp_obj_t network_ifx_whd_scan(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_passive, ARG_ssid, ARG_essid, ARG_bssid, ARG_channels };
