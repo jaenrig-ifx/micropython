@@ -143,6 +143,12 @@ STATIC mp_obj_t network_ifx_whd_active(size_t n_args, const mp_obj_t *args) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(network_ifx_whd_active_obj, 1, 2, network_ifx_whd_active);
 
+STATIC whd_scan_result_t whd_scan_result;
+STATIC volatile whd_scan_status_t whd_scan_status;
+
+STATIC void network_ifx_whd_scan_cb(whd_scan_result_t **result_ptr, void *user_data, whd_scan_status_t status) {
+
+}
 // STATIC int network_ifx_whd_scan_cb(void *env, const ifx_whd_ev_scan_result_t *res) {
 //     mp_obj_t list = MP_OBJ_FROM_PTR(env);
 
@@ -181,55 +187,79 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(network_ifx_whd_active_obj, 1, 2, net
 // }
 
 STATIC mp_obj_t network_ifx_whd_scan(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    // enum { ARG_passive, ARG_ssid, ARG_essid, ARG_bssid };
-    // static const mp_arg_t allowed_args[] = {
-    //     { MP_QSTR_passive, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
-    //     { MP_QSTR_ssid, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
-    //     { MP_QSTR_essid, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
-    //     { MP_QSTR_bssid, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
-    // };
+    enum { ARG_passive, ARG_ssid, ARG_essid, ARG_bssid, ARG_channels };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_passive, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_ssid, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
+        { MP_QSTR_essid, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
+        { MP_QSTR_bssid, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
+        { MP_QSTR_channels, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
+    };
 
-    // network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(pos_args[0]);
-    // mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    // mp_arg_parse_all(n_args - 1, pos_args + 1, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+    network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(pos_args[0]);
+    whd_interface_t itf = *(self->itf);
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args - 1, pos_args + 1, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    // // Deprecated kwarg
-    // if (args[ARG_essid].u_obj != mp_const_none) {
-    //     args[ARG_ssid].u_obj = args[ARG_essid].u_obj;
-    // }
+    // Deprecated kwarg
+    if (args[ARG_essid].u_obj != mp_const_none) {
+        args[ARG_ssid].u_obj = args[ARG_essid].u_obj;
+    }
 
-    // cyw43_wifi_scan_options_t opts;
-//     opts.scan_type = args[ARG_passive].u_bool ? 1 : 0;
-//     if (args[ARG_ssid].u_obj == mp_const_none) {
-//         opts.ssid_len = 0;
-//     } else {
-//         mp_buffer_info_t ssid;
-//         mp_get_buffer_raise(args[ARG_ssid].u_obj, &ssid, MP_BUFFER_READ);
-//         opts.ssid_len = MIN(ssid.len, sizeof(opts.ssid));
-//         memcpy(opts.ssid, ssid.buf, opts.ssid_len);
-//     }
-//     if (args[ARG_bssid].u_obj == mp_const_none) {
-//         memset(opts.bssid, 0xff, sizeof(opts.bssid));
-//     } else {
-//         mp_buffer_info_t bssid;
-//         mp_get_buffer_raise(args[ARG_bssid].u_obj, &bssid, MP_BUFFER_READ);
-//         memcpy(opts.bssid, bssid.buf, sizeof(opts.bssid));
-//     }
+    // Extract scan type, if given.
+    // Note: WHD driver provides also prohibited channel,
+    // currently not added to keep the interface as similar
+    // to the cy43w network module implementation.
+    whd_scan_type_t scan_type = WHD_SCAN_TYPE_PASSIVE;
+    if (args[ARG_passive].u_bool) {
+        scan_type = WHD_SCAN_TYPE_ACTIVE;
+    }
 
-//     mp_obj_t res = mp_obj_new_list(0, NULL);
-//     int scan_res = cyw43_wifi_scan(self->cyw, &opts, MP_OBJ_TO_PTR(res), network_cyw43_scan_cb);
+    // Extract ssid, if given
+    whd_ssid_t *ssid_ptr = NULL;
+    whd_ssid_t ssid;
+    if (args[ARG_ssid].u_obj != mp_const_none) {
+        ssid_ptr = &ssid;
+        mp_buffer_info_t ssid_arg;
+        mp_get_buffer_raise(args[ARG_ssid].u_obj, &ssid_arg, MP_BUFFER_READ);
+        ssid.length = MIN(ssid_arg.len, SSID_NAME_SIZE);
+        memcpy(ssid.value, ssid_arg.buf, ssid.length);
+    }
 
-//     if (scan_res < 0) {
-//         mp_raise_OSError(-scan_res);
-//     }
+    // Extract bssid, if given
+    whd_mac_t *bssid_ptr = NULL;
+    whd_mac_t bssid;
+    if (args[ARG_bssid].u_obj != mp_const_none) {
+        bssid_ptr = &bssid;
+        mp_buffer_info_t bssid_arg;
+        mp_get_buffer_raise(args[ARG_bssid].u_obj, &bssid_arg, MP_BUFFER_READ);
+        memcpy(bssid.octet, bssid_arg.buf, 6);
+    }
 
-//     // Wait for scan to finish, with a 10s timeout
-//     uint32_t start = mp_hal_ticks_ms();
-//     while (cyw43_wifi_scan_active(self->cyw) && mp_hal_ticks_ms() - start < 10000) {
-//         MICROPY_EVENT_POLL_HOOK
-//     }
+    // Extract channel list, if provided
+    uint16_t channel_list[sizeof(uint8_t)] = {0};
+    if (args[ARG_channels].u_obj != mp_const_none) {
+        mp_buffer_info_t channels_arg;
+        mp_get_buffer_raise(args[ARG_channels].u_obj, &channels_arg, MP_BUFFER_READ);
+        memcpy(channel_list, channels_arg.buf, channels_arg.len);
+        channel_list[channels_arg.len] = 0; // The channel list array needs to be zero terminated.
+    }
 
-    return mp_const_none; // return res;
+    // Note: Optional extended parameters are not provided.
+    whd_scan_status = WHD_SCAN_INCOMPLETE;
+    mp_obj_t res = mp_obj_new_list(0, NULL);
+    uint32_t ret = whd_wifi_scan(itf, scan_type, WHD_BSS_TYPE_ANY, ssid_ptr, bssid_ptr, channel_list, NULL, network_ifx_whd_scan_cb, &whd_scan_result, &res);
+    if (ret != WHD_SUCCESS) {
+        mp_raise_OSError(-ret);
+    }
+
+    // Wait for scan to finish, with a 10s timeout
+    uint32_t start = mp_hal_ticks_ms();
+    while (whd_scan_status && (mp_hal_ticks_ms() - start < 10000)) {
+        MICROPY_EVENT_POLL_HOOK
+    }
+
+    return res;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(network_ifx_whd_scan_obj, 1, network_ifx_whd_scan);
 
