@@ -35,6 +35,7 @@
 // #include "lwip/netif.h"
 #include "whd.h"
 #include "whd_network_types.h"
+#include "whd_wlioctl.h"
 #include "extmod/network_ifx_whd.h"
 #include "whd_wifi_api.h"
 #include "modnetwork.h"
@@ -148,17 +149,6 @@ STATIC volatile whd_scan_status_t whd_scan_status;
 
 STATIC void network_ifx_whd_scan_cb(whd_scan_result_t **result_ptr, void *user_data, whd_scan_status_t status) {
     mp_obj_t list = MP_OBJ_FROM_PTR(user_data);
-
-
-    // Scan info tuple
-    // 0 - ssid
-    // 1 - bssid
-    // 2 - channel
-    // 3 - rssi
-    // 4 - auth mode
-    // 5 - hidden
-    // 6 - Number of result appareances
-
     whd_scan_result_t *scan_result_ptr = *result_ptr;
     // Search for existing BSSID to remove duplicates
     bool found = false;
@@ -178,6 +168,13 @@ STATIC void network_ifx_whd_scan_cb(whd_scan_result_t **result_ptr, void *user_d
     }
 
     // Add to list of results if wanted
+    // Scan info tuple
+    // 0 - ssid
+    // 1 - bssid
+    // 2 - channel
+    // 3 - rssi
+    // 4 - auth mode
+    // 5 - Number of result appareances
     if (!found) {
         mp_obj_t tuple[6] = {
             mp_obj_new_bytes(scan_result_ptr->SSID.value, scan_result_ptr->SSID.length),
@@ -379,200 +376,209 @@ STATIC mp_obj_t network_ifx_whd_isconnected(mp_obj_t self_in) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(network_ifx_whd_isconnected_obj, network_ifx_whd_isconnected);
 
 STATIC mp_obj_t network_ifx_whd_ifconfig(size_t n_args, const mp_obj_t *args) {
-//     network_cyw43_obj_t *self = MP_OBJ_TO_PTR(args[0]);
-//     return mod_network_nic_ifconfig(&self->cyw->netif[self->itf], n_args - 1, args + 1);
+    // network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(args[0]);
+    // Explore the integration with the network stack ... lwip
+    // return mod_network_nic_ifconfig(&self->cyw->netif[self->itf], n_args - 1, args + 1);
     return mp_const_none;
 }
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(network_ifx_whd_ifconfig_obj, 1, 2, network_ifx_whd_ifconfig);
 
 STATIC mp_obj_t network_ifx_whd_status(size_t n_args, const mp_obj_t *args) {
-//     network_cyw43_obj_t *self = MP_OBJ_TO_PTR(args[0]);
-//     (void)self;
+    network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(args[0]);
+    whd_interface_t itf = *(self->itf);
 
-//     if (n_args == 1) {
-//         // no arguments: return link status
-//         return MP_OBJ_NEW_SMALL_INT(cyw43_tcpip_link_status(self->cyw, self->itf));
-//     }
+    if (n_args == 1) {
+        // no arguments: return link status
+        return MP_OBJ_NEW_SMALL_INT(whd_wifi_is_ready_to_transceive(itf));
+    }
 
-//     // one argument: return status based on query parameter
-//     switch (mp_obj_str_get_qstr(args[1])) {
-//         case MP_QSTR_stations: {
-//             // return list of connected stations
-//             if (self->itf != CYW43_ITF_AP) {
-//                 mp_raise_ValueError(MP_ERROR_TEXT("AP required"));
-//             }
-//             int num_stas;
-//             uint8_t macs[32 * 6];
-//             cyw43_wifi_ap_get_stas(self->cyw, &num_stas, macs);
-//             mp_obj_t list = mp_obj_new_list(num_stas, NULL);
-//             for (int i = 0; i < num_stas; ++i) {
-//                 mp_obj_t tuple[1] = {
-//                     mp_obj_new_bytes(&macs[i * 6], 6),
-//                 };
-//                 ((mp_obj_list_t *)MP_OBJ_TO_PTR(list))->items[i] = mp_obj_new_tuple(1, tuple);
-//             }
-//             return list;
-//         }
-//     }
+    // one argument: return status based on query parameter
+    switch (mp_obj_str_get_qstr(args[1])) {
+        case MP_QSTR_stations: {
+            // return list of connected stations
+            // if (self->itf != CYW43_ITF_AP) {
+            //     mp_raise_ValueError(MP_ERROR_TEXT("AP required"));
+            // }
+            int num_stas;
+            uint8_t macs[32 * 6];
+            // cyw43_wifi_ap_get_stas(self->cyw, &num_stas, macs);
+            mp_obj_t list = mp_obj_new_list(num_stas, NULL);
+            for (int i = 0; i < num_stas; ++i) {
+                mp_obj_t tuple[1] = {
+                    mp_obj_new_bytes(&macs[i * 6], 6),
+                };
+                ((mp_obj_list_t *)MP_OBJ_TO_PTR(list))->items[i] = mp_obj_new_tuple(1, tuple);
+            }
+            return list;
+        }
+    }
 
-//     mp_raise_ValueError(MP_ERROR_TEXT("unknown status param"));
+    mp_raise_ValueError(MP_ERROR_TEXT("unknown status param"));
     return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(network_ifx_whd_status_obj, 1, 2, network_ifx_whd_status);
 
-// static inline uint32_t nw_get_le32(const uint8_t *buf) {
-//     return buf[0] | buf[1] << 8 | buf[2] << 16 | buf[3] << 24;
-// }
+static inline uint32_t nw_get_le32(const uint8_t *buf) {
+    return buf[0] | buf[1] << 8 | buf[2] << 16 | buf[3] << 24;
+}
 
-// static inline void nw_put_le32(uint8_t *buf, uint32_t x) {
-//     buf[0] = x;
-//     buf[1] = x >> 8;
-//     buf[2] = x >> 16;
-//     buf[3] = x >> 24;
-// }
+static inline void nw_put_le32(uint8_t *buf, uint32_t x) {
+    buf[0] = x;
+    buf[1] = x >> 8;
+    buf[2] = x >> 16;
+    buf[3] = x >> 24;
+}
 
 STATIC mp_obj_t network_ifx_whd_config(size_t n_args, const mp_obj_t *args, mp_map_t *kwargs) {
-//     network_cyw43_obj_t *self = MP_OBJ_TO_PTR(args[0]);
+    network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(args[0]);
+    whd_interface_t itf = *(self->itf);
 
-//     if (kwargs->used == 0) {
-//         // Get config value
-//         if (n_args != 2) {
-//             mp_raise_TypeError(MP_ERROR_TEXT("must query one param"));
-//         }
+    if (kwargs->used == 0) {
+        // Get config value
+        if (n_args != 2) {
+            mp_raise_TypeError(MP_ERROR_TEXT("must query one param"));
+        }
 
-//         switch (mp_obj_str_get_qstr(args[1])) {
-//             case MP_QSTR_antenna: {
-//                 uint8_t buf[4];
-//                 cyw43_ioctl(self->cyw, CYW43_IOCTL_GET_ANTDIV, 4, buf, self->itf);
-//                 return MP_OBJ_NEW_SMALL_INT(nw_get_le32(buf));
-//             }
-//             case MP_QSTR_channel: {
-//                 uint8_t buf[4];
-//                 cyw43_ioctl(self->cyw, CYW43_IOCTL_GET_CHANNEL, 4, buf, self->itf);
-//                 return MP_OBJ_NEW_SMALL_INT(nw_get_le32(buf));
-//             }
-//             case MP_QSTR_ssid:
-//             case MP_QSTR_essid: {
-//                 if (self->itf == CYW43_ITF_STA) {
-//                     uint8_t buf[36];
-//                     cyw43_ioctl(self->cyw, CYW43_IOCTL_GET_SSID, 36, buf, self->itf);
-//                     return mp_obj_new_str((const char *)buf + 4, nw_get_le32(buf));
-//                 } else {
-//                     size_t len;
-//                     const uint8_t *buf;
-//                     cyw43_wifi_ap_get_ssid(self->cyw, &len, &buf);
-//                     return mp_obj_new_str((const char *)buf, len);
-//                 }
-//             }
-//             #if MICROPY_PY_NETWORK_CYW43_USE_LIB_DRIVER
-//             case MP_QSTR_security: {
-//                 return MP_OBJ_NEW_SMALL_INT(cyw43_wifi_ap_get_auth(self->cyw));
-//             }
-//             #endif
-//             case MP_QSTR_mac: {
-//                 uint8_t buf[6];
-//                 cyw43_wifi_get_mac(self->cyw, self->itf, buf);
-//                 return mp_obj_new_bytes(buf, 6);
-//             }
-//             case MP_QSTR_txpower: {
-//                 uint8_t buf[13];
-//                 memcpy(buf, "qtxpower\x00\x00\x00\x00\x00", 13);
-//                 cyw43_ioctl(self->cyw, CYW43_IOCTL_GET_VAR, 13, buf, self->itf);
-//                 return MP_OBJ_NEW_SMALL_INT(nw_get_le32(buf) / 4);
-//             }
-//             #if !MICROPY_PY_NETWORK_CYW43_USE_LIB_DRIVER
-//             case MP_QSTR_hostname: {
-//                 return mp_obj_new_str(self->cyw->hostname, strlen(self->cyw->hostname));
-//             }
-//             #endif
-//             default:
-//                 mp_raise_ValueError(MP_ERROR_TEXT("unknown config param"));
-//         }
-//     } else {
-//         // Set config value(s)
-//         if (n_args != 1) {
-//             mp_raise_TypeError(MP_ERROR_TEXT("can't specify pos and kw args"));
-//         }
+        switch (mp_obj_str_get_qstr(args[1])) {
+            case MP_QSTR_antenna: {
+                uint8_t buf[4];
+                uint32_t ret = whd_wifi_get_ioctl_buffer(itf, WLC_GET_ANTDIV, buf, 4);
+                if (ret != WHD_SUCCESS) {
+                    mp_raise_OSError(-ret);
+                }
+                return MP_OBJ_NEW_SMALL_INT(nw_get_le32(buf));
+            }
+            case MP_QSTR_channel: {
+                uint32_t channel;
+                uint32_t ret = whd_wifi_get_channel(itf, &channel);
+                if (ret != WHD_SUCCESS) {
+                    mp_raise_OSError(-ret);
+                }
+                return MP_OBJ_NEW_SMALL_INT(channel);
+            }
+            case MP_QSTR_ssid:
+            case MP_QSTR_essid: {
+                wl_bss_info_t bss_info;
+                uint32_t ret = whd_wifi_get_bss_info(itf, &bss_info);
+                if (ret != WHD_SUCCESS) {
+                    mp_raise_OSError(-ret);
+                }
+                return mp_obj_new_str((const char *)bss_info.SSID, bss_info.SSID_len);
+            }
 
-//         for (size_t i = 0; i < kwargs->alloc; ++i) {
-//             if (MP_MAP_SLOT_IS_FILLED(kwargs, i)) {
-//                 mp_map_elem_t *e = &kwargs->table[i];
-//                 switch (mp_obj_str_get_qstr(e->key)) {
-//                     case MP_QSTR_antenna: {
-//                         uint8_t buf[4];
-//                         nw_put_le32(buf, mp_obj_get_int(e->value));
-//                         cyw43_ioctl(self->cyw, CYW43_IOCTL_SET_ANTDIV, 4, buf, self->itf);
-//                         break;
-//                     }
-//                     case MP_QSTR_channel: {
-//                         cyw43_wifi_ap_set_channel(self->cyw, mp_obj_get_int(e->value));
-//                         break;
-//                     }
-//                     case MP_QSTR_ssid:
-//                     case MP_QSTR_essid: {
-//                         size_t len;
-//                         const char *str = mp_obj_str_get_data(e->value, &len);
-//                         cyw43_wifi_ap_set_ssid(self->cyw, len, (const uint8_t *)str);
-//                         break;
-//                     }
-//                     case MP_QSTR_monitor: {
-//                         mp_int_t value = mp_obj_get_int(e->value);
-//                         uint8_t buf[9 + 4];
-//                         memcpy(buf, "allmulti\x00", 9);
-//                         nw_put_le32(buf + 9, value);
-//                         cyw43_ioctl(self->cyw, CYW43_IOCTL_SET_VAR, 9 + 4, buf, self->itf);
-//                         nw_put_le32(buf, value);
-//                         cyw43_ioctl(self->cyw, CYW43_IOCTL_SET_MONITOR, 4, buf, self->itf);
-//                         if (value) {
-//                             self->cyw->trace_flags |= CYW43_TRACE_MAC;
-//                         } else {
-//                             self->cyw->trace_flags &= ~CYW43_TRACE_MAC;
-//                         }
-//                         break;
-//                     }
-//                     case MP_QSTR_security: {
-//                         cyw43_wifi_ap_set_auth(self->cyw, mp_obj_get_int(e->value));
-//                         break;
-//                     }
-//                     case MP_QSTR_key:
-//                     case MP_QSTR_password: {
-//                         size_t len;
-//                         const char *str = mp_obj_str_get_data(e->value, &len);
-//                         cyw43_wifi_ap_set_password(self->cyw, len, (const uint8_t *)str);
-//                         break;
-//                     }
-//                     case MP_QSTR_pm: {
-//                         cyw43_wifi_pm(self->cyw, mp_obj_get_int(e->value));
-//                         break;
-//                     }
-//                     case MP_QSTR_trace: {
-//                         self->cyw->trace_flags = mp_obj_get_int(e->value);
-//                         break;
-//                     }
-//                     case MP_QSTR_txpower: {
-//                         mp_int_t dbm = mp_obj_get_int(e->value);
-//                         uint8_t buf[9 + 4];
-//                         memcpy(buf, "qtxpower\x00", 9);
-//                         nw_put_le32(buf + 9, dbm * 4);
-//                         cyw43_ioctl(self->cyw, CYW43_IOCTL_SET_VAR, 9 + 4, buf, self->itf);
-//                         break;
-//                     }
-//                     #if !MICROPY_PY_NETWORK_CYW43_USE_LIB_DRIVER
-//                     case MP_QSTR_hostname: {
-//                         const char *hostname = mp_obj_str_get_str(e->value);
-//                         strncpy(self->cyw->hostname, hostname, MICROPY_BOARD_HOSTNAME_LENGTH);
-//                         self->cyw->hostname[MICROPY_BOARD_HOSTNAME_LENGTH - 1] = 0;
-//                         break;
-//                     }
-//                     #endif
-//                     default:
-//                         mp_raise_ValueError(MP_ERROR_TEXT("unknown config param"));
-//                 }
-//             }
-//         }
+            case MP_QSTR_security: {
+                whd_security_t security;
+                uint32_t ret = whd_wifi_get_ap_info(itf, NULL, &security);
+                if (ret != WHD_SUCCESS) {
+                    mp_raise_OSError(-ret);
+                }
+                return MP_OBJ_NEW_SMALL_INT(security);
+            }
 
-    return mp_const_none;
-//     }
+            case MP_QSTR_mac: {
+                uint8_t buf[6];
+                // cyw43_wifi_get_mac(self->cyw, self->itf, buf);
+                return mp_obj_new_bytes(buf, 6);
+            }
+            case MP_QSTR_txpower: {
+                uint8_t buf[13];
+                memcpy(buf, "qtxpower\x00\x00\x00\x00\x00", 13);
+                // cyw43_ioctl(self->cyw, CYW43_IOCTL_GET_VAR, 13, buf, self->itf);
+                return MP_OBJ_NEW_SMALL_INT(nw_get_le32(buf) / 4);
+            }
+            #if !MICROPY_PY_NETWORK_CYW43_USE_LIB_DRIVER
+            case MP_QSTR_hostname: {
+                // return mp_obj_new_str(self->cyw->hostname, strlen(self->cyw->hostname));
+            }
+            #endif
+            default:
+                mp_raise_ValueError(MP_ERROR_TEXT("unknown config param"));
+        }
+    } else {
+        // Set config value(s)
+        if (n_args != 1) {
+            mp_raise_TypeError(MP_ERROR_TEXT("can't specify pos and kw args"));
+        }
+
+        for (size_t i = 0; i < kwargs->alloc; ++i) {
+            if (MP_MAP_SLOT_IS_FILLED(kwargs, i)) {
+                mp_map_elem_t *e = &kwargs->table[i];
+                switch (mp_obj_str_get_qstr(e->key)) {
+                    case MP_QSTR_antenna: {
+                        uint8_t buf[4];
+                        nw_put_le32(buf, mp_obj_get_int(e->value));
+                        // cyw43_ioctl(self->cyw, CYW43_IOCTL_SET_ANTDIV, 4, buf, self->itf);
+                        break;
+                    }
+                    case MP_QSTR_channel: {
+                        // cyw43_wifi_ap_set_channel(self->cyw, mp_obj_get_int(e->value));
+                        break;
+                    }
+                    case MP_QSTR_ssid:
+                    case MP_QSTR_essid: {
+                        // size_t len;
+                        // const char *str = mp_obj_str_get_data(e->value, &len);
+                        // cyw43_wifi_ap_set_ssid(self->cyw, len, (const uint8_t *)str);
+                        break;
+                    }
+                    case MP_QSTR_monitor: {
+                        mp_int_t value = mp_obj_get_int(e->value);
+                        uint8_t buf[9 + 4];
+                        memcpy(buf, "allmulti\x00", 9);
+                        nw_put_le32(buf + 9, value);
+                        // cyw43_ioctl(self->cyw, CYW43_IOCTL_SET_VAR, 9 + 4, buf, self->itf);
+                        nw_put_le32(buf, value);
+                        // cyw43_ioctl(self->cyw, CYW43_IOCTL_SET_MONITOR, 4, buf, self->itf);
+                        // if (value) {
+                        //     self->cyw->trace_flags |= CYW43_TRACE_MAC;
+                        // } else {
+                        //     self->cyw->trace_flags &= ~CYW43_TRACE_MAC;
+                        // }
+                        // break;
+                    }
+                    case MP_QSTR_security: {
+                        // cyw43_wifi_ap_set_auth(self->cyw, mp_obj_get_int(e->value));
+                        break;
+                    }
+                    case MP_QSTR_key:
+                    case MP_QSTR_password: {
+                        // size_t len;
+                        // const char *str = mp_obj_str_get_data(e->value, &len);
+                        // cyw43_wifi_ap_set_password(self->cyw, len, (const uint8_t *)str);
+                        break;
+                    }
+                    case MP_QSTR_pm: {
+                        // cyw43_wifi_pm(self->cyw, mp_obj_get_int(e->value));
+                        break;
+                    }
+                    case MP_QSTR_trace: {
+                        // self->cyw->trace_flags = mp_obj_get_int(e->value);
+                        break;
+                    }
+                    case MP_QSTR_txpower: {
+                        mp_int_t dbm = mp_obj_get_int(e->value);
+                        uint8_t buf[9 + 4];
+                        memcpy(buf, "qtxpower\x00", 9);
+                        nw_put_le32(buf + 9, dbm * 4);
+                        // cyw43_ioctl(self->cyw, CYW43_IOCTL_SET_VAR, 9 + 4, buf, self->itf);
+                        break;
+                    }
+                    #if !MICROPY_PY_NETWORK_CYW43_USE_LIB_DRIVER
+                    case MP_QSTR_hostname: {
+                        // const char *hostname = mp_obj_str_get_str(e->value);
+                        // strncpy(self->cyw->hostname, hostname, MICROPY_BOARD_HOSTNAME_LENGTH);
+                        // self->cyw->hostname[MICROPY_BOARD_HOSTNAME_LENGTH - 1] = 0;
+                        break;
+                    }
+                    #endif
+                    default:
+                        mp_raise_ValueError(MP_ERROR_TEXT("unknown config param"));
+                }
+            }
+        }
+
+        return mp_const_none;
+    }
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(network_ifx_whd_config_obj, 1, network_ifx_whd_config);
 
