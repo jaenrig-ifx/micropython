@@ -26,7 +26,6 @@
 
 // Options controlling how MicroPython is built, overriding defaults in py/mpconfig.h
 #include <stdint.h>
-#include "mpconfigboard.h"
 
 // Board and hardware specific configuration
 #define MICROPY_HW_MCU_NAME                     "PSoC62"
@@ -73,7 +72,7 @@
 
 #define MICROPY_LONGINT_IMPL                    (MICROPY_LONGINT_IMPL_MPZ)
 #define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_FLOAT)
-//#define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_DOUBLE)
+// #define MICROPY_FLOAT_IMPL                      (MICROPY_FLOAT_IMPL_DOUBLE)
 
 #define MICROPY_SCHEDULER_DEPTH                 (8)
 #define MICROPY_SCHEDULER_STATIC_NODES          (1)
@@ -145,7 +144,8 @@
 #endif
 
 
-#define MICROPY_PY_NETWORK              (1)
+#define MICROPY_PY_NETWORK                      (1)
+#define MICROPY_PY_NETWORK_CYW43_USE_LIB_DRIVER (1)
 
 // By default networking should include sockets, ssl, websockets, webrepl, dupterm.
 #if MICROPY_PY_NETWORK
@@ -175,11 +175,6 @@
 #endif
 
 #endif
-
-
-// #define MICROPY_PY_NETWORK_CYW43        (1)
-#define MICROPY_PY_NETWORK_CYW43_USE_LIB_DRIVER    (1)
-// #define MICROPY_PY_LWIP                 (1)
 
 
 #if MICROPY_PY_NETWORK_CYW43
@@ -291,9 +286,7 @@ extern void cyw43_post_poll_hook(void);
 
 
 
-
-
-        // if (get_core_num() == 0) { MICROPY_HW_USBDEV_TASK_HOOK } 
+// if (get_core_num() == 0) { MICROPY_HW_USBDEV_TASK_HOOK }
 
 #define MICROPY_EVENT_POLL_HOOK_FAST \
     do { \
@@ -305,7 +298,7 @@ extern void cyw43_post_poll_hook(void);
     do { \
         MICROPY_EVENT_POLL_HOOK_FAST; \
     } while (0);
-//        best_effort_wfe_or_timeout(make_timeout_time_ms(1)); 
+//        best_effort_wfe_or_timeout(make_timeout_time_ms(1));
 
 
 
@@ -317,34 +310,23 @@ extern void lwip_lock_release(void);
 #define MICROPY_PY_LWIP_EXIT    lwip_lock_release();
 
 
-extern uint32_t cyw43_country_code;
-extern void cyw43_irq_init(void);
-extern void cyw43_post_poll_hook(void);
-
-#define CYW43_POST_POLL_HOOK cyw43_post_poll_hook();
-#define MICROPY_CYW43_COUNTRY cyw43_country_code
-
 
 #include "cybsp.h"
 
 // siehe auch boards/CY8CPROTO-062-4343W/bsps/TARGET_APP_CY8CPROTO-062-4343W/config/GeneratedSource/cycfg_pins.h
-#define CYW43_PIN_WL_REG_ON   (CYBSP_WIFI_WL_REG_ON)
+#define CYW43_PIN_WL_REG_ON                     (CYBSP_WIFI_WL_REG_ON)
 
 // siehe auch boards/mtb_shared/mtb-pdl-cat1/release-v3.0.0/device-info/personalities/peripheral/connectivity_wifi-1.0.cypersonality
-// #define CYW43_PIN_WL_HOST_WAKE (24)
+// #define CYW43_PIN_WL_HOST_WAKE (CYBSP_WIFI_HOST_WAKE)
 
-#define CYW43_PIN_WL_SDIO_1  (10)
+#define CYW43_PIN_WL_SDIO_1                     (CYBSP_WIFI_SDIO_D1)
 
-
-// #define CYBSP_WIFI_SDIO_D0 (P2_0)
-// #define CYBSP_WIFI_SDIO_D1 (P2_1)
-// #define CYBSP_WIFI_SDIO_D2 (P2_2)
-// #define CYBSP_WIFI_SDIO_D3 (P2_3)
-// #define CYBSP_WIFI_SDIO_CMD (P2_4)
-// #define CYBSP_WIFI_SDIO_CLK (P2_5)
-
-#define CYW43_USE_SPI (0)
+#define CYW43_USE_SPI                           (0)
 
 
 #define sdio_transfer               cyw43_sdio_transfer
 #define sdio_enable_high_speed_4bit cyw43_sdio_enable_high_speed_4bit
+
+
+// make board specific changes in the setup
+#include "mpconfigboard.h"

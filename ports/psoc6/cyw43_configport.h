@@ -32,6 +32,13 @@
 #include "py/mphal.h"
 #include "pendsv.h"
 
+
+#include "cybsp.h"
+#include "cyhal.h"
+#include "cy_pdl.h"
+
+
+
 #define CYW43_WIFI_NVRAM_INCLUDE_FILE   "firmware/wifi_nvram_43439.h"
 #define CYW43_IOCTL_TIMEOUT_US          (1000000)
 #define CYW43_SLEEP_MAX                 (10)
@@ -47,21 +54,21 @@
 #define CYW43_THREAD_EXIT               MICROPY_PY_LWIP_EXIT
 #define CYW43_THREAD_LOCK_CHECK
 
-// #define CYW43_SDPCM_SEND_COMMON_WAIT 
-//     if (get_core_num() == 0) { 
-//         cyw43_yield(); 
-//     } 
+// #define CYW43_SDPCM_SEND_COMMON_WAIT
+//     if (get_core_num() == 0) {
+//         cyw43_yield();
+//     }
 
-// #define CYW43_DO_IOCTL_WAIT 
-//     if (get_core_num() == 0) { 
-//         cyw43_yield(); 
-//     } 
+// #define CYW43_DO_IOCTL_WAIT
+//     if (get_core_num() == 0) {
+//         cyw43_yield();
+//     }
 
 #define CYW43_SDPCM_SEND_COMMON_WAIT \
-        cyw43_yield();
+    cyw43_yield();
 
 #define CYW43_DO_IOCTL_WAIT \
-        cyw43_yield(); 
+    cyw43_yield();
 
 #define CYW43_ARRAY_SIZE(a)             MP_ARRAY_SIZE(a)
 

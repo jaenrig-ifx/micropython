@@ -31,8 +31,9 @@
 #include "py/mphal.h"
 
 
-#include "cyhal.h"
 #include "cybsp.h"
+#include "cyhal.h"
+#include "cy_pdl.h"
 
 // #include "dma.h"
 // #include "pin.h"
@@ -42,7 +43,7 @@
 #include "pendsv.h"
 #include "sdio.h"
 
-#if MICROPY_PY_NETWORK_CYW43
+#if MICROPY_PY_NETWORK_CYW43_USE_LIB_DRIVER
 
 #define DEFAULT_MASK (0)
 
@@ -108,60 +109,56 @@ STATIC cyhal_sdio_t sdio_object;
 // #define MICROPY_HW_SDIO_CMD     (pin_D2)
 // #endif
 
-#if defined(STM32H7)
-static uint32_t safe_divide(uint32_t denom) {
-    printf("safe_divide\n");
-    // uint32_t num = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_SDMMC);
-    uint32_t divres;
+// #if defined(STM32H7)
+// static uint32_t safe_divide(uint32_t denom) {
+//     printf("safe_divide\n");
+//     // uint32_t num = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_SDMMC);
+//     uint32_t divres;
 
-    // divres = num / (2U * denom);
-    // if ((num % (2U * denom)) > denom) {
-    //     divres++;
-    // }
-    return divres;
-}
-#endif
+//     // divres = num / (2U * denom);
+//     // if ((num % (2U * denom)) > denom) {
+//     //     divres++;
+//     // }
+//     return divres;
+// }
+// #endif
 
 void cyw43_sdio_init(uint32_t irq_pri) {
     printf("cyw43_sdio_init\n");
-    
- 
+
+
     #define BLOCK_SIZE     (512)
     #define SDIO_FREQ_HF   (100000000UL)
- 
+
     cyhal_sdio_cfg_t my_sdio_cfg =
     {
-        .block_size      = BLOCK_SIZE,
+        .block_size = BLOCK_SIZE,
         .frequencyhal_hz = SDIO_FREQ_HF
     };
- 
-
-// #define CYBSP_WIFI_SDIO_D0 (P2_0)
-// #define CYBSP_WIFI_SDIO_D1 (P2_1)
-// #define CYBSP_WIFI_SDIO_D2 (P2_2)
-// #define CYBSP_WIFI_SDIO_D3 (P2_3)
-// #define CYBSP_WIFI_SDIO_CMD (P2_4)
-// #define CYBSP_WIFI_SDIO_CLK (P2_5)
 
     cy_rslt_t rslt = cyhal_sdio_init(&sdio_object,
-                                     CYBSP_WIFI_SDIO_CMD,
-                                     CYBSP_WIFI_SDIO_CLK,
-                                     CYBSP_WIFI_SDIO_D0,
-                                     CYBSP_WIFI_SDIO_D1,
-                                     CYBSP_WIFI_SDIO_D2,
-                                     CYBSP_WIFI_SDIO_D3);
- 
+        CYBSP_WIFI_SDIO_CMD,
+        CYBSP_WIFI_SDIO_CLK,
+        CYBSP_WIFI_SDIO_D0,
+        CYBSP_WIFI_SDIO_D1,
+        CYBSP_WIFI_SDIO_D2,
+        CYBSP_WIFI_SDIO_D3);
+
+    printf("init : %ld\n", rslt);
+
     rslt = cyhal_sdio_configure(&sdio_object, &my_sdio_cfg);
-    printf("%ld\n", rslt);
+    printf("config : %ld\n", rslt);
+
+    sdio_enable_high_speed_4bit();
 
 
     // // configure IO pins
-    // mp_hal_pin_config_alt_static(MICROPY_HW_SDIO_D0, MP_HAL_PIN_MODE_ALT, MP_HAL_PIN_PULL_UP, STATIC_AF_SDMMC_D0);
-    // mp_hal_pin_config_alt_static(MICROPY_HW_SDIO_D1, MP_HAL_PIN_MODE_ALT, MP_HAL_PIN_PULL_UP, STATIC_AF_SDMMC_D1);
-    // mp_hal_pin_config_alt_static(MICROPY_HW_SDIO_D2, MP_HAL_PIN_MODE_ALT, MP_HAL_PIN_PULL_UP, STATIC_AF_SDMMC_D2);
-    // mp_hal_pin_config_alt_static(MICROPY_HW_SDIO_D3, MP_HAL_PIN_MODE_ALT, MP_HAL_PIN_PULL_UP, STATIC_AF_SDMMC_D3);
-    // mp_hal_pin_config_alt_static(MICROPY_HW_SDIO_CK, MP_HAL_PIN_MODE_ALT, MP_HAL_PIN_PULL_NONE, STATIC_AF_SDMMC_CK);
-    // mp_hal_pin_config_alt_static(MICROPY_HW_SDIO_CMD, MP_HAL_PIN_MODE_ALT, MP_HAL_PIN_PULL_UP, STATIC_AF_SDMMC_CMD);
+    // mp_hal_pin_config_alt_static(CYBSP_WIFI_SDIO_D0, MP_HAL_PIN_MODE_ALT, MP_HAL_PIN_PULL_UP, STATIC_AF_SDMMC_D0);
+    // mp_hal_pin_config_alt_static(CYBSP_WIFI_SDIO_D1, MP_HAL_PIN_MODE_ALT, MP_HAL_PIN_PULL_UP, STATIC_AF_SDMMC_D1);
+    // mp_hal_pin_config_alt_static(CYBSP_WIFI_SDIO_D2, MP_HAL_PIN_MODE_ALT, MP_HAL_PIN_PULL_UP, STATIC_AF_SDMMC_D2);
+    // mp_hal_pin_config_alt_static(CYBSP_WIFI_SDIO_D3, MP_HAL_PIN_MODE_ALT, MP_HAL_PIN_PULL_UP, STATIC_AF_SDMMC_D3);
+    // mp_hal_pin_config_alt_static(CYBSP_WIFI_SDIO_CLK, MP_HAL_PIN_MODE_ALT, MP_HAL_PIN_PULL_NONE, STATIC_AF_SDMMC_CK);
+    // mp_hal_pin_config_alt_static(CYBSP_WIFI_SDIO_CMD, MP_HAL_PIN_MODE_ALT, MP_HAL_PIN_PULL_UP, STATIC_AF_SDMMC_CMD);
 
     // SDMMC_CLK_ENABLE(); // enable SDIO peripheral
 
@@ -203,13 +200,68 @@ void cyw43_sdio_reenable(void) {
     printf("cyw43_sdio_reenable\n");
     // if (SDMMC_IS_CLK_DISABLED()) {
     //     SDMMC_CLK_ENABLE(); // enable SDIO peripheral
-         sdio_enable_high_speed_4bit();
+    sdio_enable_high_speed_4bit();
     // }
 }
+
+
+// Event handler callback function
+void sdio_event_handler(void *handler_arg, cyhal_sdio_event_t event) {
+    printf("sdio_event_handler\n");
+
+    CY_UNUSED_PARAMETER(handler_arg);
+    CY_UNUSED_PARAMETER(event);
+
+    switch (event)
+    {
+        case CYHAL_SDIO_CARD_INSERTION: {
+            // Triggered when card insertion is detected in present state
+            // Insert application code to handle events
+            printf("IRQ : CYHAL_SDIO_CARD_INSERTION\n");
+            break;
+        }
+
+        case CYHAL_SDIO_CMD_COMPLETE: {
+            // Triggered when command transfer is complete
+            // Insert application code to handle events
+            printf("IRQ : CYHAL_SDIO_CMD_COMPLETE\n");
+            break;
+        }
+
+        case CYHAL_SDIO_XFER_COMPLETE: {
+            // Triggered when host read/write transfer is complete
+            // Insert application code to handle events
+            printf("IRQ :CYHAL_SDIO_XFER_COMPLETE\n");
+            break;
+        }
+
+        default: {
+            // Anything for other commands
+            printf("IRQ : unknown oper<ation : %ld\n", (uint32_t)event);
+            break;
+        }
+    }
+}
+
 
 void cyw43_sdio_set_irq(bool enable) {
 // void cyw43_sdio_enable_irq(bool enable) {
     printf("cyw43_sdio_set_irq\n");
+
+// cy_rslt_t cyhal_system_set_isr	(	int32_t         irq_num,
+// int32_t      irq_src,
+// uint8_t      priority,
+// cyhal_irq_handler    handler
+// )
+
+    // #define INTERRUPT_PRIORITY (3u)
+
+    // // Register the event callback
+    // cyhal_sdio_register_callback(&sdio_object, &sdio_event_handler, NULL);
+
+    // // Enable events that should trigger the callback
+    // cyhal_sdio_enable_event(&sdio_object, CYHAL_SDIO_ALL_INTERRUPTS, INTERRUPT_PRIORITY, enable);
+
     // if (enable) {
     //     SDMMC->MASK |= SDMMC_MASK_SDIOITIE;
     // } else {
@@ -241,118 +293,135 @@ void cyw43_sdio_enable_high_speed_4bit(void) {
 //     mp_hal_delay_us(10);
 }
 
-void SDMMC_IRQHandler(void) {
-    printf("SDMMC_IRQHandler\n");
-    // if (SDMMC->STA & SDMMC_STA_CMDREND) {
-    //     SDMMC->ICR = SDMMC_ICR_CMDRENDC;
-    //     uint32_t r1 = SDMMC->RESP1;
-    //     if (SDMMC->RESPCMD == 53 && r1 & 0x800) {
-    //         printf("bad RESP1: %lu %lx\n", SDMMC->RESPCMD, r1);
-    //         sdmmc_error = 0xffffffff;
-    //         SDMMC->MASK &= SDMMC_MASK_SDIOITIE;
-    //         sdmmc_irq_state = SDMMC_IRQ_STATE_DONE;
-    //         return;
-    //     }
-    //     #if defined(STM32H7)
-    //     if (!sdmmc_dma) {
-    //         while (sdmmc_buf_cur < sdmmc_buf_top && (SDMMC->STA & SDMMC_STA_DPSMACT) && !(SDMMC->STA & SDMMC_STA_RXFIFOE)) {
-    //             *(uint32_t *)sdmmc_buf_cur = SDMMC->FIFO;
-    //             sdmmc_buf_cur += 4;
-    //         }
-    //     }
-    //     #endif
-    //     if (sdmmc_buf_cur >= sdmmc_buf_top) {
-    //         // data transfer finished, so we are done
-    //         SDMMC->MASK &= SDMMC_MASK_SDIOITIE;
-    //         sdmmc_irq_state = SDMMC_IRQ_STATE_DONE;
-    //         return;
-    //     }
-    //     if (sdmmc_write) {
-    //         SDMMC->DCTRL =
-    //             SDMMC_DCTRL_SDIOEN
-    //             | SDMMC_DCTRL_RWMOD
-    //             | sdmmc_block_size_log2 << SDMMC_DCTRL_DBLOCKSIZE_Pos
-    //             #if defined(STM32F7)
-    //             | (sdmmc_dma << SDMMC_DCTRL_DMAEN_Pos)
-    //             #endif
-    //             | (!sdmmc_write) << SDMMC_DCTRL_DTDIR_Pos
-    //                 | SDMMC_DCTRL_DTEN
-    //         ;
-    //         if (!sdmmc_dma) {
-    //             SDMMC->MASK |= SDMMC_MASK_TXFIFOHEIE;
-    //         }
-    //     }
-    //     sdmmc_irq_state = SDMMC_IRQ_STATE_CMD_DONE;
-    // } else if (SDMMC->STA & SDMMC_STA_DATAEND) {
-    //     // data transfer complete
-    //     // note: it's possible to get DATAEND before CMDREND
-    //     SDMMC->ICR = SDMMC_ICR_DATAENDC;
-    //     #if defined(STM32F7)
-    //     // check if there is some remaining data in RXFIFO
-    //     if (!sdmmc_dma) {
-    //         while (SDMMC->STA & SDMMC_STA_RXDAVL) {
-    //             *(uint32_t *)sdmmc_buf_cur = SDMMC->FIFO;
-    //             sdmmc_buf_cur += 4;
-    //         }
-    //     }
-    //     #endif
-    //     if (sdmmc_irq_state == SDMMC_IRQ_STATE_CMD_DONE) {
-    //         // command and data finished, so we are done
-    //         SDMMC->MASK &= SDMMC_MASK_SDIOITIE;
-    //         sdmmc_irq_state = SDMMC_IRQ_STATE_DONE;
-    //     }
-    // } else if (SDMMC->STA & SDMMC_STA_TXFIFOHE) {
-    //     if (!sdmmc_dma && sdmmc_write) {
-    //         // write up to 8 words to fifo
-    //         for (size_t i = 8; i && sdmmc_buf_cur < sdmmc_buf_top; --i) {
-    //             SDMMC->FIFO = *(uint32_t *)sdmmc_buf_cur;
-    //             sdmmc_buf_cur += 4;
-    //         }
-    //         if (sdmmc_buf_cur >= sdmmc_buf_top) {
-    //             // finished, disable IRQ
-    //             SDMMC->MASK &= ~SDMMC_MASK_TXFIFOHEIE;
-    //         }
-    //     }
-    // } else if (SDMMC->STA & SDMMC_STA_RXFIFOHF) {
-    //     if (!sdmmc_dma && !sdmmc_write) {
-    //         // read up to 8 words from fifo
-    //         for (size_t i = 8; i && sdmmc_buf_cur < sdmmc_buf_top; --i) {
-    //             *(uint32_t *)sdmmc_buf_cur = SDMMC->FIFO;
-    //             sdmmc_buf_cur += 4;
-    //         }
-    //     }
-    // } else if (SDMMC->STA & SDMMC_STA_SDIOIT) {
-    //     SDMMC->MASK &= ~SDMMC_MASK_SDIOITIE;
-    //     SDMMC->ICR = SDMMC_ICR_SDIOITC;
+// void SDMMC_IRQHandler(void) {
+//     printf("SDMMC_IRQHandler\n");
+// if (SDMMC->STA & SDMMC_STA_CMDREND) {
+//     SDMMC->ICR = SDMMC_ICR_CMDRENDC;
+//     uint32_t r1 = SDMMC->RESP1;
+//     if (SDMMC->RESPCMD == 53 && r1 & 0x800) {
+//         printf("bad RESP1: %lu %lx\n", SDMMC->RESPCMD, r1);
+//         sdmmc_error = 0xffffffff;
+//         SDMMC->MASK &= SDMMC_MASK_SDIOITIE;
+//         sdmmc_irq_state = SDMMC_IRQ_STATE_DONE;
+//         return;
+//     }
+//     #if defined(STM32H7)
+//     if (!sdmmc_dma) {
+//         while (sdmmc_buf_cur < sdmmc_buf_top && (SDMMC->STA & SDMMC_STA_DPSMACT) && !(SDMMC->STA & SDMMC_STA_RXFIFOE)) {
+//             *(uint32_t *)sdmmc_buf_cur = SDMMC->FIFO;
+//             sdmmc_buf_cur += 4;
+//         }
+//     }
+//     #endif
+//     if (sdmmc_buf_cur >= sdmmc_buf_top) {
+//         // data transfer finished, so we are done
+//         SDMMC->MASK &= SDMMC_MASK_SDIOITIE;
+//         sdmmc_irq_state = SDMMC_IRQ_STATE_DONE;
+//         return;
+//     }
+//     if (sdmmc_write) {
+//         SDMMC->DCTRL =
+//             SDMMC_DCTRL_SDIOEN
+//             | SDMMC_DCTRL_RWMOD
+//             | sdmmc_block_size_log2 << SDMMC_DCTRL_DBLOCKSIZE_Pos
+//             #if defined(STM32F7)
+//             | (sdmmc_dma << SDMMC_DCTRL_DMAEN_Pos)
+//             #endif
+//             | (!sdmmc_write) << SDMMC_DCTRL_DTDIR_Pos
+//                 | SDMMC_DCTRL_DTEN
+//         ;
+//         if (!sdmmc_dma) {
+//             SDMMC->MASK |= SDMMC_MASK_TXFIFOHEIE;
+//         }
+//     }
+//     sdmmc_irq_state = SDMMC_IRQ_STATE_CMD_DONE;
+// } else if (SDMMC->STA & SDMMC_STA_DATAEND) {
+//     // data transfer complete
+//     // note: it's possible to get DATAEND before CMDREND
+//     SDMMC->ICR = SDMMC_ICR_DATAENDC;
+//     #if defined(STM32F7)
+//     // check if there is some remaining data in RXFIFO
+//     if (!sdmmc_dma) {
+//         while (SDMMC->STA & SDMMC_STA_RXDAVL) {
+//             *(uint32_t *)sdmmc_buf_cur = SDMMC->FIFO;
+//             sdmmc_buf_cur += 4;
+//         }
+//     }
+//     #endif
+//     if (sdmmc_irq_state == SDMMC_IRQ_STATE_CMD_DONE) {
+//         // command and data finished, so we are done
+//         SDMMC->MASK &= SDMMC_MASK_SDIOITIE;
+//         sdmmc_irq_state = SDMMC_IRQ_STATE_DONE;
+//     }
+// } else if (SDMMC->STA & SDMMC_STA_TXFIFOHE) {
+//     if (!sdmmc_dma && sdmmc_write) {
+//         // write up to 8 words to fifo
+//         for (size_t i = 8; i && sdmmc_buf_cur < sdmmc_buf_top; --i) {
+//             SDMMC->FIFO = *(uint32_t *)sdmmc_buf_cur;
+//             sdmmc_buf_cur += 4;
+//         }
+//         if (sdmmc_buf_cur >= sdmmc_buf_top) {
+//             // finished, disable IRQ
+//             SDMMC->MASK &= ~SDMMC_MASK_TXFIFOHEIE;
+//         }
+//     }
+// } else if (SDMMC->STA & SDMMC_STA_RXFIFOHF) {
+//     if (!sdmmc_dma && !sdmmc_write) {
+//         // read up to 8 words from fifo
+//         for (size_t i = 8; i && sdmmc_buf_cur < sdmmc_buf_top; --i) {
+//             *(uint32_t *)sdmmc_buf_cur = SDMMC->FIFO;
+//             sdmmc_buf_cur += 4;
+//         }
+//     }
+// } else if (SDMMC->STA & SDMMC_STA_SDIOIT) {
+//     SDMMC->MASK &= ~SDMMC_MASK_SDIOITIE;
+//     SDMMC->ICR = SDMMC_ICR_SDIOITC;
 
-    //     #if MICROPY_PY_NETWORK_CYW43
-    //     extern void (*cyw43_poll)(void);
-    //     if (cyw43_poll) {
-    //         pendsv_schedule_dispatch(PENDSV_DISPATCH_CYW43, cyw43_poll);
-    //     }
-    //     #endif
-    // } else if (SDMMC->STA & 0x3f) {
-    //     // an error
-    //     sdmmc_error = SDMMC->STA;
-    //     SDMMC->ICR = SDMMC_STATIC_FLAGS;
-    //     SDMMC->MASK &= SDMMC_MASK_SDIOITIE;
-    //     sdmmc_irq_state = SDMMC_IRQ_STATE_DONE;
-    // }
-}
+//     #if MICROPY_PY_NETWORK_CYW43_USE_LIB_DRIVER
+//     extern void (*cyw43_poll)(void);
+//     if (cyw43_poll) {
+//         pendsv_schedule_dispatch(PENDSV_DISPATCH_CYW43, cyw43_poll);
+//     }
+//     #endif
+// } else if (SDMMC->STA & 0x3f) {
+//     // an error
+//     sdmmc_error = SDMMC->STA;
+//     SDMMC->ICR = SDMMC_STATIC_FLAGS;
+//     SDMMC->MASK &= SDMMC_MASK_SDIOITIE;
+//     sdmmc_irq_state = SDMMC_IRQ_STATE_DONE;
+// }
+// }
 
 
 // siehe auch boards/mtb_shared/mtb-hal-cat1/release-v2.1.0/include/cyhal_sdio.h
 
 int cyw43_sdio_transfer(uint32_t cmd, uint32_t arg, uint32_t *resp) {
-    printf("cyw43_sdio_transfer\n");
-
-    while( cyhal_sdio_is_busy(&sdio_object) ) {
+    while (cyhal_sdio_is_busy(&sdio_object)) {
         mp_hal_delay_us(10);
     }
 
-    uint32_t flag = 1 << 31;
-    cy_rslt_t rslt = cyhal_sdio_send_cmd(&sdio_object, (arg & flag) != 0 ? CYHAL_SDIO_XFER_TYPE_WRITE : CYHAL_SDIO_XFER_TYPE_READ, CYHAL_SDIO_CMD_IO_RW_DIRECT, arg, resp);
-	printf("%ld   %ld\n", rslt, *resp);
+
+//    uint32_t arg = fn << 28 | (addr & 0x1ffff) << 9 | write << 31 | (val & 0xff);
+
+    uint32_t write_flag = 1 << 31;
+    bool write = (arg & write_flag) != 0;
+    uint32_t fn = (arg & 0x7FFFFFFF) >> 28;
+    uint32_t addr = (arg & 0x01FFFFFF) >> 9;
+    uint32_t val = arg & 0xff;
+
+
+    printf("cyw43_sdio_transfer    cmd : %lu    arg : %lu   write : %u    fn : %lu    addr : %lu    val : %lu\n", cmd, arg, write, fn, addr, val);
+
+
+    uint32_t response = 10;
+    cy_rslt_t rslt = cyhal_sdio_send_cmd(&sdio_object, write ? CYHAL_SDIO_XFER_TYPE_WRITE : CYHAL_SDIO_XFER_TYPE_READ, cmd, arg, &response);
+
+    if (resp != NULL) {
+        *resp = response;
+    }
+
+    printf("%ld   %ld   %ld\n\n\n", rslt, resp != NULL ? *resp : 0, response);
+
     // #if defined(STM32F7)
     // // Wait for any outstanding TX to complete
     // while (SDMMC->STA & SDMMC_STA_TXACT) {

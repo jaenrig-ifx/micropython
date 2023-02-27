@@ -16,7 +16,7 @@ MPY_DIR_OF_MAIN_MAKEFILE  := $(dir $(MPY_PATH_TO_MAIN_MAKEFILE))
 QSTR_DEFS = qstrdefsport.h
 
 # MicroPython feature configurations
-MICROPY_ROM_TEXT_COMPRESSION ?= 1
+#MICROPY_ROM_TEXT_COMPRESSION ?= 1
 
 MICROPY_FROZEN_MANIFEST      ?= boards/manifest.py
 MICROPY_USER_FROZEN_MANIFEST ?= $(MICROPY_FROZEN_MANIFEST)
@@ -30,11 +30,11 @@ CONFIG        ?= Debug
 
 # include py core make definitions
 include ../../py/mkenv.mk
--include mpconfigport.mk
+include mpconfigport.mk
+include $(BOARD_DIR)/mpconfigboard.mk
 include $(TOP)/py/py.mk
 include $(TOP)/extmod/extmod.mk
 
-include $(BOARD_DIR)/mpconfigboard.mk
 
 
 # get path to this file
@@ -120,9 +120,8 @@ MPY_SRC_C += shared/netutils/dhcpserver.c \
  		 	 ${TOP}/lib/cyw43-driver/src/cyw43_ctrl.c \
 			 ${TOP}/lib/cyw43-driver/src/cyw43_ll.c \
 			 ${TOP}/lib/cyw43-driver/src/cyw43_lwip.c \
-			 ${TOP}/lib/cyw43-driver/src/cyw43_sdio.c 
-
-			#  ${TOP}/lib/cyw43-driver/src/cyw43_stats.c 
+			 ${TOP}/lib/cyw43-driver/src/cyw43_sdio.c \
+			 ${TOP}/lib/cyw43-driver/src/cyw43_stats.c 
  	 
 
 SRC_ASM += shared/runtime/gchelper_thumb1.s

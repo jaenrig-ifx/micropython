@@ -14,6 +14,8 @@
 #include "lwip/init.h"
 #include "lwip/apps/mdns.h"
 #endif
+
+
 #if MICROPY_PY_NETWORK_CYW43
 #include "lib/cyw43-driver/src/cyw43.h"
 #endif
@@ -48,6 +50,9 @@ extern void machine_deinit(void);
 extern void rtc_init(void);
 extern void time_init(void);
 extern void os_init(void);
+
+
+extern void mod_network_lwip_init(void);
 
 
 int main(int argc, char **argv) {
@@ -116,8 +121,8 @@ int main(int argc, char **argv) {
     #endif
     #endif
 
-#include <stdbool.h>
-bool network = false;
+    #include <stdbool.h>
+    bool network = false;
     #if MICROPY_PY_NETWORK_CYW43
     {
         cyw43_init(&cyw43_state);
@@ -163,13 +168,17 @@ soft_reset:
 
     mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash));
     mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash_slash_lib));
-printf("network init %d\n", network);
+    printf("network init %d\n", network);
+    printf("CYW43_PIN_WL_SDIO_1 : %d\n", CYW43_PIN_WL_SDIO_1);
+    printf("CYW43_PIN_WL_REG_ON : %d\n", CYW43_PIN_WL_REG_ON);
+
     // indicate in REPL console when debug mode is selected
     mplogger_print("\n...LOGGER DEBUG MODE...\n\n");
 
     readline_init0();
     machine_init();
 
+    mod_network_lwip_init();
 
     #if MICROPY_VFS_FAT
     pyexec_frozen_module("vfs_fat.py");

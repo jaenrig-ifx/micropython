@@ -185,4 +185,4 @@ uint32_t storage_read_blocks(uint8_t *dest, uint32_t block_num, uint32_t num_blo
 }
 
 
-const char fw_4343WA1_7_45_98_50_start[426094];
+// const char fw_4343WA1_7_45_98_50_start[426094];

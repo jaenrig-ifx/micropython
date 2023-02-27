@@ -27,7 +27,11 @@
 #include <assert.h>
 #include <stdio.h>
 #include "pendsv.h"
-// #include "RP2040.h"
+
+
+#include "cybsp.h"
+#include "cyhal.h"
+#include "cy_pdl.h"
 
 #if MICROPY_PY_NETWORK_CYW43
 #include "lib/cyw43-driver/src/cyw43_stats.h"
@@ -61,7 +65,7 @@ void pendsv_schedule_dispatch(size_t slot, pendsv_dispatch_t f) {
     assert(pendsv_lock >= 0);
     pendsv_dispatch_table[slot] = f;
     if (pendsv_lock == 0) {
-        // SCB->ICSR = SCB_ICSR_PENDSVSET_Msk;
+        SCB->ICSR = SCB_ICSR_PENDSVSET_Msk;
     } else {
         #if MICROPY_PY_NETWORK_CYW43
         CYW43_STAT_INC(PENDSV_DISABLED_COUNT);
