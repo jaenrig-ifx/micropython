@@ -25,7 +25,10 @@
  */
 
 // Options controlling how MicroPython is built, overriding defaults in py/mpconfig.h
+#include <alloca.h>
 #include <stdint.h>
+
+#include "shared/runtime/interrupt_char.h"
 
 // Board and hardware specific configuration
 #define MICROPY_HW_MCU_NAME                     "PSoC62"
@@ -128,29 +131,18 @@ typedef intptr_t mp_int_t;  // must be pointer size
 typedef uintptr_t mp_uint_t; // must be pointer size
 typedef intptr_t mp_off_t;
 
-// We need to provide a declaration/definition of alloca()
-#include <alloca.h>
 
 #define MICROPY_PY_BUILTINS_HELP_TEXT           psoc6_help_text
-
-
-// set in Makefile
-// #define MICROPY_QSTR_EXTRA_POOL                 mp_qstr_frozen_const_pool
 
 #define MICROPY_USE_INTERNAL_PRINTF             (0)
 
 #define MICROPY_REPL_INFO                       (1)
-
-// Set to zero explicitly ! Or mounting the /flash fs must be done inside try/except for both branches !
-// #define MICROPY_MODULE_BUILTIN_INIT    (0)
 
 
 // TODO: helpful to abstract main.c ?
 // #define MICROPY_PORT_INIT_FUNC ??
 // #define MICROPY_PORT_DEINIT_FUNC ??
 
-
-#include "shared/runtime/interrupt_char.h"
 
 // Potentially to be changed. Impact / improvements unclear !
 // #define MICROPY_OBJ_REPR                        (MICROPY_OBJ_REPR_A)
