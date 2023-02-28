@@ -222,6 +222,8 @@ if [ ${implemented} -eq 1 ]; then
   echo
 
 fi
+
+
 ### not yet enabled/implemented, therefore failing
 if [ ${notYetImplemented} -eq 1 ]; then
 
