@@ -217,7 +217,7 @@ run-tests.py         : run tests from host platform
 
 ###########################################################################
 ### Test results
-840 tests performed (23909 individual testcases)
+840 tests performed (23903 individual testcases)
 837 tests passed
 59  tests skipped
 3   tests failed
@@ -228,9 +228,14 @@ run-tests.py         : run tests from host platform
 # unclear why
 FAIL  extmod/ussl_basic.py
 FAIL  extmod/ussl_keycert.py
+FAIL  extmod/utime_res.py
 
-FAIL  stress/bytecode_limit.py
 
+### tests that fail sometimes
+extmod/uasyncio_lock.py   => crash
+extmod/utime_res.py       => crash
+psoc6/time.py             => test_ticks_ms due to latencies greater than tested range
+stress/bytecode_limit.py
 
 ###########################################################################
 ### skipped tests
