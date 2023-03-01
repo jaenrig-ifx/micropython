@@ -4,6 +4,7 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2022 Damien P. George
+ * Copyright (c) 2022 Jim Mussared
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +24,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#ifndef MICROPY_INCLUDED_RP2_CYW43_CONFIGPORT_H
-#define MICROPY_INCLUDED_RP2_CYW43_CONFIGPORT_H
+#ifndef MICROPY_INCLUDED_STM32_CYW43_CONFIGPORT_H
+#define MICROPY_INCLUDED_STM32_CYW43_CONFIGPORT_H
 
 // The board-level config will be included here, so it can set some CYW43 values.
 #include "py/mpconfig.h"
@@ -32,13 +33,18 @@
 #include "py/mphal.h"
 #include "extmod/modnetwork.h"
 #include "pendsv.h"
+#include "sdio.h"
 
-#define CYW43_CHIPSET_FIRMWARE_INCLUDE_FILE "w43439A0_7_95_49_00_combined.h"
-#define CYW43_WIFI_NVRAM_INCLUDE_FILE   "wifi_nvram_43439.h"
+#define CYW43_USE_SPI                   (0)
+#define CYW43_LWIP                      (1)
+#define CYW43_USE_STATS                 (0)
+
+#define CYW43_CHIPSET_FIRMWARE_INCLUDE_FILE "lib/cyw43-driver/firmware/w4343WA1_7_45_98_50_combined.h"
+#define CYW43_WIFI_NVRAM_INCLUDE_FILE   "lib/cyw43-driver/firmware/wifi_nvram_1dx.h"
 #define CYW43_IOCTL_TIMEOUT_US          (1000000)
-#define CYW43_SLEEP_MAX                 (10)
+#define CYW43_SLEEP_MAX                 (50)
 #define CYW43_NETUTILS                  (1)
-#define CYW43_USE_OTP_MAC               (1)
+#define CYW43_CLEAR_SDIO_INT            (1)
 
 #define CYW43_EPERM                     MP_EPERM // Operation not permitted
 #define CYW43_EIO                       MP_EIO // I/O error
@@ -51,15 +57,8 @@
 
 #define CYW43_HOST_NAME                 mod_network_hostname
 
-#define CYW43_SDPCM_SEND_COMMON_WAIT \
-    if (get_core_num() == 0) { \
-        cyw43_yield(); \
-    } \
-
-#define CYW43_DO_IOCTL_WAIT \
-    if (get_core_num() == 0) { \
-        cyw43_yield(); \
-    } \
+#define CYW43_SDPCM_SEND_COMMON_WAIT    __WFI();
+#define CYW43_DO_IOCTL_WAIT             __WFI();
 
 #define CYW43_ARRAY_SIZE(a)             MP_ARRAY_SIZE(a)
 
@@ -70,11 +69,6 @@
 #define CYW43_HAL_PIN_PULL_DOWN         MP_HAL_PIN_PULL_DOWN
 
 #define CYW43_HAL_MAC_WLAN0             MP_HAL_MAC_WLAN0
-
-// set in SDK board header
-#define CYW43_NUM_GPIOS                 CYW43_WL_GPIO_COUNT
-
-#define CYW43_POST_POLL_HOOK            cyw43_post_poll_hook();
 
 #define cyw43_hal_ticks_us              mp_hal_ticks_us
 #define cyw43_hal_ticks_ms              mp_hal_ticks_ms
@@ -89,18 +83,17 @@
 #define cyw43_hal_get_mac_ascii         mp_hal_get_mac_ascii
 #define cyw43_hal_generate_laa_mac      mp_hal_generate_laa_mac
 
+#define CYW43_PIN_WL_REG_ON             pyb_pin_WL_REG_ON
+#define CYW43_PIN_WL_HOST_WAKE          pyb_pin_WL_HOST_WAKE
+#define CYW43_PIN_WL_SDIO_1             pyb_pin_WL_SDIO_1
+
+#if MICROPY_HW_ENABLE_RF_SWITCH
+#define CYW43_PIN_WL_RFSW_VDD           pyb_pin_WL_RFSW_VDD
+#endif
+
 #define cyw43_schedule_internal_poll_dispatch(func) pendsv_schedule_dispatch(PENDSV_DISPATCH_CYW43, func)
 
 void cyw43_post_poll_hook(void);
-extern volatile int cyw43_has_pending;
-
-static inline void cyw43_yield(void) {
-    uint32_t my_interrupts = save_and_disable_interrupts();
-    if (!cyw43_has_pending) {
-        __WFI();
-    }
-    restore_interrupts(my_interrupts);
-}
 
 static inline void cyw43_delay_us(uint32_t us) {
     uint32_t start = mp_hal_ticks_us();
@@ -110,13 +103,36 @@ static inline void cyw43_delay_us(uint32_t us) {
 
 static inline void cyw43_delay_ms(uint32_t ms) {
     uint32_t us = ms * 1000;
-    int32_t start = mp_hal_ticks_us();
+    uint32_t start = mp_hal_ticks_us();
     while (mp_hal_ticks_us() - start < us) {
-        cyw43_yield();
-        MICROPY_EVENT_POLL_HOOK_FAST;
+        MICROPY_EVENT_POLL_HOOK;
     }
 }
 
-#define CYW43_EVENT_POLL_HOOK MICROPY_EVENT_POLL_HOOK_FAST
+static inline void cyw43_sdio_init(void) {
+    sdio_init(NVIC_EncodePriority(NVIC_PRIORITYGROUP_4, 14, 0));
+}
 
-#endif // MICROPY_INCLUDED_RP2_CYW43_CONFIGPORT_H
+static inline void cyw43_sdio_reinit(void) {
+    sdio_reenable();
+}
+
+static inline void cyw43_sdio_deinit(void) {
+    sdio_deinit();
+}
+
+static inline void cyw43_sdio_set_irq(bool enable) {
+    sdio_enable_irq(enable);
+}
+
+static inline int cyw43_sdio_transfer(uint32_t cmd, uint32_t arg, uint32_t *resp) {
+    return sdio_transfer(cmd, arg, resp);
+}
+
+static inline int cyw43_sdio_transfer_cmd53(bool write, uint32_t block_size, uint32_t arg, size_t len, uint8_t *buf) {
+    return sdio_transfer_cmd53(write, block_size, arg, len, buf);
+}
+
+#define CYW43_EVENT_POLL_HOOK MICROPY_EVENT_POLL_HOOK
+
+#endif // MICROPY_INCLUDED_STM32_CYW43_CONFIGPORT_H

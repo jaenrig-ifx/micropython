@@ -3,7 +3,7 @@
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2021 Damien P. George
+ * Copyright (c) 2022 Jim Mussared
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,35 +23,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
-#include "py/runtime.h"
-#include "drivers/dht/dht.h"
-#include "modrp2.h"
+#ifndef MICROPY_INCLUDED_RP2_MPNETWORKPORT_H
+#define MICROPY_INCLUDED_RP2_MPNETWORKPORT_H
 
 #if MICROPY_PY_NETWORK_CYW43
-#include "extmod/modnetwork.h"
+extern void cyw43_irq_init(void);
 #endif
 
-#if MICROPY_PY_NETWORK_CYW43
-MP_DECLARE_CONST_FUN_OBJ_VAR_BETWEEN(mod_network_country_obj);
-#endif
-
-STATIC const mp_rom_map_elem_t rp2_module_globals_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___name__),            MP_ROM_QSTR(MP_QSTR_rp2) },
-    { MP_ROM_QSTR(MP_QSTR_Flash),               MP_ROM_PTR(&rp2_flash_type) },
-    { MP_ROM_QSTR(MP_QSTR_PIO),                 MP_ROM_PTR(&rp2_pio_type) },
-    { MP_ROM_QSTR(MP_QSTR_StateMachine),        MP_ROM_PTR(&rp2_state_machine_type) },
-
-    #if MICROPY_PY_NETWORK_CYW43
-    // Deprecated (use network.country instead).
-    { MP_ROM_QSTR(MP_QSTR_country),             MP_ROM_PTR(&mod_network_country_obj) },
-    #endif
-};
-STATIC MP_DEFINE_CONST_DICT(rp2_module_globals, rp2_module_globals_table);
-
-const mp_obj_module_t mp_module_rp2 = {
-    .base = { &mp_type_module },
-    .globals = (mp_obj_dict_t *)&rp2_module_globals,
-};
-
-MP_REGISTER_MODULE(MP_QSTR__rp2, mp_module_rp2);
+#endif // MICROPY_INCLUDED_RP2_MPNETWORKPORT_H
