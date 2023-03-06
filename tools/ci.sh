@@ -265,6 +265,7 @@ function ci_psoc6_setup {
     docker exec mtb-ci /bin/bash -c "git config --global --add safe.directory /micropython/lib/micropython-lib"
     docker exec mtb-ci /bin/bash -c "git config --global --add safe.directory /micropython/lib/wifi-host-driver"
     docker exec mtb-ci /bin/bash -c "git config --global --add safe.directory /micropython/lib/mbedtls"
+    docker exec mtb-ci /bin/bash -c "git config --global --add safe.directory /micropython/lib/lwip"
 }
 
 function ci_psoc6_build {
