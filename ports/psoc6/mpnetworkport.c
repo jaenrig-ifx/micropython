@@ -63,3 +63,12 @@ cy_rslt_t cy_rtos_delay_milliseconds(cy_time_t num_ms) {
 }
 
 #endif // MICROPY_PY_NETWORK_IFX_WHD
+
+#if MICROPY_PY_LWIP
+#include "lwip/arch.h"
+
+u32_t sys_now(void) {
+    return mp_hal_ticks_ms();
+}
+
+#endif // MICROPY_PY_LWIP

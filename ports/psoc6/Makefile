@@ -52,6 +52,9 @@ $(info CONFIG                           : $(CONFIG))
 INC += -I.
 INC += -I$(TOP)
 INC += -I$(BUILD)
+ifeq ($(MICROPY_PY_LWIP),1)
+INC += -Ilwip_inc
+endif
 
 
 ### for testing purposes only

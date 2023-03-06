@@ -4,6 +4,7 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2018-2019 Damien P. George
+ * Copyright (c) 2023 Infineon Technologies AG
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +33,7 @@
 
 #if MICROPY_PY_NETWORK_IFX_WHD
 
-// #include "lwip/netif.h"
+#include "lwip/netif.h"
 #include "whd.h"
 #include "whd_network_types.h"
 #include "whd_wlioctl.h"
@@ -48,6 +49,7 @@ typedef struct _network_ifx_whd_obj_t {
     mp_obj_base_t base;
     whd_driver_t *whd;
     whd_interface_t *itf;
+    struct netif netif;
 } network_ifx_whd_obj_t;
 
 STATIC network_ifx_whd_obj_t network_ifx_whd_wl_sta = { { &mp_network_ifx_whd_type }, &whd, &itf_sta };
@@ -476,21 +478,28 @@ STATIC mp_obj_t network_ifx_whd_config(size_t n_args, const mp_obj_t *args, mp_m
             }
 
             case MP_QSTR_mac: {
-                uint8_t buf[6];
-                // cyw43_wifi_get_mac(self->cyw, self->itf, buf);
-                return mp_obj_new_bytes(buf, 6);
+                wl_bss_info_t bss_info;
+                uint32_t ret = whd_wifi_get_bss_info(itf, &bss_info);
+                if (ret != WHD_SUCCESS) {
+                    mp_raise_OSError(-ret);
+                }
+                return mp_obj_new_bytes(bss_info.BSSID.octet, 6);
             }
             case MP_QSTR_txpower: {
                 uint8_t buf[13];
                 memcpy(buf, "qtxpower\x00\x00\x00\x00\x00", 13);
-                // cyw43_ioctl(self->cyw, CYW43_IOCTL_GET_VAR, 13, buf, self->itf);
+                uint32_t ret = whd_wifi_get_ioctl_buffer(itf, WLC_GET_VAR, buf, 13);
+                if (ret != WHD_SUCCESS) {
+                    mp_raise_OSError(-ret);
+                }
                 return MP_OBJ_NEW_SMALL_INT(nw_get_le32(buf) / 4);
             }
-            #if !MICROPY_PY_NETWORK_CYW43_USE_LIB_DRIVER
+
             case MP_QSTR_hostname: {
-                // return mp_obj_new_str(self->cyw->hostname, strlen(self->cyw->hostname));
+                const char *hostname = netif_get_hostname(&(self->netif));
+                return mp_obj_new_str(hostname, strlen(hostname));
             }
-            #endif
+
             default:
                 mp_raise_ValueError(MP_ERROR_TEXT("unknown config param"));
         }
