@@ -108,21 +108,16 @@ STATIC mp_obj_t network_ifx_whd_send_ethernet(mp_obj_t self_in, mp_obj_t buf_in)
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(network_ifx_whd_send_ethernet_obj, network_ifx_whd_send_ethernet);
 
-STATIC mp_obj_t network_ifx_whd_ioctl(mp_obj_t self_in, mp_obj_t cmd_in, mp_obj_t buf_in) {
-//     network_cyw43_obj_t *self = MP_OBJ_TO_PTR(self_in);
-//     mp_buffer_info_t buf;
-//     mp_get_buffer_raise(buf_in, &buf, MP_BUFFER_READ | MP_BUFFER_WRITE);
-//     cyw43_ioctl(self->cyw, mp_obj_get_int(cmd_in), buf.len, buf.buf, self->itf);
-    return mp_const_none;
-}
-STATIC MP_DEFINE_CONST_FUN_OBJ_3(network_ifx_whd_ioctl_obj, network_ifx_whd_ioctl);
-
 /*******************************************************************************/
 // network API
 
 STATIC mp_obj_t network_ifx_whd_deinit(mp_obj_t self_in) {
-//     network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(self_in);
-//     cyw43_deinit(self->cyw);
+    network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    whd_interface_t itf = *(self->itf);
+    uint32_t ret = whd_deinit(itf);
+    if (ret != WHD_SUCCESS) {
+        mp_raise_OSError(-ret);
+    }
     return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(network_ifx_whd_deinit_obj, network_ifx_whd_deinit);
@@ -378,10 +373,8 @@ STATIC mp_obj_t network_ifx_whd_isconnected(mp_obj_t self_in) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(network_ifx_whd_isconnected_obj, network_ifx_whd_isconnected);
 
 STATIC mp_obj_t network_ifx_whd_ifconfig(size_t n_args, const mp_obj_t *args) {
-    // network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(args[0]);
-    // Explore the integration with the network stack ... lwip
-    // return mod_network_nic_ifconfig(&self->cyw->netif[self->itf], n_args - 1, args + 1);
-    return mp_const_none;
+    network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(args[0]);
+    return mod_network_nic_ifconfig(&(self->netif), n_args - 1, args + 1);
 }
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(network_ifx_whd_ifconfig_obj, 1, 2, network_ifx_whd_ifconfig);
 
@@ -516,18 +509,35 @@ STATIC mp_obj_t network_ifx_whd_config(size_t n_args, const mp_obj_t *args, mp_m
                     case MP_QSTR_antenna: {
                         uint8_t buf[4];
                         nw_put_le32(buf, mp_obj_get_int(e->value));
-                        // cyw43_ioctl(self->cyw, CYW43_IOCTL_SET_ANTDIV, 4, buf, self->itf);
+                        uint32_t ret = whd_wifi_get_ioctl_buffer(itf, WLC_SET_ANTDIV, buf, 4);
+                        if (ret != WHD_SUCCESS) {
+                            mp_raise_OSError(-ret);
+                        }
                         break;
                     }
                     case MP_QSTR_channel: {
-                        // cyw43_wifi_ap_set_channel(self->cyw, mp_obj_get_int(e->value));
+                        uint32_t ret = whd_wifi_set_channel(itf, mp_obj_get_int(e->value));
+                        if (ret != WHD_SUCCESS) {
+                            mp_raise_OSError(-ret);
+                        }
                         break;
                     }
                     case MP_QSTR_ssid:
                     case MP_QSTR_essid: {
+
                         // size_t len;
-                        // const char *str = mp_obj_str_get_data(e->value, &len);
-                        // cyw43_wifi_ap_set_ssid(self->cyw, len, (const uint8_t *)str);
+                        // const char *ssid_str = mp_obj_str_get_data(e->value, &len);
+                        // whd_security_t security;
+                        // wl_bss_info_t bss_info;
+                        // uint32_t ret = whd_wifi_get_ap_info(itf, &bss_info, &security);
+                        // if (ret != WHD_SUCCESS) {
+                        //     mp_raise_OSError(-ret);
+                        // }
+                        // whd_ssid_t whd_ssid;
+                        // memcpy(whd_ssid.value, ssid_str, len);
+                        // whd_ssid.length = len;
+                        // uint32_t ret = whd_wifi_init_ap(itf, &whd_ssid, &security,  );
+
                         break;
                     }
                     case MP_QSTR_monitor: {
@@ -596,7 +606,6 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_KW(network_ifx_whd_config_obj, 1, network_ifx_whd
 
 STATIC const mp_rom_map_elem_t network_ifx_whd_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_send_ethernet), MP_ROM_PTR(&network_ifx_whd_send_ethernet_obj) },
-    { MP_ROM_QSTR(MP_QSTR_ioctl), MP_ROM_PTR(&network_ifx_whd_ioctl_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_deinit), MP_ROM_PTR(&network_ifx_whd_deinit_obj) }, // shall this be part of the module ??
     { MP_ROM_QSTR(MP_QSTR_active), MP_ROM_PTR(&network_ifx_whd_active_obj) },
@@ -631,8 +640,6 @@ STATIC const mp_rom_map_elem_t network_ifx_whd_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_WPA2_FBT_ENT),              MP_ROM_INT(WHD_SECURITY_WPA2_FBT_ENT) },
     { MP_ROM_QSTR(MP_QSTR_WPA2_IBSS_OPEN),            MP_ROM_INT(WHD_SECURITY_IBSS_OPEN) },
     { MP_ROM_QSTR(MP_QSTR_WPA2_WPS_SECURE),           MP_ROM_INT(WHD_SECURITY_WPS_SECURE) },
-
-    //
 };
 STATIC MP_DEFINE_CONST_DICT(network_ifx_whd_locals_dict, network_ifx_whd_locals_dict_table);
 
