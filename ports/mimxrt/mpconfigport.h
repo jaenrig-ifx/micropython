@@ -118,6 +118,10 @@ uint32_t trng_random_u32(void);
 #define MICROPY_PY_LWIP_REENTER MICROPY_PY_PENDSV_REENTER
 #define MICROPY_PY_LWIP_EXIT    MICROPY_PY_PENDSV_EXIT
 
+#ifndef MICROPY_PY_NETWORK_HOSTNAME_DEFAULT
+#define MICROPY_PY_NETWORK_HOSTNAME_DEFAULT "mpy-mimxrt"
+#endif
+
 #endif
 
 // For regular code that wants to prevent "background tasks" from running.
@@ -180,6 +184,11 @@ extern const struct _mp_obj_type_t network_lan_type;
 
 #ifndef MICROPY_BOARD_ROOT_POINTERS
 #define MICROPY_BOARD_ROOT_POINTERS
+#endif
+
+// Additional entries for use with pendsv_schedule_dispatch.
+#ifndef MICROPY_BOARD_PENDSV_ENTRIES
+#define MICROPY_BOARD_PENDSV_ENTRIES
 #endif
 
 #define MP_STATE_PORT MP_STATE_VM

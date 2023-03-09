@@ -6,3 +6,4 @@
 // #define MICROPY_HW_USB_MSC  (1)
 
 #define MICROPY_PY_NETWORK              (1)
+#define MICROPY_PY_NETWORK_HOSTNAME_DEFAULT     "CY8C-062-4343W"

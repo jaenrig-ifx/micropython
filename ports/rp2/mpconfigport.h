@@ -141,6 +141,10 @@
 
 // By default networking should include sockets, ssl, websockets, webrepl, dupterm.
 #if MICROPY_PY_NETWORK
+#ifndef MICROPY_PY_NETWORK_HOSTNAME_DEFAULT
+#define MICROPY_PY_NETWORK_HOSTNAME_DEFAULT "mpy-rp2"
+#endif
+
 #ifndef MICROPY_PY_USOCKET
 #define MICROPY_PY_USOCKET              (1)
 #endif
@@ -196,6 +200,11 @@ extern const struct _mp_obj_type_t mod_network_nic_type_wiznet5k;
     MICROPY_HW_NIC_NINAW10  \
     MICROPY_HW_NIC_WIZNET5K \
     MICROPY_BOARD_NETWORK_INTERFACES \
+
+// Additional entries for use with pendsv_schedule_dispatch.
+#ifndef MICROPY_BOARD_PENDSV_ENTRIES
+#define MICROPY_BOARD_PENDSV_ENTRIES
+#endif
 
 #define MP_STATE_PORT MP_STATE_VM
 
@@ -263,10 +272,3 @@ typedef intptr_t mp_off_t;
 extern uint32_t rosc_random_u32(void);
 extern void lwip_lock_acquire(void);
 extern void lwip_lock_release(void);
-
-extern uint32_t cyw43_country_code;
-extern void cyw43_irq_init(void);
-extern void cyw43_post_poll_hook(void);
-
-#define CYW43_POST_POLL_HOOK cyw43_post_poll_hook();
-#define MICROPY_CYW43_COUNTRY cyw43_country_code

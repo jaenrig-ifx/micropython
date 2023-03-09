@@ -48,7 +48,9 @@
 #if MICROPY_PY_LWIP
 #include "lwip/init.h"
 #include "lwip/apps/mdns.h"
-#include "drivers/cyw43/cyw43.h"
+#if MICROPY_PY_NETWORK_CYW43
+#include "lib/cyw43-driver/src/cyw43.h"
+#endif
 #endif
 
 #if MICROPY_PY_BLUETOOTH
@@ -296,6 +298,9 @@ STATIC bool init_sdcard_fs(void) {
 #endif
 
 void stm32_main(uint32_t reset_mode) {
+    // Low-level MCU initialisation.
+    stm32_system_init();
+
     #if !defined(STM32F0) && defined(MICROPY_HW_VTOR)
     // Change IRQ vector table if configured differently
     SCB->VTOR = MICROPY_HW_VTOR;
