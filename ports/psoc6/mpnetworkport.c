@@ -57,7 +57,6 @@ cy_rslt_t cy_rtos_get_time(cy_time_t *tval) {
 }
 
 cy_rslt_t cy_rtos_delay_milliseconds(cy_time_t num_ms) {
-
     mp_hal_delay_ms(num_ms);
     return CY_RSLT_SUCCESS;
 }
