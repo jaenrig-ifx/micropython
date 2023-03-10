@@ -375,21 +375,8 @@ STATIC mp_obj_t network_ifx_whd_status(size_t n_args, const mp_obj_t *args) {
     // one argument: return status based on query parameter
     switch (mp_obj_str_get_qstr(args[1])) {
         case MP_QSTR_stations: {
-            // return list of connected stations
-            // if (self->itf != CYW43_ITF_AP) {
-            //     mp_raise_ValueError(MP_ERROR_TEXT("AP required"));
-            // }
-            int num_stas;
-            uint8_t macs[32 * 6];
-            // cyw43_wifi_ap_get_stas(self->cyw, &num_stas, macs);
-            mp_obj_t list = mp_obj_new_list(num_stas, NULL);
-            for (int i = 0; i < num_stas; ++i) {
-                mp_obj_t tuple[1] = {
-                    mp_obj_new_bytes(&macs[i * 6], 6),
-                };
-                ((mp_obj_list_t *)MP_OBJ_TO_PTR(list))->items[i] = mp_obj_new_tuple(1, tuple);
-            }
-            return list;
+            // TODO: return list of connected stations to the AP
+            // check cyw43 implementation as reference
         }
     }
 
@@ -527,7 +514,7 @@ STATIC mp_obj_t network_ifx_whd_config(size_t n_args, const mp_obj_t *args, mp_m
                         nw_put_le32(buf, value);
                         ret = whd_wifi_set_ioctl_buffer(itf, WLC_SET_MONITOR, buf, 4);
                         whd_assert_raise(ret);
-                        // In cyw43 the keep the trace flags in a variable.
+                        // In cyw43 they keep the trace flags in a variable.
                         // TODO. Understand how are these trace flags used, and if
                         // an equivalent tracing feature can/should be enabled
                         // for the WHD.
