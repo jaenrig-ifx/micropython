@@ -1,6 +1,5 @@
 // std includes
 
-
 // micropython includes
 #include "genhdr/mpversion.h"
 #include "py/gc.h"
@@ -20,12 +19,8 @@
 #include "cybsp.h"
 #include "cy_retarget_io.h"
 
-
 // port-specific includes
 #include "mplogger.h"
-
-
-
 
 #if MICROPY_ENABLE_GC
 
@@ -168,7 +163,10 @@ soft_reset:
     #if MICROPY_PY_NETWORK
     mod_network_deinit();
     #if MICROPY_PY_NETWORK_IFX_WHD
-    // whd_init(whd->itf);
+    // TODO: Is this deiniting the interfaces, or the whd_driver?
+    // As both use the same driver, then only one call would be required.
+    whd_deinit(itf_ap);
+    whd_deinit(itf_sta);
     #endif
     #endif
 
