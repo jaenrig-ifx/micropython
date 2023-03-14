@@ -50,16 +50,10 @@ $(info CONFIG                           : $(CONFIG))
 INC += -I.
 INC += -I$(TOP)
 INC += -I$(BUILD)
-#INC += -I./lwip_inc
-#INC += -Iboards/mtb_shared/wifi-core-freertos-lwip-mbedtls/release-v1.0.0/configs
-#INC += -I$(TOP)/extmod/lwip-include
-
-
 
 ### for testing purposes only
 # USERMOD_DIR = $(TOP)/examples/usercmodule/cexample
 # include $(TOP)/examples/usercmodule/cexample/micropython.mk
-
 
 LD               = arm-none-eabi-gcc
 CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingle-precision-constant -Wdouble-promotion -Wfloat-conversion -UMICROPY_USE_INTERNAL_PRINTF
@@ -92,10 +86,7 @@ $(info Compiling in $(CONFIG) mode !)
 CXXFLAGS += $(filter-out -std=c99,$(CFLAGS))
 CXXFLAGS += $(CXXFLAGS_MOD)
 
-# Flags from extmod
-# CFLAGS  += $(CFLAGS_THIRDPARTY)
 LDFLAGS += $(LDFLAGS_MOD)
-# -Werror
 
 LIBS += 
 
@@ -153,27 +144,6 @@ SRC_C = \
 	mpnetworkport.c \
 	$(BUILD)/frozen_content.c
 
-	# $(DRIVERS_SRC_C) \
-	# $(MOD_SRC_C) \
-	# $(MPY_SRC_C) \
-    # \
-
-	# \
-	# cy_network_buffer.c \
-	# lwip_inc/arch/sys_arch.c \
-    # pendsv.c \
-    # 
-
-
-# SRC_QSTR += $(MPY_SRC_C) $(SRC_USERMOD) $(SRC_EXTMOD_C)
-# SRC_QSTR += modules/machine/modmachine.c \
-#             modules/machine/machine_i2c.c \
-#             modules/machine/machine_pin.c \
-# 			modules/machine/machine_rtc.c \
-# 			modules/psoc6/modpsoc6.c \
-#             \
-#             modules/os/moduos.c
-
 SRC_QSTR += $(SHARED_SRC_C) $(MOD_SRC_C)
 
 OBJ += $(PY_O) 
@@ -184,10 +154,6 @@ OBJ += $(addprefix $(BUILD)/, $(SRC_C:.c=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_ASM:.s=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_CXX:.cpp=.o))
 
-# OBJ = $(PY_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o)) $(addprefix $(BUILD)/, $(SRC_ASM:.s=.o))
-# OBJ += $(addprefix $(BUILD)/, $(SRC_CXX:.cpp=.o))
-
-
 # switch for debug mode, also added to mpconfigport.h
 # TODO: keep the more suitable one, delete the other
 MP_LOGGER_DEBUG ?= 0
@@ -196,7 +162,6 @@ ifeq ($(MP_LOGGER_DEBUG), 1)
    CFLAGS += -DMICROPY_LOGGER_DEBUG=1
 endif
 
- # boards/mtb_shared/wifi-host-driver/release-v2.5.0/build/whd/libwhd.a
 
 $(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ) $(MPY_MTB_LIBRARIES) $(LIBS)
 	$(info )
@@ -218,10 +183,5 @@ include $(BOARD_DIR)/makefile_mtb.mk
 include $(TOP)/py/mkrules.mk
 
 all: $(MPY_MAIN_BUILD_DIR)/firmware.hex $(MPY_PATH_TO_MAIN_MAKEFILE)
-
-# clean:
-# 	-rm -rf $(BUILD)
-# 	mkdir -p $(BUILD)
-
 
 rebuild: clean mpy_mtb_clean all
