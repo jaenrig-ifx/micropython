@@ -29,7 +29,6 @@
 #include <stdint.h>
 
 #include "shared/runtime/interrupt_char.h"
-// #include "boards/mtb_shared/wifi-core-freertos-lwip-mbedtls/release-v1.0.0/configs/lwipopts.h"
 
 // Board and hardware specific configuration
 #define MICROPY_HW_MCU_NAME                     "PSoC62"
@@ -38,7 +37,6 @@
 #define MICROPY_HW_ENABLE_USBDEV                (0)
 
 #define MICROPY_CONFIG_ROM_LEVEL                (MICROPY_CONFIG_ROM_LEVEL_FULL_FEATURES)
-
 
 // Memory allocation policies
 #define MICROPY_GC_STACK_ENTRY_TYPE             uint16_t

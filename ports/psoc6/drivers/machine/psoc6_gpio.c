@@ -2,9 +2,11 @@
 
 // std includes
 #include <stdbool.h>
-#include "py/runtime.h"
 
+
+// port-specific includes
 #include "psoc6_gpio.h"
+
 
 gpio_init_rslt gpio_init(cyhal_gpio_t pin, cyhal_gpio_direction_t direction, cyhal_gpio_drive_mode_t drive_mode, bool init_val) {
     // Free up the cy gpio obj

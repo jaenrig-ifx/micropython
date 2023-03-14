@@ -48,6 +48,8 @@ static uint8_t pin_map[MICROPY_HW_PIN_EXT_COUNT] = {
     27, // LEDR
     25, // LEDG
     26, // LEDB
+    34, // A4
+    39, // A5
     36, // A6
     35, // A7
 };
@@ -68,6 +70,7 @@ bool machine_pin_ext_get(machine_pin_obj_t *self) {
     if (self->id >= 0 && self->id < MICROPY_HW_PIN_EXT_COUNT) {
         uint8_t buf[] = {pin_map[self->id]};
         nina_ioctl(NINA_GPIO_READ, sizeof(buf), buf, 0);
+        value = buf[0];
     }
     return value;
 }

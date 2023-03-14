@@ -58,6 +58,12 @@ INC += -I$(BUILD)
 #INC += -I$(TOP)/extmod/lwip-include
 
 
+
+### for testing purposes only
+# USERMOD_DIR = $(TOP)/examples/usercmodule/cexample
+# include $(TOP)/examples/usercmodule/cexample/micropython.mk
+
+
 LD               = arm-none-eabi-gcc
 CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingle-precision-constant -Wdouble-promotion -Wfloat-conversion -UMICROPY_USE_INTERNAL_PRINTF
 
@@ -72,8 +78,6 @@ LDFLAGS += -Wl,--cref -Wl,--gc-sections
 # Tune for Debugging or Optimization
 ifeq ($(CONFIG), Debug)
   CFLAGS         += -O0 -ggdb
-  # -fanalyzer
-  # -fsanitize=leak -fsanitize=bounds -fsanitize=object-size  -fstack-protector -fsanitize=address
   MPY_MTB_CONFIG  = Debug
   MICROPY_ROM_TEXT_COMPRESSION ?= 0
 else
@@ -163,12 +167,7 @@ SRC_QSTR += modules/machine/modmachine.c \
             modules/machine/machine_pin.c \
 			modules/machine/machine_rtc.c \
             \
-            modules/os/moduos.c \
-			\
-            modules/psoc6/modpsoc6.c modules/psoc6/psoc6_fatfs.c modules/psoc6/psoc6_flash.c modules/psoc6/psoc6_qspi_flash.c \
-			\
-			modules/time/modutime.c
-
+            modules/os/moduos.c
 
 OBJ = $(PY_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o)) $(addprefix $(BUILD)/, $(SRC_ASM:.s=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_CXX:.cpp=.o))

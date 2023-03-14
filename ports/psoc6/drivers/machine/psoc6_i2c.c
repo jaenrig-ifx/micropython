@@ -3,7 +3,6 @@
 
 
 // mpy includes
-#include "py/runtime.h"
 
 
 // MTB includes

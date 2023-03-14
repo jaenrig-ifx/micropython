@@ -14,18 +14,21 @@ working with this port it may be useful to get an overview of the microcontrolle
 
 .. toctree::
    :maxdepth: 1
+   :includehidden:
 
    general.rst
    intro.rst
    installation.rst
    mpy-usage.rst
+   feature_list.rst
 
 .. warning::
 
     The PSoC6™ port is still in an early stage of development. It is expected any MicroPython built-in
-    library to be supported, but not all libraries, modules and features have been yet evaluated.
+    library to be supported, but not all libraries, modules and features have been implemented yet.
     For those modules relying on platform and hardware dependencies, only the listed and documented in this
-    quick reference are certainyly supported. 
+    quick reference are certainyly supported.
+    Check :ref:`here <psoc6_feature_list>` for a complete list of currently enabled or implemented modules as well as not yet implemented functionality.
     
     Please, consider opening an `issue <https://github.com/jaenrig-ifx/micropython/issues>`_ or
     `discussion <https://github.com/jaenrig-ifx/micropython/discussionsh>`_ on GitHub for any clarification

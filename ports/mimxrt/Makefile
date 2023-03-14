@@ -2,15 +2,27 @@
 # Parameter Configuration
 # =============================================================================
 
+# Select the board to build for:
+ifdef BOARD_DIR
+# Custom board path - remove trailing slash and get the final component of
+# the path as the board name.
+BOARD ?= $(notdir $(BOARD_DIR:/=))
+else
+# If not given on the command line, then default to TEENSY40.
 BOARD ?= TEENSY40
 BOARD_DIR ?= boards/$(BOARD)
+endif
+
+ifeq ($(wildcard $(BOARD_DIR)/.),)
+    $(error Invalid BOARD specified: $(BOARD_DIR))
+endif
+
 BUILD ?= build-$(BOARD)
 PORT ?= /dev/ttyACM0
 CROSS_COMPILE ?= arm-none-eabi-
 GIT_SUBMODULES += lib/tinyusb lib/nxp_driver
 
 # MicroPython feature configurations
-FROZEN_MANIFEST ?= boards/manifest.py
 MICROPY_VFS_LFS2 ?= 1
 MICROPY_VFS_FAT ?= 1
 
@@ -26,10 +38,13 @@ MAKE_FLEXRAM_LD = boards/make-flexram-config.py
 include ../../py/mkenv.mk
 
 # Include micropython configuration board makefile
-ifeq ($(wildcard $(BOARD_DIR)/.),)
-    $(error Invalid BOARD specified: $(BOARD_DIR))
-endif
 include $(BOARD_DIR)/mpconfigboard.mk
+
+# MicroPython feature configurations
+MICROPY_ROM_TEXT_COMPRESSION ?= 1
+
+# File containing description of content to be frozen into firmware.
+FROZEN_MANIFEST ?= boards/manifest.py
 
 # Include py core make definitions
 include $(TOP)/py/py.mk
@@ -278,6 +293,8 @@ SRC_QSTR += $(SRC_C) $(SHARED_SRC_C) $(GEN_PINS_SRC)
 CFLAGS += -g  # always include debug info in the ELF
 ifeq ($(DEBUG),1)
 CFLAGS += -Og
+# Disable text compression in debug builds
+MICROPY_ROM_TEXT_COMPRESSION = 0
 else
 CFLAGS += -Os -DNDEBUG
 endif
