@@ -116,12 +116,12 @@
 
 #define MP_STATE_PORT                           MP_STATE_VM
 
-#define MICROPY_PY_UCRYPTOLIB                   (1)
+#define MICROPY_PY_UCRYPTOLIB                   (0) /* Disabled while mtb/mbedtls dependency is resolved */
 #define MICROPY_PY_UCRYPTOLIB_CTR               (1)
 #define MICROPY_PY_UCRYPTOLIB_CONSTS            (1)
 
-#define MICROPY_PY_UHASHLIB_MD5                 (1)
-#define MICROPY_PY_UHASHLIB_SHA1                (1)
+#define MICROPY_PY_UHASHLIB_MD5                 (0) /* Disabled while mtb/mbedtls dependency is resolved */
+#define MICROPY_PY_UHASHLIB_SHA1                (0) /* Disabled while mtb/mbedtls dependency is resolved */
 
 // Miscellaneous settings
 #define MICROPY_MAKE_POINTER_CALLABLE(p)        ((void *)((mp_uint_t)(p) | 1))
