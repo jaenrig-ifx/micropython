@@ -1,4 +1,22 @@
+
 // std includes
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stdio.h>
+
+
+// MTB includes
+#include "cybsp.h"
+#include "cybsp_wifi.h"
+#include "cy_retarget_io.h"
+#include "cyhal.h"
+#include "cy_wcm.h"
+
+/* FreeRTOS header file */
+#include <FreeRTOS.h>
+#include <task.h>
+#include <queue.h>
+
 
 
 // micropython includes
@@ -16,23 +34,36 @@
 #endif
 
 
-#if MICROPY_PY_NETWORK_CYW43
-#include "lib/cyw43-driver/src/cyw43.h"
+// port-specific includes
+#include "mplogger.h"
+
+/* Task header files */
+#include "scan_task.h"
+
+
+/* Include serial flash library and QSPI memory configurations only for the
+ * kits that require the Wi-Fi firmware to be loaded in external QSPI NOR flash.
+ */
+#if defined(CY_DEVICE_PSOC6A512K)
+#include "cy_serial_flash_qspi.h"
+#include "cycfg_qspi_memslot.h"
 #endif
 
 
-// /* Wi-Fi connection manager header files. */
-// #include "cy_wcm.h"
-// #include "cy_wcm_error.h"
+// /*******************************************************************************
+//  * Macros
+//  ******************************************************************************/
+#define GPIO_INTERRUPT_PRIORITY             (7)
 
 
-// MTB includes
-#include "cybsp.h"
-#include "cy_retarget_io.h"
-
-
-// port-specific includes
-#include "mplogger.h"
+// /*******************************************************************************
+//  * Global Variables
+//  ******************************************************************************/
+cyhal_gpio_callback_data_t cb_data =
+{
+    .callback = gpio_interrupt_handler,
+    .callback_arg = NULL
+};
 
 
 #if MICROPY_ENABLE_GC
@@ -44,30 +75,27 @@ __attribute__((section(".bss"))) static char gc_heap[MICROPY_GC_HEAP_SIZE];
 #endif
 
 
-extern void machine_init(void);
-extern void machine_deinit(void);
-
 extern void rtc_init(void);
 extern void time_init(void);
 extern void os_init(void);
 
 
-extern void mod_network_lwip_init(void);
+// extern void mod_network_lwip_init(void);
+bool is_retarget_io_initialized = false;
+bool is_led_initialized = false;
 
 
 int main(int argc, char **argv) {
-    #if MICROPY_PY_THREAD
-    mp_thread_init();
-    #endif
+    // #if MICROPY_PY_THREAD
+    // mp_thread_init();
+    // #endif
 
 
     #if MICROPY_ENABLE_GC
 
     mp_stack_set_top(&__StackTop);
-    mp_stack_set_limit((mp_uint_t)&__StackTop - (mp_uint_t)&__StackLimit);
-    // mp_stack_set_limit((mp_uint_t)&__StackLimit);
-    // TODO: Or set specific value ?
-    // mp_stack_set_limit((mp_uint_t)&__StackTop - 256 - MICROPY_GC_STACK_SIZE);
+    // mp_stack_set_limit((mp_uint_t)&__StackTop - (mp_uint_t)&__StackLimit);
+    mp_stack_set_limit((mp_uint_t)&__StackLimit);
     gc_init(&gc_heap[0], &gc_heap[MP_ARRAY_SIZE(gc_heap)]);
 
     #endif
@@ -93,17 +121,22 @@ int main(int argc, char **argv) {
 
     // Board init failed. Stop program execution
     if (result != CY_RSLT_SUCCESS) {
-        mp_raise_ValueError(MP_ERROR_TEXT("cybsp_init failed !\n"));
+        printf("cybsp_init failed !\n");
+        // mp_raise_ValueError(MP_ERROR_TEXT("cybsp_init failed !\n"));
     }
 
 
     // Initialize retarget-io to use the debug UART port
     result = cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, CY_RETARGET_IO_BAUDRATE);
+    error_handler(result, NULL);
 
     // retarget-io init failed. Stop program execution
     if (result != CY_RSLT_SUCCESS) {
-        mp_raise_ValueError(MP_ERROR_TEXT("cy_retarget_io_init failed !\n"));
+        printf("cy_retarget_io_init failed !\n");
+        // mp_raise_ValueError(MP_ERROR_TEXT("cy_retarget_io_init failed !\n"));
     }
+
+    is_retarget_io_initialized = true;
 
     // Initialize modules. Or to be redone after a reset and therefore to be placed next to machine_init below ?
     os_init();
@@ -121,115 +154,49 @@ int main(int argc, char **argv) {
     #endif
     #endif
 
-    #include <stdbool.h>
-    bool network = false;
-    #if MICROPY_PY_NETWORK_CYW43
-    {
-        cyw43_init(&cyw43_state);
-        cyw43_irq_init();
-        cyw43_post_poll_hook(); // enable the irq
-        uint8_t buf[8];
-        memcpy(&buf[0], "PSoC", 4);
 
-        // MAC isn't loaded from OTP yet, so use unique id to generate the default AP ssid.
-        // const char hexchr[16] = "0123456789ABCDEF";
-        // pico_unique_board_id_t pid;
-        // pico_get_unique_board_id(&pid);
-        // buf[4] = hexchr[pid.id[7] >> 4];
-        // buf[5] = hexchr[pid.id[6] & 0xf];
-        // buf[6] = hexchr[pid.id[5] >> 4];
-        // buf[7] = hexchr[pid.id[4] & 0xf];
-        cyw43_wifi_ap_set_ssid(&cyw43_state, 8, buf);
-        cyw43_wifi_ap_set_auth(&cyw43_state, CYW43_AUTH_WPA2_AES_PSK);
-        cyw43_wifi_ap_set_password(&cyw43_state, 8, (const uint8_t *)"psoc6--");
+    result = cyhal_gpio_init(CYBSP_USER_LED, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF);
+    error_handler(result, NULL);
+    is_led_initialized = true;
 
-        printf("Network init done\n");
-        network = true;
-    }
-    #endif
+    result = cyhal_gpio_init(CYBSP_USER_BTN, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_PULLUP, CYBSP_BTN_OFF);
+    error_handler(result, NULL);
 
+    /* Configure GPIO interrupt. */
+    cyhal_gpio_register_callback(CYBSP_USER_BTN, &cb_data);
+    cyhal_gpio_enable_event(CYBSP_USER_BTN, CYHAL_GPIO_IRQ_FALL, GPIO_INTERRUPT_PRIORITY, true);
 
-//     uint8_t           security_key[] = {0, 1, 2, 3};
-//     // char              ssidString[] = "AP SSID";
-//     whd_ssid_t        ssid; // = { .length = strlen(ssidString), .value = 0 };
-
-
-
-soft_reset:
-
-    mp_init();
-
-    // ANSI ESC sequence for clear screen. Refer to  https://stackoverflow.com/questions/517970/how-to-clear-the-interpreter-console
-    // mp_printf(&mp_plat_print, "\033[H\033[2J");
-
-    mp_printf(&mp_plat_print, MICROPY_BANNER_NAME_AND_VERSION);
-    mp_printf(&mp_plat_print, "; " MICROPY_BANNER_MACHINE);
-    mp_printf(&mp_plat_print, "\nUse Ctrl-D to exit, Ctrl-E for paste mode\n");
-
-    mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash));
-    mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash_slash_lib));
-    printf("network init %d\n", network);
-    printf("CYW43_PIN_WL_SDIO_1 : %d\n", CYW43_PIN_WL_SDIO_1);
-    printf("CYW43_PIN_WL_REG_ON : %d\n", CYW43_PIN_WL_REG_ON);
-
-    // indicate in REPL console when debug mode is selected
-    mplogger_print("\n...LOGGER DEBUG MODE...\n\n");
-
-    readline_init0();
-    machine_init();
-
-    mod_network_lwip_init();
-
-    #if MICROPY_VFS_FAT
-    pyexec_frozen_module("vfs_fat.py");
-    #elif MICROPY_VFS_LFS2
-    pyexec_frozen_module("vfs_lfs2.py");
-    #endif
-
-    // Execute user scripts.
-    int ret = pyexec_file_if_exists("flash/boot.py");
-
-    if (ret & PYEXEC_FORCED_EXIT) {
-        goto soft_reset;
-    }
-
-    if (pyexec_mode_kind == PYEXEC_MODE_FRIENDLY_REPL) {
-        ret = pyexec_file_if_exists("flash/main.py");
-
-        if (ret & PYEXEC_FORCED_EXIT) {
-            goto soft_reset;
-        }
-    }
-
+    /* Enable global interrupts. */
     __enable_irq();
 
-    for (;;) {
-        if (pyexec_mode_kind == PYEXEC_MODE_RAW_REPL) {
-            if (pyexec_raw_repl() != 0) {
-                break;
-            }
-        } else {
-            if (pyexec_friendly_repl() != 0) {
-                break;
-            }
-        }
-    }
 
-    mp_printf(&mp_plat_print, "MPY: soft reboot\n");
+    /* Init QSPI and enable XIP to get the Wi-Fi firmware from the QSPI NOR flash */
+    #if defined(CY_DEVICE_PSOC6A512K)
+    const uint32_t bus_frequency = 50000000lu;
+    cy_serial_flash_qspi_init(smifMemConfigs[0], CYBSP_QSPI_D0, CYBSP_QSPI_D1,
+        CYBSP_QSPI_D2, CYBSP_QSPI_D3, NC, NC, NC, NC,
+        CYBSP_QSPI_SCK, CYBSP_QSPI_SS, bus_frequency);
 
-    // Deinitialize modules
-    machine_deinit();
+    cy_serial_flash_qspi_enable_xip(true);
+    #endif
 
-    gc_sweep_all();
-    mp_deinit();
+    /* Create the tasks. */
+    xTaskCreate(scan_task, "Scan task", SCAN_TASK_STACK_SIZE, NULL, SCAN_TASK_PRIORITY, &scan_task_handle);
 
-    goto soft_reset;
+    // /* Start the FreeRTOS scheduler. */
+    vTaskStartScheduler();
 
+
+    printf("Done !!\n");
+    fflush(stdout);
+
+    /* Should never get here. */
+    CY_ASSERT(0);
     return 0;
 }
 
 
-// TODO: to be implemented
+// // TODO: to be implemented
 void nlr_jump_fail(void *val) {
     mplogger_print("nlr_jump_fail\n");
 
@@ -239,27 +206,4 @@ void nlr_jump_fail(void *val) {
     for (;;) {
         __BKPT(0);
     }
-}
-
-
-
-
-
-#define POLY (0xD5)
-
-uint8_t rosc_random_u8(size_t cycles) {
-    static uint8_t r;
-    // for (size_t i = 0; i < cycles; ++i) {
-    //     r = ((r << 1) | rosc_hw->randombit) ^ (r & 0x80 ? POLY : 0);
-    //     mp_hal_delay_us_fast(1);
-    // }
-    return r;
-}
-
-uint32_t rosc_random_u32(void) {
-    uint32_t value = 0;
-    for (size_t i = 0; i < 4; ++i) {
-        value = value << 8 | rosc_random_u8(32);
-    }
-    return value;
 }

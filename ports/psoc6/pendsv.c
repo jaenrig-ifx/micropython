@@ -83,7 +83,9 @@ void PendSV_Handler(void) {
     #endif
 
     for (size_t i = 0; i < PENDSV_DISPATCH_NUM_SLOTS; ++i) {
+        printf("   PendSV_Handler checking\n");
         if (pendsv_dispatch_table[i] != NULL) {
+            printf("   PendSV_Handler executing\n");
             pendsv_dispatch_t f = pendsv_dispatch_table[i];
             pendsv_dispatch_table[i] = NULL;
             f();

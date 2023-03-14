@@ -45,7 +45,7 @@
 extern cyhal_rtc_t psoc6_rtc;
 
 
-static int32_t lwip_alarm_id = -1;
+// static int32_t lwip_alarm_id = -1;
 
 #if MICROPY_PY_NETWORK_CYW43
 #include "lib/cyw43-driver/src/cyw43.h"
@@ -118,30 +118,30 @@ void lwip_lock_release(void) {
 
 
 
-STATIC void alarm_callback(void *arg, cyhal_rtc_event_t event) {
-    printf("alarm_callback\n");
+// STATIC void alarm_callback(void *arg, cyhal_rtc_event_t event) {
+//     printf("alarm_callback\n");
 
-    pendsv_schedule_dispatch(PENDSV_DISPATCH_LWIP, lwip_poll);
-}
+//     pendsv_schedule_dispatch(PENDSV_DISPATCH_LWIP, lwip_poll);
+// }
 
 
 void mod_network_lwip_init(void) {
     printf("mod_network_lwip_init\n");
 
 
-// MTB
-    if (lwip_alarm_id != -1) {
-        // cyhal_rtc_enable_event(&psoc6_rtc, CYHAL_RTC_ALARM, RTC_INTERRUPT_PRIORITY, false);
-        // cy_rsllt rslt = cyhal_rtc_set_alarm_by_seconds(&psoc6_rtc, 1);
-        // printf("setting alarm : %ld\n", rslt);
-    } else {
-        cyhal_rtc_register_callback(&psoc6_rtc, alarm_callback, NULL);
-        lwip_alarm_id = 0;
-        cyhal_rtc_enable_event(&psoc6_rtc, CYHAL_RTC_ALARM, RTC_INTERRUPT_PRIORITY, true);
-    }
+// // MTB
+//     if (lwip_alarm_id != -1) {
+//         // cyhal_rtc_enable_event(&psoc6_rtc, CYHAL_RTC_ALARM, RTC_INTERRUPT_PRIORITY, false);
+//         // cy_rsllt rslt = cyhal_rtc_set_alarm_by_seconds(&psoc6_rtc, 1);
+//         // printf("setting alarm : %ld\n", rslt);
+//     } else {
+//         cyhal_rtc_register_callback(&psoc6_rtc, alarm_callback, NULL);
+//         lwip_alarm_id = 0;
+//         cyhal_rtc_enable_event(&psoc6_rtc, CYHAL_RTC_ALARM, RTC_INTERRUPT_PRIORITY, true);
+//     }
 
-    cy_rslt_t rslt = cyhal_rtc_set_alarm_by_seconds(&psoc6_rtc, 1);
-    printf("setting alarm : %ld\n", rslt);
+//     cy_rslt_t rslt = cyhal_rtc_set_alarm_by_seconds(&psoc6_rtc, 1);
+//     printf("setting alarm : %ld\n", rslt);
 
 
 

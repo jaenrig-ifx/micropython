@@ -87,7 +87,8 @@ VERBOSE=
 # ... then code in directories named COMPONENT_foo and COMPONENT_bar will be
 # added to the build
 #
-COMPONENTS=
+COMPONENTS=FREERTOS LWIP MBEDTLS
+#LWIP MBEDTLS
 
 # Like COMPONENTS, but disable optional code that was enabled by default.
 DISABLE_COMPONENTS=
@@ -98,12 +99,24 @@ DISABLE_COMPONENTS=
 # by default, or otherwise not found by the build system.
 SOURCES=
 
+# Custom configuration of mbedtls library.
+MBEDTLSFLAGS = MBEDTLS_USER_CONFIG_FILE='"mbedtls_user_config.h"'
+DEFINES=$(MBEDTLSFLAGS) CYBSP_WIFI_CAPABLE CY_RETARGET_IO_CONVERT_LF_TO_CRLF CY_RTOS_AWARE
+
+# CY8CPROTO-062-4343W board shares the same GPIO for the user button (USER BTN1)
+# and the CYW4343W host wake up pin. Since this example uses the GPIO for
+# interfacing with the user button, the SDIO interrupt to wake up the host is
+# disabled by setting CY_WIFI_HOST_WAKE_SW_FORCE to '0'.
+DEFINES+=CY_WIFI_HOST_WAKE_SW_FORCE=0
+
 # Like SOURCES, but for include directories. Value should be paths to
 # directories (without a leading -I).
-INCLUDES=../mtb_shared/wifi-host-driver/release-v2.5.0/External/rtos
+INCLUDES=
+#../mtb_shared/wifi-host-driver/release-v2.5.0/External/rtos ../mtb_shared/lwip/STABLE-2_1_2_RELEASE/src/include ../../lwip_inc
 
 # Add additional defines to the build process (without a leading -D).
-DEFINES=CY_RETARGET_IO_CONVERT_LF_TO_CRLF=1
+#DEFINES=CY_RETARGET_IO_CONVERT_LF_TO_CRLF=1 CY_WIFI_HOST_WAKE_SW_FORCE=0
+## WPRINT_ENABLE_WHD_INFO WPRINT_ENABLE_WHD_DEBUG WPRINT_ENABLE_WHD_DATA_LOG WHD_IOCTL_LOG_ENABLE  LWIP_DEBUG
 
 # Select softfp or hardfp floating point. Default is softfp.
 VFP_SELECT=
@@ -112,7 +125,7 @@ VFP_SELECT=
 #
 # NOTE: Includes and defines should use the INCLUDES and DEFINES variable
 # above.
-CFLAGS=
+CFLAGS=-Wall -Werror -Wno-error=unused-function 
 
 # Additional / custom C++ compiler flags.
 #
