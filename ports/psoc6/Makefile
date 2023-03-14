@@ -204,9 +204,9 @@ include $(TOP)/py/mkrules.mk
 
 all: $(MPY_MAIN_BUILD_DIR)/firmware.hex $(MPY_PATH_TO_MAIN_MAKEFILE)
 
-clean:
-	-rm -rf $(BUILD)
-	mkdir -p $(BUILD)
+# clean:
+# 	-rm -rf $(BUILD)
+# 	mkdir -p $(BUILD)
 
 
 rebuild: clean mpy_mtb_clean all
