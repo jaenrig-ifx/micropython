@@ -50,6 +50,9 @@ $(info CONFIG                           : $(CONFIG))
 INC += -I.
 INC += -I$(TOP)
 INC += -I$(BUILD)
+ifeq ($(MICROPY_PY_LWIP),1)
+INC += -Ilwip_inc
+endif
 
 ### for testing purposes only
 # USERMOD_DIR = $(TOP)/examples/usercmodule/cexample
@@ -102,15 +105,8 @@ SHARED_SRC_C += $(addprefix shared/,\
 	runtime/pyexec.c \
 	runtime/stdout_helpers.c \
 	runtime/sys_stdio_mphal.c \
-	\
 	timeutils/timeutils.c \
 	)
-
-MPY_SRC_C += $(SHARED_SRC_C) \
-			 $(SRC_THIRDPARTY_C)
- 	 
-
-SRC_ASM += shared/runtime/gchelper_thumb1.s
 
 DRIVERS_SRC_C += $(addprefix drivers/,\
 	machine/psoc6_gpio.c \
@@ -135,14 +131,23 @@ MOD_SRC_C += $(addprefix modules/,\
 	time/modutime.c \
 	)
 
-SRC_C = \
- 	main.c \
-	scan_task.c \
-	heap_usage.c \
-	help.c \
-	mphalport.c \
-	mpnetworkport.c \
-	$(BUILD)/frozen_content.c
+ifeq ($(MICROPY_PY_NETWORK_IFX_WHD),1)
+CFLAGS += -DMICROPY_PY_NETWORK_IFX_WHD=1 -Wno-stringop-truncation
+	MOD_SRC_C += $(addprefix modules/network/,\
+		network_ifx_whd.c \
+		)
+	INC += -Imodules/network
+endif
+
+SRC_C = help.c \
+		main.c \
+		heap_usage.c \
+		scan_task.c \
+		mphalport.c \
+		mpnetworkport.c \
+		$(BUILD)/frozen_content.c 
+	
+SRC_ASM += shared/runtime/gchelper_thumb1.s
 
 SRC_QSTR += $(SHARED_SRC_C) $(MOD_SRC_C)
 

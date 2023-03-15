@@ -18,7 +18,6 @@
 #include <queue.h>
 
 
-
 // micropython includes
 #include "genhdr/mpversion.h"
 #include "py/gc.h"
@@ -27,12 +26,12 @@
 #include "py/stackctrl.h"
 #include "shared/readline/readline.h"
 #include "shared/runtime/pyexec.h"
+#include "extmod/modnetwork.h"
 
 #if MICROPY_PY_LWIP
 #include "lwip/init.h"
 #include "lwip/apps/mdns.h"
 #endif
-
 
 // port-specific includes
 #include "mplogger.h"
