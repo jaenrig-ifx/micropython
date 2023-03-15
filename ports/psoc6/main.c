@@ -120,8 +120,7 @@ int main(int argc, char **argv) {
 
     // Board init failed. Stop program execution
     if (result != CY_RSLT_SUCCESS) {
-        printf("cybsp_init failed !\n");
-        // mp_raise_ValueError(MP_ERROR_TEXT("cybsp_init failed !\n"));
+        mp_raise_ValueError(MP_ERROR_TEXT("cybsp_init failed !\n"));
     }
 
 
@@ -131,8 +130,7 @@ int main(int argc, char **argv) {
 
     // retarget-io init failed. Stop program execution
     if (result != CY_RSLT_SUCCESS) {
-        printf("cy_retarget_io_init failed !\n");
-        // mp_raise_ValueError(MP_ERROR_TEXT("cy_retarget_io_init failed !\n"));
+        mp_raise_ValueError(MP_ERROR_TEXT("cy_retarget_io_init failed !\n"));
     }
 
     is_retarget_io_initialized = true;
@@ -165,8 +163,8 @@ int main(int argc, char **argv) {
     cyhal_gpio_register_callback(CYBSP_USER_BTN, &cb_data);
     cyhal_gpio_enable_event(CYBSP_USER_BTN, CYHAL_GPIO_IRQ_FALL, GPIO_INTERRUPT_PRIORITY, true);
 
-    /* Enable global interrupts. */
-    __enable_irq();
+    // /* Enable global interrupts. */
+    // __enable_irq();
 
 
     /* Init QSPI and enable XIP to get the Wi-Fi firmware from the QSPI NOR flash */
