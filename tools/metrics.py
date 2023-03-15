@@ -71,7 +71,6 @@ port_data = {
     "r": PortData("nrf", "nrf", "build-pca10040/firmware.elf"),
     "p": PortData("rp2", "rp2", "build-PICO/firmware.elf"),
     "d": PortData("samd", "samd", "build-ADAFRUIT_ITSYBITSY_M4_EXPRESS/firmware.elf"),
-    "i": PortData("psoc6", "psoc6", "build/firmware.elf"),
 }
 
 
