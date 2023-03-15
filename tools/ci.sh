@@ -50,12 +50,12 @@ function ci_code_size_setup {
 
 function ci_code_size_build {
     # check the following ports for the change in their code size
-    PORTS_TO_CHECK=bmusp
+    PORTS_TO_CHECK=bmuspi
     SUBMODULES="lib/berkeley-db-1.xx lib/mbedtls lib/micropython-lib lib/pico-sdk lib/stm32lib lib/tinyusb"
 
     # starts off at either the ref/pull/N/merge FETCH_HEAD, or the current branch HEAD
     git checkout -b pull_request # save the current location
-    git remote add upstream https://github.com/micropython/micropython.git
+    git remote add upstream https://github.com/jaenrig-ifx/micropython.git
     git fetch --depth=100 upstream master
     # build reference, save to size0
     # ignore any errors with this build, in case master is failing
