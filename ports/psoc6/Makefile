@@ -14,7 +14,7 @@ MPY_DIR_OF_MAIN_MAKEFILE  := $(dir $(MPY_PATH_TO_MAIN_MAKEFILE))
 
 # qstr definitions (must come before including py.mk)
 QSTR_DEFS = qstrdefsport.h
-
+QSTR_GLOBAL_DEPENDENCIES += $(BOARD_DIR)/mpconfigboard.h
 
 MICROPY_FROZEN_MANIFEST      ?= boards/manifest.py
 MICROPY_USER_FROZEN_MANIFEST ?= $(MICROPY_FROZEN_MANIFEST)
@@ -33,14 +33,10 @@ CONFIG        ?= Debug
 
 # include py core make definitions
 include ../../py/mkenv.mk
-
 include mpconfigport.mk
 include $(BOARD_DIR)/mpconfigboard.mk
-
 include $(TOP)/py/py.mk
 include $(TOP)/extmod/extmod.mk
-
-
 
 # get path to this file
 MPY_MAIN_BUILD_DIR := $(dir $(MPY_DIR_OF_MAIN_MAKEFILE))/$(BUILD)
@@ -54,12 +50,13 @@ $(info CONFIG                           : $(CONFIG))
 INC += -I.
 INC += -I$(TOP)
 INC += -I$(BUILD)
-
+ifeq ($(MICROPY_PY_LWIP),1)
+INC += -Ilwip_inc
+endif
 
 ### for testing purposes only
 # USERMOD_DIR = $(TOP)/examples/usercmodule/cexample
 # include $(TOP)/examples/usercmodule/cexample/micropython.mk
-
 
 LD               = arm-none-eabi-gcc
 CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingle-precision-constant -Wdouble-promotion -Wfloat-conversion -UMICROPY_USE_INTERNAL_PRINTF
@@ -67,7 +64,8 @@ CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingl
 
 # std=c11 instead of std=c99 : provides "static_assert" (not available in c99) 
 # -D_XOPEN_SOURCE=700 : makes sure the setenv/unsetenv headers are included
-CFLAGS  += $(INC) -Wall -Werror -std=c11 $(CFLAGS_CORTEX_M4) $(COPT) -D_XOPEN_SOURCE=700 -Wno-error=double-promotion -Wno-error=overflow -Wno-error=analyzer-null-dereference -Wno-error=maybe-uninitialized
+CFLAGS  += $(INC) -Wall -Werror -std=c11 $(CFLAGS_CORTEX_M4) $(COPT) -D_XOPEN_SOURCE=700
+CFLAGS  += -Wno-error=double-promotion -Wno-error=overflow -Wno-error=analyzer-null-dereference -Wno-error=unused-local-typedefs -Wno-error=unused-function -Wno-error=maybe-uninitialized
 LDFLAGS += -Wl,--cref -Wl,--gc-sections
 
 
@@ -91,89 +89,96 @@ $(info Compiling in $(CONFIG) mode !)
 CXXFLAGS += $(filter-out -std=c99,$(CFLAGS))
 CXXFLAGS += $(CXXFLAGS_MOD)
 
-
-# Flags for user C modules
-CFLAGS  += $(CFLAGS_MOD)
-
-# Flags from extmod
-CFLAGS  += $(CFLAGS_THIRDPARTY) $(CFLAGS_EXTMOD)
-
-
 LDFLAGS += $(LDFLAGS_MOD)
 
-LIBS +=
+LIBS += 
 
+SHARED_SRC_C += $(addprefix shared/,\
+	netutils/dhcpserver.c \
+	netutils/netutils.c \
+	netutils/trace.c \
+	\
+	readline/readline.c \
+	\
+	runtime/gchelper_native.c \
+	runtime/interrupt_char.c \
+	runtime/pyexec.c \
+	runtime/stdout_helpers.c \
+	runtime/sys_stdio_mphal.c \
+	timeutils/timeutils.c \
+	)
 
-MPY_SRC_C = shared/readline/readline.c \
-			\
-			shared/runtime/gchelper_native.c \
-			shared/runtime/interrupt_char.c \
-		 	shared/runtime/pyexec.c \
-		 	shared/runtime/stdout_helpers.c \
-			\
-		 	shared/timeutils/timeutils.c \
-		    \
-			shared/runtime/sys_stdio_mphal.c \
-			\
-			help.c \
-			\
-    		drivers/machine/psoc6_gpio.c \
-    		drivers/machine/psoc6_i2c.c \
-    		drivers/machine/psoc6_system.c  \
-			\
-			modules/gc/modgc.c \
-			\
-			modules/machine/modmachine.c \
-			modules/machine/machine_i2c.c \
-			modules/machine/machine_pin.c \
-			modules/machine/machine_rtc.c \
-			modules/machine/pins.c \
-			\
-			modules/psoc6/modpsoc6.c \
-			modules/psoc6/psoc6_fatfs.c \
-			modules/psoc6/psoc6_flash.c \
-			modules/psoc6/psoc6_qspi_flash.c \
-			\
-			modules/time/modutime.c \
-			\
-			$(SRC_THIRDPARTY_C) \
-			$(SRC_USERMOD)
-		 	 
+DRIVERS_SRC_C += $(addprefix drivers/,\
+	machine/psoc6_gpio.c \
+	machine/psoc6_i2c.c \
+	machine/psoc6_system.c  \
+	)
 
+MOD_SRC_C += $(addprefix modules/,\
+	gc/modgc.c \
+	\
+	machine/modmachine.c \
+	machine/machine_i2c.c \
+	machine/machine_pin.c \
+	machine/machine_rtc.c \
+	machine/pins.c \
+	\
+	psoc6/modpsoc6.c \
+	psoc6/psoc6_fatfs.c \
+	psoc6/psoc6_flash.c \
+	psoc6/psoc6_qspi_flash.c \
+	\
+	time/modutime.c \
+	)
+
+ifeq ($(MICROPY_PY_NETWORK_IFX_WHD),1)
+CFLAGS += -DMICROPY_PY_NETWORK_IFX_WHD=1 -Wno-stringop-truncation
+	MOD_SRC_C += $(addprefix modules/network/,\
+		network_ifx_whd.c \
+		)
+	INC += -Imodules/network
+endif
+
+SRC_C = help.c \
+		main.c \
+		heap_usage.c \
+		scan_task.c \
+		mphalport.c \
+		mpnetworkport.c \
+		$(BUILD)/frozen_content.c 
+	
 SRC_ASM += shared/runtime/gchelper_thumb1.s
 
+SRC_QSTR += $(SHARED_SRC_C) $(MOD_SRC_C)
 
-SRC_C    += main.c mphalport.c $(MPY_SRC_C) $(BUILD)/frozen_content.c $(SRC_EXTMOD_C)
-SRC_CXX  += 
-
-
-SRC_QSTR += $(MPY_SRC_C) \
-            \
-            modules/os/moduos.c
-
-OBJ += $(PY_O) $(addprefix $(BUILD)/, $(SRC_C:.c=.o)) $(addprefix $(BUILD)/, $(SRC_ASM:.s=.o))
+OBJ += $(PY_O) 
+OBJ += $(addprefix $(BUILD)/, $(SHARED_SRC_C:.c=.o)) 
+OBJ += $(addprefix $(BUILD)/, $(DRIVERS_SRC_C:.c=.o)) 
+OBJ += $(addprefix $(BUILD)/, $(MOD_SRC_C:.c=.o)) 
+OBJ += $(addprefix $(BUILD)/, $(SRC_C:.c=.o)) 
+OBJ += $(addprefix $(BUILD)/, $(SRC_ASM:.s=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_CXX:.cpp=.o))
-
 
 # switch for debug mode, also added to mpconfigport.h
 # TODO: keep the more suitable one, delete the other
 MP_LOGGER_DEBUG ?= 0
 
 ifeq ($(MP_LOGGER_DEBUG), 1)
-  CFLAGS += -DMICROPY_LOGGER_DEBUG=1
+   CFLAGS += -DMICROPY_LOGGER_DEBUG=1
 endif
+
 
 $(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ) $(MPY_MTB_LIBRARIES) $(LIBS)
 	$(info )
-	$(info Linking $@ ...)
-	$(Q)$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
+	$(info Linking $@     $^  $(LIBS) ...)
+	$(Q) $(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 	$(info Linking $@ done.)
-	$(Q)$(SIZE) $@ -A
+	$(Q) $(SIZE) $@ -A
 	$(info )
 
 
 $(MPY_MAIN_BUILD_DIR)/firmware.hex: $(MPY_MAIN_BUILD_DIR)/firmware.elf
-	$(Q)$(OBJCOPY) -O ihex $^ $@
+	$(Q) $(OBJCOPY) -O ihex $^ $@
 
 
 # include adapter makefile
@@ -181,7 +186,6 @@ include $(BOARD_DIR)/makefile_mtb.mk
 
 # include py core make definitions
 include $(TOP)/py/mkrules.mk
-
 
 all: $(MPY_MAIN_BUILD_DIR)/firmware.hex $(MPY_PATH_TO_MAIN_MAKEFILE)
 

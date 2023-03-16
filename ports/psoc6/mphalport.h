@@ -59,3 +59,13 @@ STATIC inline void mp_hal_stdout_tx_strn(const char *str, mp_uint_t len) {
 
 mp_uint_t begin_atomic_section();
 void end_atomic_section(mp_uint_t state);
+
+
+static inline void mp_hal_pin_config(mp_hal_pin_obj_t pin, uint32_t mode, uint32_t pull, uint32_t alt) {
+    printf("mp_hal_pin_config %d   mode : %ld   pull : %ld   alt : %ld\n", pin, mode, pull, alt);
+    cyhal_gpio_configure(pin, mode, pull);
+
+    // assert((mode == MP_HAL_PIN_MODE_INPUT || mode == MP_HAL_PIN_MODE_OUTPUT) && alt == 0);
+    // gpio_set_dir(pin, mode);
+    // gpio_set_pulls(pin, pull == MP_HAL_PIN_PULL_UP, pull == MP_HAL_PIN_PULL_DOWN);
+}
