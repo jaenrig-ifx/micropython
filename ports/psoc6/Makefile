@@ -141,12 +141,10 @@ endif
 
 SRC_C = help.c \
 		main.c \
-		heap_usage.c \
-		scan_task.c \
 		mphalport.c \
 		mpnetworkport.c \
 		$(BUILD)/frozen_content.c 
-	
+
 SRC_ASM += shared/runtime/gchelper_thumb1.s
 
 SRC_QSTR += $(SHARED_SRC_C) $(MOD_SRC_C)
