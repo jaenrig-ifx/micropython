@@ -150,7 +150,7 @@ int main(int argc, char **argv) {
     mdns_resp_init();
     #endif
     #endif
-
+ 
 
     result = cyhal_gpio_init(CYBSP_USER_LED, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF);
     error_handler(result, NULL);
