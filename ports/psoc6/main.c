@@ -36,29 +36,38 @@
 // port-specific includes
 #include "mplogger.h"
 
-/* Include serial flash library and QSPI memory configurations only for the
- * kits that require the Wi-Fi firmware to be loaded in external QSPI NOR flash.
- */
-#if defined(CY_DEVICE_PSOC6A512K)
-#include "cy_serial_flash_qspi.h"
-#include "cycfg_qspi_memslot.h"
-#endif
+#define MPY_TASK_STACK_SIZE                    (4096u)
+#define MPY_TASK_PRIORITY                      (3u)
 
+void mpy_task(void *arg);
 
-// /*******************************************************************************
-//  * Macros
-//  ******************************************************************************/
-#define GPIO_INTERRUPT_PRIORITY             (7)
+TaskHandle_t mpy_task_handle;
 
+int main(int argc, char **argv) {
+    // Initialize the device and board peripherals
+    cy_rslt_t result = cybsp_init();
+    if (result != CY_RSLT_SUCCESS) {
+        mp_raise_ValueError(MP_ERROR_TEXT("cybsp_init failed !\n"));
+    }
+
+    // Initialize retarget-io to use the debug UART port
+    result = cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, CY_RETARGET_IO_BAUDRATE);
+    if (result != CY_RSLT_SUCCESS) {
+        mp_raise_ValueError(MP_ERROR_TEXT("cy_retarget_io_init failed !\n"));
+    }
+
+    xTaskCreate(mpy_task, "MicroPython task", MPY_TASK_STACK_SIZE, NULL, MPY_TASK_PRIORITY, &mpy_task_handle);
+    vTaskStartScheduler();
+
+    // Should never get here
+    CY_ASSERT(0);
+    return 0;
+}
 
 #if MICROPY_ENABLE_GC
-
 extern uint8_t __StackTop, __StackLimit;
-
 __attribute__((section(".bss"))) static char gc_heap[MICROPY_GC_HEAP_SIZE];
-
 #endif
-
 
 extern void rtc_init(void);
 extern void time_init(void);
@@ -66,29 +75,13 @@ extern void os_init(void);
 extern void machine_init(void);
 extern void machine_deinit(void);
 
-void mpy_task(void *arg);
-
-TaskHandle_t mpy_task_handle;
-
-#define MPY_TASK_STACK_SIZE                    (4096u)
-#define MPY_TASK_PRIORITY                      (3u)
-
-// extern void mod_network_lwip_init(void);
-// bool is_retarget_io_initialized = false;
-// bool is_led_initialized = false;
-
-
-int main(int argc, char **argv) {
-
+void mpy_task(void *arg) {
     #if MICROPY_ENABLE_GC
-
     mp_stack_set_top(&__StackTop);
     // mp_stack_set_limit((mp_uint_t)&__StackTop - (mp_uint_t)&__StackLimit);
     mp_stack_set_limit((mp_uint_t)&__StackLimit);
     gc_init(&gc_heap[0], &gc_heap[MP_ARRAY_SIZE(gc_heap)]);
-
     #endif
-
 
     #ifdef SIGPIPE
     // Do not raise SIGPIPE, instead return EPIPE. Otherwise, e.g. writing
@@ -103,22 +96,6 @@ int main(int argc, char **argv) {
     // catch EPIPE themselves.
     signal(SIGPIPE, SIG_IGN);
     #endif
-
-    // Initialize the device and board peripherals
-    cy_rslt_t result = cybsp_init();
-
-    // Board init failed. Stop program execution
-    if (result != CY_RSLT_SUCCESS) {
-        mp_raise_ValueError(MP_ERROR_TEXT("cybsp_init failed !\n"));
-    }
-
-    // Initialize retarget-io to use the debug UART port
-    result = cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, CY_RETARGET_IO_BAUDRATE);
-
-    // retarget-io init failed. Stop program execution
-    if (result != CY_RSLT_SUCCESS) {
-        mp_raise_ValueError(MP_ERROR_TEXT("cy_retarget_io_init failed !\n"));
-    }
 
     // Initialize modules. Or to be redone after a reset and therefore to be placed next to machine_init below ?
     os_init();
@@ -135,40 +112,8 @@ int main(int argc, char **argv) {
     #endif
     #endif
 
-    /* Init QSPI and enable XIP to get the Wi-Fi firmware from the QSPI NOR flash */
-    #if defined(CY_DEVICE_PSOC6A512K)
-    const uint32_t bus_frequency = 50000000lu;
-    cy_serial_flash_qspi_init(smifMemConfigs[0], CYBSP_QSPI_D0, CYBSP_QSPI_D1,
-        CYBSP_QSPI_D2, CYBSP_QSPI_D3, NC, NC, NC, NC,
-        CYBSP_QSPI_SCK, CYBSP_QSPI_SS, bus_frequency);
-
-    cy_serial_flash_qspi_enable_xip(true);
-    #endif
-
-    /* Create the tasks. */
-    xTaskCreate(mpy_task, "MicroPython task", MPY_TASK_STACK_SIZE, NULL, MPY_TASK_PRIORITY, &mpy_task_handle);
-
-    // /* Start the FreeRTOS scheduler. */
-    vTaskStartScheduler();
-
-    printf("Done !!\n");
-    fflush(stdout);
-
-    /* Should never get here. */
-    CY_ASSERT(0);
-    return 0;
-}
-
-void mpy_task(void *arg) {
-    cy_wcm_scan_filter_t scan_filter;
-    // cy_rslt_t result = CY_RSLT_SUCCESS;
     cy_wcm_config_t wcm_config = { .interface = CY_WCM_INTERFACE_TYPE_STA };
-    // cy_wcm_mac_t scan_for_mac_value = {SCAN_FOR_MAC_ADDRESS};
-
-    memset(&scan_filter, 0, sizeof(cy_wcm_scan_filter_t));
-    // result =
     cy_wcm_init(&wcm_config);
-
 
 soft_reset:
 
