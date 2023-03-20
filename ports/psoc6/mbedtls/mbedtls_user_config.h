@@ -25,6 +25,7 @@
  *
  *  This file is part of mbed TLS (https://tls.mbed.org)
  */
+
 #ifndef MBEDTLS_USER_CONFIG_HEADER
 #define MBEDTLS_USER_CONFIG_HEADER
 
@@ -867,40 +868,5 @@
 #endif
 
 #endif /* DISABLE_MBEDTLS_ACCELERATION */
-
-
-
-// added by JB
-
-// make sure to comment out lines 1623 - 1629 in modlwip.c JB
-
-// this file was copied from   boards/mtb_shared/wifi-core-freertos-lwip-mbedtls/release-v1.0.0/configs/mbedtls_user_config.h
-// further configs can be found at : boards/mtb_shared/mbedtls/mbedtls-2.25.0/configs/
-
-// this is the content of old lwipopts.h JB :
-// // Set mbedtls configuration
-#define MBEDTLS_ECP_NIST_OPTIM
-#define MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED
-
-// // Enable mbedtls modules
-#define MBEDTLS_GCM_C
-#define MBEDTLS_HAVE_TIME
-#define MBEDTLS_HAVE_TIME_DATE
-
-// // #define MBEDTLS_NO_PLATFORM_ENTROPY
-#define MBEDTLS_CIPHER_MODE_CTR
-
-// // // Time hook
-// // #include <time.h>
-// // time_t psoc6_rtctime_seconds(time_t *timer);
-// // #define MBEDTLS_PLATFORM_TIME_MACRO rp2_rtctime_seconds
-
-// Set MicroPython-specific options.
-#define MICROPY_MBEDTLS_CONFIG_BARE_METAL (1)
-
-// Include common mbedtls configuration.
-#include "extmod/mbedtls/mbedtls_config_common.h"
-
-#undef MBEDTLS_ENTROPY_HARDWARE_ALT
 
 #endif /* MBEDTLS_USER_CONFIG_HEADER */

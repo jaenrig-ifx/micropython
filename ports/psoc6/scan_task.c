@@ -129,93 +129,93 @@ void print_heap_usage(char *msg);
  *
  ******************************************************************************/
 void scan_task(void *arg) {
-    cy_wcm_scan_filter_t scan_filter;
-    cy_rslt_t result = CY_RSLT_SUCCESS;
-    cy_wcm_config_t wcm_config = { .interface = CY_WCM_INTERFACE_TYPE_STA };
-    cy_wcm_mac_t scan_for_mac_value = {SCAN_FOR_MAC_ADDRESS};
+    // cy_wcm_scan_filter_t scan_filter;
+    // cy_rslt_t result = CY_RSLT_SUCCESS;
+    // cy_wcm_config_t wcm_config = { .interface = CY_WCM_INTERFACE_TYPE_STA };
+    // cy_wcm_mac_t scan_for_mac_value = {SCAN_FOR_MAC_ADDRESS};
 
-    memset(&scan_filter, 0, sizeof(cy_wcm_scan_filter_t));
-    result = cy_wcm_init(&wcm_config);
-    error_handler(result, "Failed to initialize Wi-Fi Connection Manager.\n");
+    // memset(&scan_filter, 0, sizeof(cy_wcm_scan_filter_t));
+    // result = cy_wcm_init(&wcm_config);
+    // error_handler(result, "Failed to initialize Wi-Fi Connection Manager.\n");
 
-    int i = 0;
-    // while (true)
-    while (i++ < 5) {
-        /* Select the type of filter to use.*/
-        switch (scan_filter_mode_select)
-        {
-            case SCAN_FILTER_NONE:
-                APP_INFO(("Scanning without any filter\n"));
-                break;
+    // int i = 0;
+    // // while (true)
+    // while (i++ < 5) {
+    //     /* Select the type of filter to use.*/
+    //     switch (scan_filter_mode_select)
+    //     {
+    //         case SCAN_FILTER_NONE:
+    //             APP_INFO(("Scanning without any filter\n"));
+    //             break;
 
-            case SCAN_FILTER_SSID:
-                APP_INFO(("Scanning for %s.\n", SCAN_FOR_SSID_VALUE));
+    //         case SCAN_FILTER_SSID:
+    //             APP_INFO(("Scanning for %s.\n", SCAN_FOR_SSID_VALUE));
 
-                /* Configure the scan filter for SSID specified by
-                 * SCAN_FOR_SSID_VALUE.
-                 */
-                scan_filter.mode = CY_WCM_SCAN_FILTER_TYPE_SSID;
-                memcpy(scan_filter.param.SSID, SCAN_FOR_SSID_VALUE, sizeof(SCAN_FOR_SSID_VALUE));
-                break;
+    //             /* Configure the scan filter for SSID specified by
+    //              * SCAN_FOR_SSID_VALUE.
+    //              */
+    //             scan_filter.mode = CY_WCM_SCAN_FILTER_TYPE_SSID;
+    //             memcpy(scan_filter.param.SSID, SCAN_FOR_SSID_VALUE, sizeof(SCAN_FOR_SSID_VALUE));
+    //             break;
 
-            case SCAN_FILTER_RSSI:
-                APP_INFO(("Scanning for RSSI > %d dBm.\n", SCAN_FOR_RSSI_VALUE));
+    //         case SCAN_FILTER_RSSI:
+    //             APP_INFO(("Scanning for RSSI > %d dBm.\n", SCAN_FOR_RSSI_VALUE));
 
-                /* Configure the scan filter for RSSI range specified by
-                 * SCAN_FOR_RSSI_VALUE.
-                 */
-                scan_filter.mode = CY_WCM_SCAN_FILTER_TYPE_RSSI;
-                scan_filter.param.rssi_range = SCAN_FOR_RSSI_VALUE;
-                break;
+    //             /* Configure the scan filter for RSSI range specified by
+    //              * SCAN_FOR_RSSI_VALUE.
+    //              */
+    //             scan_filter.mode = CY_WCM_SCAN_FILTER_TYPE_RSSI;
+    //             scan_filter.param.rssi_range = SCAN_FOR_RSSI_VALUE;
+    //             break;
 
-            case SCAN_FILTER_MAC:
-                APP_INFO(("Scanning for %02X:%02X:%02X:%02X:%02X:%02X.\n", scan_for_mac_value[0], scan_for_mac_value[1], scan_for_mac_value[2], scan_for_mac_value[3], scan_for_mac_value[4], scan_for_mac_value[5]));
+    //         case SCAN_FILTER_MAC:
+    //             APP_INFO(("Scanning for %02X:%02X:%02X:%02X:%02X:%02X.\n", scan_for_mac_value[0], scan_for_mac_value[1], scan_for_mac_value[2], scan_for_mac_value[3], scan_for_mac_value[4], scan_for_mac_value[5]));
 
-                /* Configure the scan filter for MAC specified by scan_for_mac_value
-                 */
-                scan_filter.mode = CY_WCM_SCAN_FILTER_TYPE_MAC;
-                memcpy(scan_filter.param.BSSID, &scan_for_mac_value, sizeof(scan_for_mac_value));
-                break;
+    //             /* Configure the scan filter for MAC specified by scan_for_mac_value
+    //              */
+    //             scan_filter.mode = CY_WCM_SCAN_FILTER_TYPE_MAC;
+    //             memcpy(scan_filter.param.BSSID, &scan_for_mac_value, sizeof(scan_for_mac_value));
+    //             break;
 
-            case SCAN_FILTER_BAND:
-                APP_INFO(("Scanning in %s band.\n", band_string[SCAN_FOR_BAND_VALUE]));
+    //         case SCAN_FILTER_BAND:
+    //             APP_INFO(("Scanning in %s band.\n", band_string[SCAN_FOR_BAND_VALUE]));
 
-                /* Configure the scan filter for band specified by
-                 * SCAN_FOR_BAND_VALUE.
-                 */
-                scan_filter.mode = CY_WCM_SCAN_FILTER_TYPE_BAND;
-                scan_filter.param.band = SCAN_FOR_BAND_VALUE;
-                break;
+    //             /* Configure the scan filter for band specified by
+    //              * SCAN_FOR_BAND_VALUE.
+    //              */
+    //             scan_filter.mode = CY_WCM_SCAN_FILTER_TYPE_BAND;
+    //             scan_filter.param.band = SCAN_FOR_BAND_VALUE;
+    //             break;
 
-            default:
-                break;
-        }
+    //         default:
+    //             break;
+    //     }
 
-        PRINT_SCAN_TEMPLATE();
+    //     PRINT_SCAN_TEMPLATE();
 
-        if (SCAN_FILTER_NONE == scan_filter_mode_select) {
-            result = cy_wcm_start_scan(scan_callback, NULL, NULL);
-        } else {
-            result = cy_wcm_start_scan(scan_callback, NULL, &scan_filter);
-        }
+    //     if (SCAN_FILTER_NONE == scan_filter_mode_select) {
+    //         result = cy_wcm_start_scan(scan_callback, NULL, NULL);
+    //     } else {
+    //         result = cy_wcm_start_scan(scan_callback, NULL, &scan_filter);
+    //     }
 
-        /* Wait for scan completion if scan was started successfully. The API
-         * cy_wcm_start_scan doesn't wait for scan completion. If it is called
-         * again when the scan hasn't completed, the API returns
-         * CY_WCM_RESULT_SCAN_IN_PROGRESS.
-         */
-        if (CY_RSLT_SUCCESS == result) {
-            xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
-        }
+    //     /* Wait for scan completion if scan was started successfully. The API
+    //      * cy_wcm_start_scan doesn't wait for scan completion. If it is called
+    //      * again when the scan hasn't completed, the API returns
+    //      * CY_WCM_RESULT_SCAN_IN_PROGRESS.
+    //      */
+    //     if (CY_RSLT_SUCCESS == result) {
+    //         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
+    //     }
 
-        /* Define PRINT_HEAP_USAGE using DEFINES variable in the Makefile. */
-        print_heap_usage("After scan results are printed to UART");
+    //     /* Define PRINT_HEAP_USAGE using DEFINES variable in the Makefile. */
+    //     print_heap_usage("After scan results are printed to UART");
 
-        vTaskDelay(pdMS_TO_TICKS(SCAN_DELAY_MS));
-    }
+    //     vTaskDelay(pdMS_TO_TICKS(SCAN_DELAY_MS));
+    // }
 
 
-    fflush(stdout);
+    // fflush(stdout);
 
 soft_reset:
 

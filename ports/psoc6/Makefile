@@ -50,9 +50,17 @@ $(info CONFIG                           : $(CONFIG))
 INC += -I.
 INC += -I$(TOP)
 INC += -I$(BUILD)
-ifeq ($(MICROPY_PY_LWIP),1)
+
+# JB
+#ifeq ($(MICROPY_PY_LWIP),1)
 INC += -Ilwip_inc
-endif
+#endif
+
+#INC += -I$(MPY_DIR_OF_MAIN_MAKEFILE)
+CFLAGS_EXTMOD += -DMBEDTLS_CONFIG_FILE=\"mbedtls/mbedtls_config.h\"
+#CFLAGS_EXTMOD += -DMICROPY_SSL_MBEDTLS=1
+# end JB
+
 
 ### for testing purposes only
 # USERMOD_DIR = $(TOP)/examples/usercmodule/cexample
@@ -144,9 +152,10 @@ SRC_C = help.c \
 		heap_usage.c \
 		scan_task.c \
 		mphalport.c \
-		mpnetworkport.c \
 		$(BUILD)/frozen_content.c 
-	
+# commented out by JB
+#			mpnetworkport.c \
+
 SRC_ASM += shared/runtime/gchelper_thumb1.s
 
 SRC_QSTR += $(SHARED_SRC_C) $(MOD_SRC_C)
