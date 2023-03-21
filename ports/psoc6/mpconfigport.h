@@ -45,7 +45,6 @@
 
 #define MICROPY_MEM_STATS                       (1)
 #define MICROPY_MALLOC_USES_ALLOCATED_SIZE      (1)
-#define MICROPY_SSL_MBEDTLS                     (1)
 #define MICROPY_TRACKED_ALLOC                   (MICROPY_SSL_MBEDTLS)
 #define MICROPY_QSTR_BYTES_IN_HASH              (1)
 

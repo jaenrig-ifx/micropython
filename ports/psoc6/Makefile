@@ -52,14 +52,13 @@ INC += -I$(TOP)
 INC += -I$(BUILD)
 
 ifeq ($(MICROPY_PSOC6_LWIP),1)
-INC += -Ilwip_inc
+  INC += -Ilwip_inc
 endif
 
-#INC += -I$(MPY_DIR_OF_MAIN_MAKEFILE)
-CFLAGS_EXTMOD += -DMBEDTLS_CONFIG_FILE=\"mbedtls/mbedtls_config.h\"
-#CFLAGS_EXTMOD += -DMICROPY_SSL_MBEDTLS=1
-# end JB
-
+ifeq ($(MICROPY_PSOC6_SSL_MBEDTLS),1)
+  CFLAGS += -DMBEDTLS_CONFIG_FILE=\"mbedtls/mbedtls_config.h\"
+  CFLAGS += -DMICROPY_SSL_MBEDTLS=1
+endif
 
 ### for testing purposes only
 # USERMOD_DIR = $(TOP)/examples/usercmodule/cexample

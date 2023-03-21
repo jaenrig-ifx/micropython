@@ -141,15 +141,15 @@ int main(int argc, char **argv) {
     time_init();
 
 
-    #if MICROPY_PY_LWIP
-    // lwIP doesn't allow to reinitialise itself by subsequent calls to this function
-    // because the system timeout list (next_timeout) is only ever reset by BSS clearing.
-    // So for now we only init the lwIP stack once on power-up.
-    lwip_init();
-    #if LWIP_MDNS_RESPONDER
-    mdns_resp_init();
-    #endif
-    #endif
+    // #if MICROPY_PY_LWIP
+    // // lwIP doesn't allow to reinitialise itself by subsequent calls to this function
+    // // because the system timeout list (next_timeout) is only ever reset by BSS clearing.
+    // // So for now we only init the lwIP stack once on power-up.
+    // lwip_init();
+    // #if LWIP_MDNS_RESPONDER
+    // mdns_resp_init();
+    // #endif
+    // #endif
 
 
     result = cyhal_gpio_init(CYBSP_USER_LED, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF);
