@@ -111,12 +111,12 @@ SHARED_SRC_C += $(addprefix shared/,\
 	)
 
 ifeq ($(MICROPY_PSOC6_LWIP),1)
-  CFLAGS += -DMICROPY_PY_LWIP=1 
   SHARED_SRC_C += $(addprefix shared/,\
 	netutils/dhcpserver.c \
 	netutils/netutils.c \
 	netutils/trace.c \
   )
+  CFLAGS += -DMICROPY_PY_LWIP=1
 endif
 
 DRIVERS_SRC_C += $(addprefix drivers/,\
@@ -198,3 +198,11 @@ include $(TOP)/py/mkrules.mk
 all: $(MPY_MAIN_BUILD_DIR)/firmware.hex $(MPY_PATH_TO_MAIN_MAKEFILE)
 
 rebuild: clean mpy_mtb_clean all
+
+test: 
+	$(info )
+	$(info Running PSoC6 tests)
+	$(Q) cd ../../tests ; ./run-tests.py --target psoc6 --device /dev/ttyACM0 -d psoc6
+
+
+.PHONY: test

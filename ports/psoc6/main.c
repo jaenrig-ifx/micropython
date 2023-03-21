@@ -103,15 +103,6 @@ void mpy_task(void *arg) {
     time_init();
 
     #if MICROPY_PY_NETWORK
-    #if MICROPY_PY_LWIP
-    // lwIP doesn't allow to reinitialise itself by subsequent calls to this function
-    // because the system timeout list (next_timeout) is only ever reset by BSS clearing.
-    // So for now we only init the lwIP stack once on power-up.
-    lwip_init();
-    #if LWIP_MDNS_RESPONDER
-    mdns_resp_init();
-    #endif
-    #endif
     cy_wcm_config_t wcm_config = { .interface = CY_WCM_INTERFACE_TYPE_STA };
     cy_wcm_init(&wcm_config);
     #endif

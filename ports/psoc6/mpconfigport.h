@@ -45,7 +45,6 @@
 
 #define MICROPY_MEM_STATS                       (1)
 #define MICROPY_MALLOC_USES_ALLOCATED_SIZE      (1)
-// #define MICROPY_SSL_MBEDTLS                     (1)
 #define MICROPY_TRACKED_ALLOC                   (MICROPY_SSL_MBEDTLS)
 #define MICROPY_QSTR_BYTES_IN_HASH              (1)
 
@@ -185,9 +184,6 @@ typedef intptr_t mp_off_t;
 // if set to 0, filesystem is located in an allotted area of internal flash of PSoC6
 #define MICROPY_ENABLE_EXT_QSPI_FLASH           (1)
 #define MICROPY_LOGGER_DEBUG                    (0)
-
-
-// #define MICROPY_PY_LWIP                         (1)
 
 // extern void lwip_lock_acquire(void);
 // extern void lwip_lock_release(void);
