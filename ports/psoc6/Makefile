@@ -50,8 +50,9 @@ $(info CONFIG                           : $(CONFIG))
 INC += -I.
 INC += -I$(TOP)
 INC += -I$(BUILD)
-ifeq ($(MICROPY_PY_LWIP),1)
-INC += -Ilwip_inc
+
+ifeq ($(MICROPY_PSOC6_LWIP),1)
+  INC += -Ilwip_inc
 endif
 
 ### for testing purposes only
@@ -61,11 +62,16 @@ endif
 LD               = arm-none-eabi-gcc
 CFLAGS_CORTEX_M4 = -mthumb -mtune=cortex-m4 -mcpu=cortex-m4 -msoft-float -fsingle-precision-constant -Wdouble-promotion -Wfloat-conversion -UMICROPY_USE_INTERNAL_PRINTF
 
-
 # std=c11 instead of std=c99 : provides "static_assert" (not available in c99) 
 # -D_XOPEN_SOURCE=700 : makes sure the setenv/unsetenv headers are included
 CFLAGS  += $(INC) -Wall -Werror -std=c11 $(CFLAGS_CORTEX_M4) $(COPT) -D_XOPEN_SOURCE=700
 CFLAGS  += -Wno-error=double-promotion -Wno-error=overflow -Wno-error=analyzer-null-dereference -Wno-error=unused-local-typedefs -Wno-error=unused-function -Wno-error=maybe-uninitialized
+
+ifeq ($(MICROPY_PSOC6_SSL_MBEDTLS),1)
+  CFLAGS += -DMBEDTLS_CONFIG_FILE=\"mbedtls/mbedtls_config.h\" 
+  CFLAGS += -DMICROPY_SSL_MBEDTLS=1
+endif
+
 LDFLAGS += -Wl,--cref -Wl,--gc-sections
 
 
@@ -94,10 +100,6 @@ LDFLAGS += $(LDFLAGS_MOD)
 LIBS += 
 
 SHARED_SRC_C += $(addprefix shared/,\
-	netutils/dhcpserver.c \
-	netutils/netutils.c \
-	netutils/trace.c \
-	\
 	readline/readline.c \
 	\
 	runtime/gchelper_native.c \
@@ -107,6 +109,15 @@ SHARED_SRC_C += $(addprefix shared/,\
 	runtime/sys_stdio_mphal.c \
 	timeutils/timeutils.c \
 	)
+
+ifeq ($(MICROPY_PSOC6_LWIP),1)
+  CFLAGS += -DMICROPY_PY_LWIP=1 
+  SHARED_SRC_C += $(addprefix shared/,\
+	netutils/dhcpserver.c \
+	netutils/netutils.c \
+	netutils/trace.c \
+  )
+endif
 
 DRIVERS_SRC_C += $(addprefix drivers/,\
 	machine/psoc6_gpio.c \
@@ -142,7 +153,6 @@ endif
 SRC_C = help.c \
 		main.c \
 		mphalport.c \
-		mpnetworkport.c \
 		$(BUILD)/frozen_content.c 
 
 SRC_ASM += shared/runtime/gchelper_thumb1.s
