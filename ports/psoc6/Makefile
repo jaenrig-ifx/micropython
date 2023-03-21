@@ -51,10 +51,9 @@ INC += -I.
 INC += -I$(TOP)
 INC += -I$(BUILD)
 
-# JB
-#ifeq ($(MICROPY_PY_LWIP),1)
+ifeq ($(MICROPY_PSOC6_LWIP),1)
 INC += -Ilwip_inc
-#endif
+endif
 
 #INC += -I$(MPY_DIR_OF_MAIN_MAKEFILE)
 CFLAGS_EXTMOD += -DMBEDTLS_CONFIG_FILE=\"mbedtls/mbedtls_config.h\"
@@ -102,10 +101,6 @@ LDFLAGS += $(LDFLAGS_MOD)
 LIBS += 
 
 SHARED_SRC_C += $(addprefix shared/,\
-	netutils/dhcpserver.c \
-	netutils/netutils.c \
-	netutils/trace.c \
-	\
 	readline/readline.c \
 	\
 	runtime/gchelper_native.c \
@@ -115,6 +110,15 @@ SHARED_SRC_C += $(addprefix shared/,\
 	runtime/sys_stdio_mphal.c \
 	timeutils/timeutils.c \
 	)
+
+ifeq ($(MICROPY_PSOC6_LWIP),1)
+  SHARED_SRC_C += $(addprefix shared/,\
+	netutils/dhcpserver.c \
+	netutils/netutils.c \
+	netutils/trace.c \
+  )
+  CFLAGS += -DMICROPY_PY_LWIP=1
+endif
 
 DRIVERS_SRC_C += $(addprefix drivers/,\
 	machine/psoc6_gpio.c \
@@ -153,8 +157,6 @@ SRC_C = help.c \
 		scan_task.c \
 		mphalport.c \
 		$(BUILD)/frozen_content.c 
-# commented out by JB
-#			mpnetworkport.c \
 
 SRC_ASM += shared/runtime/gchelper_thumb1.s
 
@@ -199,3 +201,11 @@ include $(TOP)/py/mkrules.mk
 all: $(MPY_MAIN_BUILD_DIR)/firmware.hex $(MPY_PATH_TO_MAIN_MAKEFILE)
 
 rebuild: clean mpy_mtb_clean all
+
+test: 
+	$(info )
+	$(info Running PSoC6 tests)
+	$(Q) cd ../../tests ; ./run-tests.py --target psoc6 --device /dev/ttyACM0 -d psoc6
+
+
+.PHONY: test

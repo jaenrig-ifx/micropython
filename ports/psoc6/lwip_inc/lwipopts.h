@@ -282,5 +282,5 @@ extern void sys_check_core_locking();
 
 
 // added by JB
-// this file was copied copied from boards/mtb_shared/wifi-core-freertos-lwip-mbedtls/release-v1.0.0/configs/lwipopts.h 
+// this file was copied copied from boards/mtb_shared/wifi-core-freertos-lwip-mbedtls/release-v1.0.0/configs/lwipopts.h
 typedef uint32_t sys_prot_t;

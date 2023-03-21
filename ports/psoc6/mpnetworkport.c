@@ -3,11 +3,7 @@
  *
  * The MIT License (MIT)
  *
-<<<<<<< HEAD
- * Copyright (c) 2014 Damien P. George
-=======
  * Copyright (c) 2023 Infineon Technologies AG
->>>>>>> whdnet_merge
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
