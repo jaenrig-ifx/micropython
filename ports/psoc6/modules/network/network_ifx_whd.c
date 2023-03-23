@@ -40,6 +40,9 @@
 #include "network_ifx_whd.h"
 #include "whd_wifi_api.h"
 #include "extmod/modnetwork.h"
+#include "cy_wcm.h"
+
+#include "FreeRTOS.h"
 
 whd_driver_t whd;
 whd_interface_t itf_sta;
@@ -105,9 +108,10 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_2(network_ifx_whd_send_ethernet_obj, network_ifx_
 // network API
 
 STATIC mp_obj_t network_ifx_whd_deinit(mp_obj_t self_in) {
-    network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    whd_interface_t itf = *(self->itf);
-    uint32_t ret = whd_deinit(itf);
+    // network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    // whd_interface_t itf = *(self->itf);
+    // uint32_t ret = whd_deinit(itf);
+    uint32_t ret = cy_wcm_deinit();
     whd_assert_raise(ret);
 
     return mp_const_none;
@@ -115,18 +119,21 @@ STATIC mp_obj_t network_ifx_whd_deinit(mp_obj_t self_in) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(network_ifx_whd_deinit_obj, network_ifx_whd_deinit);
 
 STATIC mp_obj_t network_ifx_whd_active(size_t n_args, const mp_obj_t *args) {
-    network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(args[0]);
-    whd_interface_t itf = *(self->itf);
+    // network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(args[0]);
+    // whd_interface_t itf = *(self->itf);
 
     if (n_args == 1) {
-        // Is this function the most suitable? There is no whd public
-        // function to get the link status
-        return mp_obj_new_bool(whd_wifi_is_ready_to_transceive(itf));
+        return mp_obj_new_bool(cy_wcm_is_connected_to_ap());
     } else {
         if (mp_obj_is_true(args[1])) {
-            whd_wifi_set_up(itf);
+            // whd_wifi_set_up(itf);
+            /* Configure the Wi-Fi interface as a Wi-Fi STA (i.e. Client). */
+            cy_wcm_config_t wcm_config = { .interface = CY_WCM_INTERFACE_TYPE_STA };
+            cy_wcm_init(&wcm_config);
+
         } else {
-            whd_wifi_set_down(itf);
+            // whd_wifi_set_down(itf);
+            cy_wcm_deinit();
         }
         return mp_const_none;
     }
@@ -266,10 +273,25 @@ STATIC mp_obj_t network_ifx_whd_connect(size_t n_args, const mp_obj_t *pos_args,
         { MP_QSTR_channel, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = -1} },
     };
 
-    network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(pos_args[0]);
-    whd_interface_t itf = *(self->itf);
+
+    /* Maximum Wi-Fi re-connection limit. */
+    #define MAX_WIFI_CONN_RETRIES             (120u)
+
+    /* Wi-Fi re-connection time interval in milliseconds. */
+    #define WIFI_CONN_RETRY_INTERVAL_MS       (5000)
+
+    #define WIFI_CONNECTED                   (1lu << 1)
+
+    /* Flag to denote initialization status of various operations. */
+    uint32_t status_flag;
+
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args - 1, pos_args + 1, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    cy_rslt_t result = CY_RSLT_SUCCESS;
+    cy_wcm_connect_params_t connect_param;
+    cy_wcm_ip_address_t ip_address;
+    memset(&connect_param, 0, sizeof(cy_wcm_connect_params_t));
 
     // Deprecated kwarg
     if (args[ARG_auth].u_int != -1) {
@@ -279,11 +301,11 @@ STATIC mp_obj_t network_ifx_whd_connect(size_t n_args, const mp_obj_t *pos_args,
     // Extract the SSID.
     mp_buffer_info_t ssid;
     mp_get_buffer_raise(args[ARG_ssid].u_obj, &ssid, MP_BUFFER_READ);
-    // TODO: Check length cannot be more than 32 bytes. Limited by whd lib. Validate argument!
-    whd_ssid_t whd_ssid = {
-        .length = ssid.len
-    };
-    memcpy(whd_ssid.value, ssid.buf, ssid.len);
+    // // TODO: Check length cannot be more than 32 bytes. Limited by whd lib. Validate argument!
+    // whd_ssid_t whd_ssid = {
+    //     .length = ssid.len
+    // };
+    memcpy(connect_param.ap_credentials.SSID, ssid.buf, ssid.len);
 
     // Extract the key, if given.
     mp_buffer_info_t key;
@@ -291,57 +313,75 @@ STATIC mp_obj_t network_ifx_whd_connect(size_t n_args, const mp_obj_t *pos_args,
     if (args[ARG_key].u_obj != mp_const_none) {
         mp_get_buffer_raise(args[ARG_key].u_obj, &key, MP_BUFFER_READ);
     }
+    memcpy(connect_param.ap_credentials.password, key.buf, key.len);
 
-    // Extract the BSSID, if given.
-    mp_buffer_info_t bssid;
-    bssid.buf = NULL;
-    if (args[ARG_bssid].u_obj != mp_const_none) {
-        mp_get_buffer_raise(args[ARG_bssid].u_obj, &bssid, MP_BUFFER_READ);
-        whd_mac_t whd_bssid;
+    // // Extract the BSSID, if given.
+    // mp_buffer_info_t bssid;
+    // bssid.buf = NULL;
+    // if (args[ARG_bssid].u_obj != mp_const_none) {
+    //     mp_get_buffer_raise(args[ARG_bssid].u_obj, &bssid, MP_BUFFER_READ);
+    //     whd_mac_t whd_bssid;
 
-        // Check if the given bssid matches the interface bssid
-        uint32_t ret = whd_wifi_get_bssid(itf, &whd_bssid);
-        whd_assert_raise(ret);
+    //     // Check if the given bssid matches the interface bssid
+    //     uint32_t ret = whd_wifi_get_bssid(itf, &whd_bssid);
+    //     whd_assert_raise(ret);
 
-        if (bssid.len != 6) {
-            if (strncmp(bssid.buf, (char *)whd_bssid.octet, 6)) {
-                mp_raise_ValueError(NULL);
-            }
-        }
-    }
+    //     if (bssid.len != 6) {
+    //         if (strncmp(bssid.buf, (char *)whd_bssid.octet, 6)) {
+    //             mp_raise_ValueError(NULL);
+    //         }
+    //     }
+    // }
 
     // Extract the security type, if given.
-    whd_security_t auth_type;
+    cy_wcm_security_t auth_type;
     if (args[ARG_security].u_int == -1) {
         if (key.buf == NULL || key.len == 0) {
-            auth_type = WHD_SECURITY_OPEN;
+            auth_type = CY_WCM_SECURITY_OPEN;
         } else {
-            auth_type = WHD_SECURITY_WPA2_MIXED_PSK;
+            auth_type = CY_WCM_SECURITY_WPA2_AES_PSK;
         }
     } else {
         auth_type = args[ARG_security].u_int;
     }
+    connect_param.ap_credentials.security = auth_type;
 
-    // Extract channel, if given.
-    if (args[ARG_channel].u_int == -1) {
+    // // Extract channel, if given.
+    // if (args[ARG_channel].u_int == -1) {
 
-        uint32_t ret = whd_wifi_set_channel(itf, args[ARG_channel].u_int);
-        whd_assert_raise(ret);
+    //     uint32_t ret = whd_wifi_set_channel(itf, args[ARG_channel].u_int);
+    //     whd_assert_raise(ret);
+    // }
+
+    /* Connect to the Wi-Fi AP. */
+    for (uint32_t retry_count = 0; retry_count < MAX_WIFI_CONN_RETRIES; retry_count++)
+    {
+        result = cy_wcm_connect_ap(&connect_param, &ip_address);
+
+        if (result == CY_RSLT_SUCCESS) {
+            printf("\nSuccessfully connected to Wi-Fi network '%s'.\n", connect_param.ap_credentials.SSID);
+
+            /* Set the appropriate bit in the status_flag to denote
+             * successful Wi-Fi connection, print the assigned IP address.
+             */
+            status_flag |= WIFI_CONNECTED;
+            return mp_const_none;
+        }
+        printf("Connection to Wi-Fi network failed with error code 0x%0X. Retrying in %d ms. Retries left: %d\n",
+            (int)result, WIFI_CONN_RETRY_INTERVAL_MS, (int)(MAX_WIFI_CONN_RETRIES - retry_count - 1));
+
     }
-
-    // Start the WiFi join procedure.  It will run in the background.
-    uint32_t ret = whd_wifi_join(itf, &whd_ssid, auth_type, key.buf, key.len);
-    if (ret != WHD_SUCCESS) {
-        mp_raise_OSError(-ret);
-    }
+    printf("\nExceeded maximum Wi-Fi connection attempts!\n");
+    printf("Wi-Fi connection failed after retrying for %d mins\n\n",
+        (int)(WIFI_CONN_RETRY_INTERVAL_MS * MAX_WIFI_CONN_RETRIES) / 60000u);
     return mp_const_none;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(network_ifx_whd_connect_obj, 1, network_ifx_whd_connect);
 
 STATIC mp_obj_t network_ifx_whd_disconnect(mp_obj_t self_in) {
-    network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    whd_interface_t itf = *(self->itf);
-    uint32_t ret = whd_wifi_leave(itf);
+    // network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    // whd_interface_t itf = *(self->itf);
+    uint32_t ret = cy_wcm_disconnect_ap();
     whd_assert_raise(ret);
 
     return mp_const_none;
@@ -349,29 +389,29 @@ STATIC mp_obj_t network_ifx_whd_disconnect(mp_obj_t self_in) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(network_ifx_whd_disconnect_obj, network_ifx_whd_disconnect);
 
 STATIC mp_obj_t network_ifx_whd_isconnected(mp_obj_t self_in) {
-    network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    whd_interface_t itf = *(self->itf);
-    // Is this function the most suitable? There is no whd public
-    // function to get the link status
-    return mp_obj_new_bool(whd_wifi_is_ready_to_transceive(itf));
+    // network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    // whd_interface_t itf = *(self->itf);
+    return mp_obj_new_bool(cy_wcm_is_connected_to_ap());
+
 }
+
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(network_ifx_whd_isconnected_obj, network_ifx_whd_isconnected);
 
 STATIC mp_obj_t network_ifx_whd_ifconfig(size_t n_args, const mp_obj_t *args) {
-    // network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(args[0]);
+    network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(args[0]);
     // TODO: solve this after proper integration oF LWIP (from mpy or mtb)
-    // return mod_network_nic_ifconfig(&(self->netif), n_args - 1, args + 1);
+    return mod_network_nic_ifconfig(&(self->netif), n_args - 1, args + 1);
     return mp_const_none;
 }
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(network_ifx_whd_ifconfig_obj, 1, 2, network_ifx_whd_ifconfig);
 
 STATIC mp_obj_t network_ifx_whd_status(size_t n_args, const mp_obj_t *args) {
-    network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(args[0]);
-    whd_interface_t itf = *(self->itf);
+    // network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(args[0]);
+    // whd_interface_t itf = *(self->itf);
 
     if (n_args == 1) {
         // no arguments: return link status
-        return MP_OBJ_NEW_SMALL_INT(whd_wifi_is_ready_to_transceive(itf));
+        return MP_OBJ_NEW_SMALL_INT(cy_wcm_is_connected_to_ap());
     }
 
     // one argument: return status based on query parameter
