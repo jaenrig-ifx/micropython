@@ -1621,8 +1621,8 @@ STATIC MP_DEFINE_CONST_OBJ_TYPE(
 // routines for its internal structures, and since they might be called in
 // interrupt handlers, they need some protection.
 
-// Added protection flag. Only few ports are providing and OS
-// and implementing this functions.
+// These functions are to be provided by the operating system.
+// In case of no operating system, the following default ones provided.
 #if NO_SYS
 sys_prot_t sys_arch_protect() {
     return (sys_prot_t)MICROPY_BEGIN_ATOMIC_SECTION();

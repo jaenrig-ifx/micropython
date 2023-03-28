@@ -39,6 +39,17 @@
 #define MPY_TASK_STACK_SIZE                    (4096u)
 #define MPY_TASK_PRIORITY                      (3u)
 
+#if MICROPY_ENABLE_GC
+extern uint8_t __StackTop, __StackLimit;
+__attribute__((section(".bss"))) static char gc_heap[MICROPY_GC_HEAP_SIZE];
+#endif
+
+extern void rtc_init(void);
+extern void time_init(void);
+extern void os_init(void);
+extern void machine_init(void);
+extern void machine_deinit(void);
+
 void mpy_task(void *arg);
 
 TaskHandle_t mpy_task_handle;
@@ -63,17 +74,6 @@ int main(int argc, char **argv) {
     CY_ASSERT(0);
     return 0;
 }
-
-#if MICROPY_ENABLE_GC
-extern uint8_t __StackTop, __StackLimit;
-__attribute__((section(".bss"))) static char gc_heap[MICROPY_GC_HEAP_SIZE];
-#endif
-
-extern void rtc_init(void);
-extern void time_init(void);
-extern void os_init(void);
-extern void machine_init(void);
-extern void machine_deinit(void);
 
 void mpy_task(void *arg) {
     #if MICROPY_ENABLE_GC
@@ -112,7 +112,7 @@ soft_reset:
     mp_init();
 
     // ANSI ESC sequence for clear screen. Refer to  https://stackoverflow.com/questions/517970/how-to-clear-the-interpreter-console
-    // mp_printf(&mp_plat_print, "\033[H\033[2J");
+    mp_printf(&mp_plat_print, "\033[H\033[2J");
 
     mp_printf(&mp_plat_print, MICROPY_BANNER_NAME_AND_VERSION);
     mp_printf(&mp_plat_print, "; " MICROPY_BANNER_MACHINE);
