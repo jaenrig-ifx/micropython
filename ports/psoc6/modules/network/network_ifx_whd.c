@@ -41,7 +41,7 @@
 #include "network_ifx_whd.h"
 #include "whd_wifi_api.h"
 #include "extmod/modnetwork.h"
-#include "cy_wcm.c"
+#include "cy_wcm.h"
 
 #include "FreeRTOS.h"
 #include "shared/netutils/netutils.h"
@@ -57,6 +57,10 @@ typedef struct _network_ifx_whd_obj_t {
     whd_driver_t *whd;
     int itf;
 } network_ifx_whd_obj_t;
+
+#define MAX_WHD_INTERFACE  (2)
+
+extern whd_interface_t whd_ifs[MAX_WHD_INTERFACE];
 
 STATIC network_ifx_whd_obj_t network_ifx_whd_wl_sta = { { &mp_network_ifx_whd_type }, &whd, CY_WCM_INTERFACE_TYPE_STA, };
 STATIC network_ifx_whd_obj_t network_ifx_whd_wl_ap = { { &mp_network_ifx_whd_type }, &whd, CY_WCM_INTERFACE_TYPE_AP};
