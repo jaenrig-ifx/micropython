@@ -112,20 +112,14 @@
 // if set to 0, filesystem is located in an allotted area of internal flash of PSoC6
 #define MICROPY_ENABLE_EXT_QSPI_FLASH               (1)
 
-#ifndef MICROPY_BOARD_ENTER_BOOTLOADER
-#define MICROPY_BOARD_ENTER_BOOTLOADER(nargs, args)
-#endif
 
-#define MICROPY_TRACKED_ALLOC        (MICROPY_SSL_MBEDTLS)
-
-
-#define MICROPY_PY_UCRYPTOLIB                   (0) /* Disabled while mtb/mbedtls dependency is resolved */
+#define MICROPY_PY_UCRYPTOLIB                   (1)
 #define MICROPY_PY_UCRYPTOLIB_CTR               (1)
 #define MICROPY_PY_UCRYPTOLIB_CONSTS            (1)
 
-#define MICROPY_PY_UHASHLIB                     (0) /* Disabled while mtb/mbedtls dependency is resolved */
-#define MICROPY_PY_UHASHLIB_MD5                 (0) /* Disabled while mtb/mbedtls dependency is resolved */
-#define MICROPY_PY_UHASHLIB_SHA1                (0) /* Disabled while mtb/mbedtls dependency is resolved */
+#define MICROPY_PY_UHASHLIB                     (1)
+#define MICROPY_PY_UHASHLIB_MD5                 (1)
+#define MICROPY_PY_UHASHLIB_SHA1                (1)
 #define MICROPY_PY_UHASHLIB_SHA256              (1)
 
 #define MP_STATE_PORT MP_STATE_VM
@@ -190,9 +184,6 @@ typedef intptr_t mp_off_t;
 // if set to 0, filesystem is located in an allotted area of internal flash of PSoC6
 #define MICROPY_ENABLE_EXT_QSPI_FLASH           (1)
 #define MICROPY_LOGGER_DEBUG                    (0)
-
-
-#define MICROPY_PY_LWIP                         (0)
 
 // extern void lwip_lock_acquire(void);
 // extern void lwip_lock_release(void);
