@@ -49,6 +49,7 @@ extern void time_init(void);
 extern void os_init(void);
 extern void machine_init(void);
 extern void machine_deinit(void);
+extern void network_ifx_init(void);
 
 void mpy_task(void *arg);
 
@@ -101,11 +102,14 @@ void mpy_task(void *arg) {
     os_init();
     rtc_init();
     time_init();
-
     #if MICROPY_PY_NETWORK
+    network_ifx_init();
+    #endif
+
+    /*#if MICROPY_PY_NETWORK
     cy_wcm_config_t wcm_config = { .interface = CY_WCM_INTERFACE_TYPE_STA };
     cy_wcm_init(&wcm_config);
-    #endif
+    #endif*/
 
 soft_reset:
 
@@ -185,3 +189,6 @@ void nlr_jump_fail(void *val) {
         __BKPT(0);
     }
 }
+
+
+
