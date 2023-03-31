@@ -12,7 +12,7 @@
 #include "cyhal.h"
 #include "cy_wcm.h"
 
-/* FreeRTOS header file */
+// FreeRTOS header file
 #include <FreeRTOS.h>
 #include <task.h>
 #include <queue.h>
@@ -106,11 +106,6 @@ void mpy_task(void *arg) {
     network_ifx_init();
     #endif
 
-    /*#if MICROPY_PY_NETWORK
-    cy_wcm_config_t wcm_config = { .interface = CY_WCM_INTERFACE_TYPE_STA };
-    cy_wcm_init(&wcm_config);
-    #endif*/
-
 soft_reset:
 
     mp_init();
@@ -178,7 +173,7 @@ soft_reset:
     goto soft_reset;
 }
 
-// // TODO: to be implemented
+// TODO: to be implemented
 void nlr_jump_fail(void *val) {
     mplogger_print("nlr_jump_fail\n");
 
@@ -189,6 +184,3 @@ void nlr_jump_fail(void *val) {
         __BKPT(0);
     }
 }
-
-
-
