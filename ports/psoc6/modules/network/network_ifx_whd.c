@@ -46,11 +46,21 @@
 #include "FreeRTOS.h"
 #include "shared/netutils/netutils.h"
 
+// Function prototypes
+static void network_ifx_whd_scan_cb(cy_wcm_scan_result_t *result_ptr, void *user_data, cy_wcm_scan_status_t status);
+static void print_scan_result(cy_wcm_scan_result_t *result);
+
 whd_driver_t whd;
 cy_wcm_ip_address_t ip_address;
 cy_wcm_ip_address_t net_mask_addr;
 cy_wcm_ip_address_t gateway_addr;
 cy_wcm_ip_setting_t ap_ip;
+
+cy_wcm_scan_filter_t scan_filter;
+uint32_t num_scan_result;
+enum scan_filter_mode scan_filter_mode_select = SCAN_FILTER_NONE;
+void *ntwk_scan_result;
+mp_obj_t scan_list;
 
 typedef struct _network_ifx_whd_obj_t {
     mp_obj_base_t base;
@@ -69,6 +79,194 @@ STATIC network_ifx_whd_obj_t network_ifx_whd_wl_ap = { { &mp_network_ifx_whd_typ
         mp_raise_OSError(-ret); \
 }
 
+// Error handling method
+void error_handler(cy_rslt_t result, char *message) {
+    if (NULL != message) {
+        ERR_INFO(("%s", message));
+    }
+    __disable_irq();
+    CY_ASSERT(0);
+}
+
+// Based on the scan result, get micropython defined equivalent security type (possible value 0-4, extended till 7 to include all cases) and security string (mapped to IFX stack)
+static char *get_security_string_and_type(cy_wcm_scan_result_t *result, uint8_t *security_type) {
+    /* Convert the security type of the scan result to the corresponding
+     * security string
+     */
+    char *security_type_string;
+    switch (result->security)
+    {
+        case CY_WCM_SECURITY_OPEN:
+            security_type_string = SECURITY_OPEN;
+            *security_type = 0;
+            break;
+        case CY_WCM_SECURITY_WEP_PSK:
+            security_type_string = SECURITY_WEP_PSK;
+            *security_type = 1;
+            break;
+        case CY_WCM_SECURITY_WEP_SHARED:
+            security_type_string = SECURITY_WEP_SHARED;
+            *security_type = 1;
+            break;
+        case CY_WCM_SECURITY_WPA_TKIP_PSK:
+            security_type_string = SECURITY_WEP_TKIP_PSK;
+            *security_type = 1;
+            break;
+        case CY_WCM_SECURITY_WPA_AES_PSK:
+            security_type_string = SECURITY_WPA_AES_PSK;
+            *security_type = 4;
+            break;
+        case CY_WCM_SECURITY_WPA_MIXED_PSK:
+            security_type_string = SECURITY_WPA_MIXED_PSK;
+            *security_type = 4;
+            break;
+        case CY_WCM_SECURITY_WPA2_AES_PSK:
+            security_type_string = SECURITY_WPA2_AES_PSK;
+            *security_type = 3;
+            break;
+        case CY_WCM_SECURITY_WPA2_TKIP_PSK:
+            security_type_string = SECURITY_WPA2_TKIP_PSK;
+            *security_type = 3;
+            break;
+        case CY_WCM_SECURITY_WPA2_MIXED_PSK:
+            security_type_string = SECURITY_WPA2_MIXED_PSK;
+            *security_type = 3;
+            break;
+        case CY_WCM_SECURITY_WPA2_FBT_PSK:
+            security_type_string = SECURITY_WPA2_FBT_PSK;
+            *security_type = 3;
+            break;
+        case CY_WCM_SECURITY_WPA3_SAE:
+            security_type_string = SECURITY_WPA3_SAE;
+            *security_type = 5; // Not supported value in mpy. New define!
+            break;
+        case CY_WCM_SECURITY_WPA3_WPA2_PSK:
+            security_type_string = SECURITY_WPA3_WPA2_PSK;
+            *security_type = 5; // Not supported value in mpy. New define!
+            break;
+        case CY_WCM_SECURITY_IBSS_OPEN:
+            security_type_string = SECURITY_IBSS_OPEN;
+            *security_type = 0;
+            break;
+        case CY_WCM_SECURITY_WPS_SECURE:
+            security_type_string = SECURITY_WPS_SECURE;
+            *security_type = 6; // Not supported value in mpy. New define!
+            break;
+        case CY_WCM_SECURITY_UNKNOWN:
+            security_type_string = SECURITY_UNKNOWN;
+            *security_type = 7; // Not supported value in mpy. New define!
+            break;
+        case CY_WCM_SECURITY_WPA2_WPA_AES_PSK:
+            security_type_string = SECURITY_WPA2_WPA_AES_PSK;
+            *security_type = 3;
+            break;
+        case CY_WCM_SECURITY_WPA2_WPA_MIXED_PSK:
+            security_type_string = SECURITY_WPA2_WPA_MIXED_PSK;
+            *security_type = 4;
+            break;
+        case CY_WCM_SECURITY_WPA_TKIP_ENT:
+            security_type_string = SECURITY_WPA_TKIP_ENT;
+            *security_type = 2;
+            break;
+        case CY_WCM_SECURITY_WPA_AES_ENT:
+            security_type_string = SECURITY_WPA_AES_ENT;
+            *security_type = 2;
+            break;
+        case CY_WCM_SECURITY_WPA_MIXED_ENT:
+            security_type_string = SECURITY_WPA_MIXED_ENT;
+            *security_type = 2;
+            break;
+        case CY_WCM_SECURITY_WPA2_TKIP_ENT:
+            security_type_string = SECURITY_WPA2_TKIP_ENT;
+            *security_type = 3;
+            break;
+        case CY_WCM_SECURITY_WPA2_AES_ENT:
+            security_type_string = SECURITY_WPA2_AES_ENT;
+            *security_type = 3;
+            break;
+        case CY_WCM_SECURITY_WPA2_MIXED_ENT:
+            security_type_string = SECURITY_WPA2_MIXED_ENT;
+            *security_type = 3;
+            break;
+        case CY_WCM_SECURITY_WPA2_FBT_ENT:
+            security_type_string = SECURITY_WPA2_FBT_ENT;
+            *security_type = 3;
+            break;
+        default:
+            security_type_string = SECURITY_UNKNOWN;
+            *security_type = 7; // Not supported value in mpy. New define!
+            break;
+    }
+    return security_type_string;
+}
+
+// Helper function to print scan results
+static void print_scan_result(cy_wcm_scan_result_t *result) {
+    uint8_t security_type = 0;
+
+    char *security_type_string = get_security_string_and_type(result, &security_type);
+
+    printf(" %2" PRIu32 "   %-32s     %4d     %2d      %02X:%02X:%02X:%02X:%02X:%02X         %-15s\n",
+        num_scan_result, result->SSID,
+        result->signal_strength, result->channel, result->BSSID[0], result->BSSID[1],
+        result->BSSID[2], result->BSSID[3], result->BSSID[4], result->BSSID[5],
+        security_type_string);
+}
+
+// Callback function for scan method. After each scan result, the scan callback is executed.
+static void network_ifx_whd_scan_cb(cy_wcm_scan_result_t *result_ptr, void *user_data, cy_wcm_scan_status_t status) {
+    scan_list = MP_OBJ_FROM_PTR(ntwk_scan_result);
+    char bssid_buf[24];
+    uint8_t hidden_status = 1; // HIDDEN
+    uint8_t security_type = 0; // OPEN
+
+    if (status == CY_WCM_SCAN_INCOMPLETE) {
+        num_scan_result++;
+
+        // Populate BSSID buffer
+        snprintf(bssid_buf, sizeof(bssid_buf), "%u.%u.%u.%u.%u.%u", result_ptr->BSSID[0], result_ptr->BSSID[1], result_ptr->BSSID[2], result_ptr->BSSID[3], result_ptr->BSSID[4], result_ptr->BSSID[5]);
+
+        // Get the network status : hidden(1) or open(0)
+        if (strlen((const char *)result_ptr->SSID) != 0) {
+            hidden_status = 0;
+        }
+
+        // Get security type as mapped in micropython function description
+        get_security_string_and_type(result_ptr, &security_type);
+
+        mp_obj_t tuple[6] = {
+            mp_obj_new_bytes(result_ptr->SSID, strlen((const char *)result_ptr->SSID)),
+            mp_obj_new_bytes((const byte *)bssid_buf, strlen((const char *)bssid_buf)),
+            MP_OBJ_NEW_SMALL_INT(result_ptr->channel),
+            MP_OBJ_NEW_SMALL_INT(result_ptr->signal_strength),
+            MP_OBJ_NEW_SMALL_INT(security_type),
+            MP_OBJ_NEW_SMALL_INT(hidden_status)
+        };
+        mp_obj_list_append(scan_list, mp_obj_new_tuple(6, tuple));
+        print_scan_result(result_ptr);
+
+    }
+
+    if ((CY_WCM_SCAN_COMPLETE == status)) {
+        /* Reset the number of scan results to 0 for the next scan.*/
+        num_scan_result = 0;
+    }
+    return;
+}
+
+// Network Initialization function (called from main.c)
+void network_ifx_init(void) {
+    cy_rslt_t result = CY_RSLT_SUCCESS;
+    cy_wcm_config_t wcm_config = { .interface = CY_WCM_INTERFACE_TYPE_STA };
+
+    memset(&scan_filter, 0, sizeof(cy_wcm_scan_filter_t));
+    result = cy_wcm_init(&wcm_config);
+    if (result != CY_RSLT_SUCCESS) {
+        error_handler(result, "Failed to initialize Wi-Fi Connection Manager.\n");
+    }
+}
+
+// Print after constructor invoked
 STATIC void network_ifx_whd_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     // network_ifx_whd_obj_t *self = MP_OBJ_TO_PTR(self_in);
     // whd_interface_t itf = *(self->itf);
@@ -76,9 +274,23 @@ STATIC void network_ifx_whd_print(const mp_print_t *print, mp_obj_t self_in, mp_
 //     TODO: Implement print with following parameters
 //       - link status (requires tcpip stack integration)
 //       - get and print ip address
-    const char *status_str = "network status unknown. To be implemented.";
+    const char *status_str = "network status unknown. To be implemented in network.status().";
 
-    mp_printf(print, "<IFY WHD %s %u.%u.%u.%u>",
+    /*if (status == CYW43_LINK_DOWN) {
+        status_str = "down";
+    } else if (status == CYW43_LINK_JOIN || status == CYW43_LINK_NOIP) {
+        status_str = "join";
+    } else if (status == CYW43_LINK_UP) {
+        status_str = "up";
+    } else if (status == CYW43_LINK_NONET) {
+        status_str = "nonet";
+    } else if (status == CYW43_LINK_BADAUTH) {
+        status_str = "badauth";
+    } else {
+        status_str = "fail";
+    }*/
+
+    mp_printf(print, "<IFX WHD %s %u.%u.%u.%u>",
         status_str,
         0, // netif->ip_addr.addr & 0xff,
         0, // netif->ip_addr.addr >> 8 & 0xff,
@@ -147,53 +359,104 @@ STATIC mp_obj_t network_ifx_whd_active(size_t n_args, const mp_obj_t *args) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(network_ifx_whd_active_obj, 1, 2, network_ifx_whd_active);
 
-STATIC whd_scan_result_t whd_scan_result;
-STATIC volatile whd_scan_status_t whd_scan_status;
+STATIC mp_obj_t network_ifx_whd_scan(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_passive, ARG_ssid, ARG_essid, ARG_bssid, ARG_channels };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_passive, MP_ARG_KW_ONLY | MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_ssid, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
+        { MP_QSTR_essid, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
+        { MP_QSTR_bssid, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
+        { MP_QSTR_channels, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_rom_obj = MP_ROM_NONE} },
+    };
 
-STATIC void network_ifx_whd_scan_cb(whd_scan_result_t **result_ptr, void *user_data, whd_scan_status_t status) {
-    mp_obj_t list = MP_OBJ_FROM_PTR(user_data);
-    whd_scan_result_t *scan_result_ptr = *result_ptr;
-    // Search for existing BSSID to remove duplicates
-    bool found = false;
-    size_t len;
-    mp_obj_t *items;
-    mp_obj_get_array(list, &len, &items);
-    for (size_t i = 0; i < len; ++i) {
-        mp_obj_tuple_t *t = MP_OBJ_TO_PTR(items[i]);
-        if (memcmp(scan_result_ptr->BSSID.octet, ((mp_obj_str_t *)MP_OBJ_TO_PTR(t->items[1]))->data, sizeof(scan_result_ptr->BSSID.octet)) == 0) {
-            if (scan_result_ptr->signal_strength > MP_OBJ_SMALL_INT_VALUE(t->items[3])) {
-                t->items[3] = MP_OBJ_NEW_SMALL_INT(scan_result_ptr->signal_strength);
-            }
-            t->items[5] = MP_OBJ_NEW_SMALL_INT(MP_OBJ_SMALL_INT_VALUE(t->items[5]) + 1);
-            found = true;
+    const char *band_string[] =
+    {
+        [CY_WCM_WIFI_BAND_ANY] = "2.4 and 5 GHz",
+        [CY_WCM_WIFI_BAND_2_4GHZ] = "2.4 GHz",
+        [CY_WCM_WIFI_BAND_5GHZ] = "5 GHz"
+    };
+    cy_wcm_mac_t scan_for_mac_value = {SCAN_FOR_MAC_ADDRESS};
+    cy_rslt_t result = CY_RSLT_SUCCESS;
+
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args - 1, pos_args + 1, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    switch (scan_filter_mode_select)
+    {
+        case SCAN_FILTER_NONE:
+            APP_INFO(("Scanning without any filter\n"));
             break;
-        }
+
+        case SCAN_FILTER_SSID:
+            APP_INFO(("Scanning for %s.\n", SCAN_FOR_SSID_VALUE));
+
+            /* Configure the scan filter for SSID specified by
+             * SCAN_FOR_SSID_VALUE.
+             */
+            scan_filter.mode = CY_WCM_SCAN_FILTER_TYPE_SSID;
+            memcpy(scan_filter.param.SSID, SCAN_FOR_SSID_VALUE, sizeof(SCAN_FOR_SSID_VALUE));
+            break;
+
+        case SCAN_FILTER_RSSI:
+            APP_INFO(("Scanning for RSSI > %d dBm.\n", SCAN_FOR_RSSI_VALUE));
+
+            /* Configure the scan filter for RSSI range specified by
+             * SCAN_FOR_RSSI_VALUE.
+             */
+            scan_filter.mode = CY_WCM_SCAN_FILTER_TYPE_RSSI;
+            scan_filter.param.rssi_range = SCAN_FOR_RSSI_VALUE;
+            break;
+
+        case SCAN_FILTER_MAC:
+            APP_INFO(("Scanning for %02X:%02X:%02X:%02X:%02X:%02X.\n", scan_for_mac_value[0], scan_for_mac_value[1], scan_for_mac_value[2], scan_for_mac_value[3], scan_for_mac_value[4], scan_for_mac_value[5]));
+
+            /* Configure the scan filter for MAC specified by scan_for_mac_value
+             */
+            scan_filter.mode = CY_WCM_SCAN_FILTER_TYPE_MAC;
+            memcpy(scan_filter.param.BSSID, &scan_for_mac_value, sizeof(scan_for_mac_value));
+            break;
+
+        case SCAN_FILTER_BAND:
+            APP_INFO(("Scanning in %s band.\n", band_string[SCAN_FOR_BAND_VALUE]));
+
+            /* Configure the scan filter for band specified by
+             * SCAN_FOR_BAND_VALUE.
+             */
+            scan_filter.mode = CY_WCM_SCAN_FILTER_TYPE_BAND;
+            scan_filter.param.band = SCAN_FOR_BAND_VALUE;
+            break;
+
+        default:
+            break;
+    }
+    PRINT_SCAN_TEMPLATE();
+    mp_obj_t res = mp_obj_new_list(0, NULL);
+    ntwk_scan_result = MP_OBJ_TO_PTR(res);
+
+    if (SCAN_FILTER_NONE == scan_filter_mode_select) {
+        result = cy_wcm_start_scan(network_ifx_whd_scan_cb, NULL, NULL);
+    } else {
+        result = cy_wcm_start_scan(network_ifx_whd_scan_cb, NULL, &scan_filter);
     }
 
-    // Add to list of results if wanted
-    // Scan info tuple
-    // 0 - ssid
-    // 1 - bssid
-    // 2 - channel
-    // 3 - rssi
-    // 4 - auth mode
-    // 5 - Number of result appareances
-    if (!found) {
-        mp_obj_t tuple[6] = {
-            mp_obj_new_bytes(scan_result_ptr->SSID.value, scan_result_ptr->SSID.length),
-            mp_obj_new_bytes(scan_result_ptr->BSSID.octet, sizeof(scan_result_ptr->BSSID.octet)),
-            MP_OBJ_NEW_SMALL_INT(scan_result_ptr->channel),
-            MP_OBJ_NEW_SMALL_INT(scan_result_ptr->signal_strength),
-            MP_OBJ_NEW_SMALL_INT(scan_result_ptr->security),
-            MP_OBJ_NEW_SMALL_INT(1) // N
-        };
-        mp_obj_list_append(list, mp_obj_new_tuple(6, tuple));
+    /* Wait for scan completion if scan was started successfully. The API
+     * cy_wcm_start_scan doesn't wait for scan completion. If it is called
+     * again when the scan hasn't completed, the API returns
+     * CY_WCM_RESULT_SCAN_IN_PROGRESS.
+
+     * Wait for 10s timeout
+     */
+    if (CY_RSLT_SUCCESS == result) {
+        cyhal_system_delay_ms(10000);
     }
 
-    // Update scan status
-    whd_scan_status = status;
+    /* Define PRINT_HEAP_USAGE using DEFINES variable in the Makefile. */
+    // print_heap_usage("After scan results are printed to UART");
+    return res;
 }
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(network_ifx_whd_scan_obj, 1, network_ifx_whd_scan);
 
+/* WHD based implementation - Future use
 STATIC mp_obj_t network_ifx_whd_scan(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_passive, ARG_ssid, ARG_essid, ARG_bssid, ARG_channels };
     static const mp_arg_t allowed_args[] = {
@@ -268,6 +531,7 @@ STATIC mp_obj_t network_ifx_whd_scan(size_t n_args, const mp_obj_t *pos_args, mp
     return res;
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(network_ifx_whd_scan_obj, 1, network_ifx_whd_scan);
+*/
 
 STATIC mp_obj_t network_ifx_whd_connect(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_ssid, ARG_key, ARG_auth, ARG_security, ARG_bssid, ARG_channel };
