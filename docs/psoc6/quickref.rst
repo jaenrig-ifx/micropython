@@ -236,3 +236,53 @@ See :ref:`machine.RTC <machine.RTC>` ::
     Setting a random week day in 'wday' field is not valid. The underlying library implements the logic to always
     calculate the right weekday based on the year, date and month passed. However, datetime() will not raise an error 
     for this, but rather re-write the field with last calculated actual value.
+
+Network Module
+--------------
+
+The :mod:`network` module
+
+See :ref: `_network.WLAN`
+
+    The network module is used to configure the WiFi connection.The WiFi interface for the station mode is only configured.
+    Create WLAN interface object using 
+
+::   import network
+     wlan = network.WLAN(network.STA_IF) # create station interface
+    
+    These are the other functions available in the network module
+
+::   wlan.active(True)       # activate the interface
+     wlan.scan()             # scan for access points
+     wlan.isconnected()      # check if the station is connected to an AP
+     wlan.connect('ssid', 'key') # connect to an AP
+     wlan.ifconfig()         # get the interface's IP/netmask/gateway/DNS addresses
+     wlan.scan()             # scan for the available network
+   
+Here is a function you can run (or put in your boot.py file) to automatically connect to your WiFi network:
+
+::  import network
+    from utime import sleep,sleep_ms
+    def network_connect() :
+        wlan = network.WLAN(network.STA_IF)
+        if wlan.isconnected():
+            print('[Network] already connected')
+            return
+
+        # enable and connect wlan
+        wlan.active(True)
+        wlan.connect('<ssid>','<key>')
+
+        # wait for connection to establish
+        sleep(5)
+        for i in range(0,100):
+        if not wlan.isconnected() and wlan.status() >= 0:
+            print("[Network] Waiting to connect..")
+            sleep(2)
+
+        # check connection
+        if not wlan.isconnected():
+            print("[Network] Connection failed!")
+        else:
+            print(wlan.ifconfig())
+
