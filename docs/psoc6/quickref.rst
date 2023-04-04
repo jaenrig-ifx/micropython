@@ -242,7 +242,7 @@ Network Module
 
 The :mod:`network` module
 
-See :ref: `_network.WLAN`
+See :ref: `_network.WLAN <network.WLAN>`
 
     The network module is used to configure the WiFi connection.The WiFi interface for the station mode is only configured for
     this port.Create WLAN interface object using 
