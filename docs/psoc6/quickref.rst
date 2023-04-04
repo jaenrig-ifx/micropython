@@ -242,18 +242,19 @@ Network Module
 
 The :mod:`network` module
 
-See :ref: `_network.WLAN <network.WLAN>`
+See :ref:`network.WLAN <network.WLAN>`
 
-    The network module is used to configure the WiFi connection.The WiFi interface for the station mode is only configured for
-    this port.Create WLAN interface object using 
+The network module is used to configure the WiFi connection.The WiFi interface for the station mode is only configured for
+this port.Create WLAN interface object using ::
 
-::   import network
-     wlan = network.WLAN(network.STA_IF) # create station interface
+    import network
+    wlan = network.WLAN(network.STA_IF) # create station interface
 
-:   wlan.scan()             
+::
+   wlan.scan()             
     
-    Scan for the available wireless networks and returns a list of tuple information about access points
-    (ssid, bssid, channel, RSSI, security, hidden) .There are 
+Scan for the available wireless networks and returns a list of tuple information about access points
+(ssid, bssid, channel, RSSI, security, hidden) .There are 
 
             0 - open
             1 - WEP 
@@ -264,9 +265,10 @@ See :ref: `_network.WLAN <network.WLAN>`
             6 - WPS
             7 - Unknown security
     
-    These are the other functions available in the network module
+These are the other functions available in the network module
 
-::   wlan.active(True)           # activate the interface
+::   
+     wlan.active(True)           # activate the interface
      wlan.scan()                 # scan for access points
      wlan.isconnected()          # check if the station is connected to an AP
      wlan.connect('ssid', 'key') # connect to an AP
@@ -277,7 +279,8 @@ See :ref: `_network.WLAN <network.WLAN>`
    
 Here is a function you can run (or put in your boot.py file) to automatically connect to your WiFi network:
 
-::  def network_connect() :
+::  
+    def network_connect() :
         import network
         from utime import sleep,sleep_ms
         wlan = network.WLAN(network.STA_IF)

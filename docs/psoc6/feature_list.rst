@@ -113,14 +113,14 @@ Table :ref:`configuration details <table_mpy_configuration>` below lists specifi
 |                 |                                                                                                                      |
 |                 | Option to enable the port specific debug logger: ``MICROPY_LOGGER_DEBUG``.                                           |
 +-----------------+----------------------------------------------------------------------------------------------------------------------+
-| network         |  Option ``MICROPY_NETWORK`` enabled.   
-|                 | 
-|                 |  Functions not yet implemented: *phy_mode()*.                                                  |
+| network         |  Option ``MICROPY_NETWORK`` enabled.                                                                                 |
+|                 |                                                                                                                      |
+|                 |  Functions not yet implemented: *phy_mode()*.                                                                        |
 |                 |                                                                                                                      |                                                                             
-|                 |  Classes not yet implemented: *LAN*.                                                                                                                   |
-+----------------------------------------------------------------------------------------------------------------------------------------+
+|                 |  Classes not yet implemented: *LAN*.                                                                                 |                                  |
++-----------------+----------------------------------------------------------------------------------------------------------------------+
 | network.WLAN    |  Mode not yet implemented: *STA_AP*.                                                                                 |                                
 |                 |                                                                                                                      |                                                                             
 |                 |  Functions not yet implemented: *config*.                                                                            |               
 |                 |                                                                                                                      |
-+----------------------------------------------------------------------------------------------------------------------------------------+
++-----------------+----------------------------------------------------------------------------------------------------------------------+
