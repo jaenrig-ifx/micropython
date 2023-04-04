@@ -257,16 +257,16 @@ Scan for the available wireless networks using
    wlan.scan()             
     
 Scan function returns a list of tuple information about access points
-(ssid, bssid, channel, RSSI, security, hidden) .There are 7 levels of security.
+(ssid, bssid, channel, RSSI, security, hidden) .There are 7 levels of security:
 
- 0 - open,
- 1 - WEP,
- 2 - WPA,
- 3 - WPA2,
- 4 - WPA2_WPA,
- 5 - WPA3,
- 6 - WPS,
- 7 - Unknown security,          
+ * ``0 - open``,
+ * ``1 - WEP``,
+ * ``2 - WPA``,
+ * ``3 - WPA2``,
+ * ``4 - WPA2_WPA``,
+ * ``5 - WPA3``,
+ * ``6 - WPS``,
+ * ``7 - Unknown security``.          
     
 These are the other functions available in the network module
 
