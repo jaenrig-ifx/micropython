@@ -117,7 +117,7 @@ Table :ref:`configuration details <table_mpy_configuration>` below lists specifi
 |                 |                                                                                                                      |
 |                 |  Functions not yet implemented: *phy_mode()*.                                                                        |
 |                 |                                                                                                                      |                                                                             
-|                 |  Classes not yet implemented: *LAN*.                                                                                 |                                  |
+|                 |  Classes not yet implemented: *LAN*.                                                                                 |                                  
 +-----------------+----------------------------------------------------------------------------------------------------------------------+
 | network.WLAN    |  Mode not yet implemented: *STA_AP*.                                                                                 |                                
 |                 |                                                                                                                      |                                                                             

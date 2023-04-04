@@ -251,30 +251,33 @@ this port.Create WLAN interface object using ::
     wlan = network.WLAN(network.STA_IF) # create station interface
 
 ::
+
    wlan.scan()             
     
 Scan for the available wireless networks and returns a list of tuple information about access points
 (ssid, bssid, channel, RSSI, security, hidden) .There are 
 
-            0 - open
-            1 - WEP 
-            2 - WPA
-            3 - WPA2
-            4 - WPA2_WPA
-            5 - WPA3
-            6 - WPS
-            7 - Unknown security
+ 0 - open
+ 1 - WEP 
+ 2 - WPA
+ 3 - WPA2
+ 4 - WPA2_WPA
+ 5 - WPA3
+ 6 - WPS
+ 7 - Unknown security           
     
 These are the other functions available in the network module
 
 ::   
-     wlan.active(True)           # activate the interface
-     wlan.scan()                 # scan for access points
-     wlan.isconnected()          # check if the station is connected to an AP
-     wlan.connect('ssid', 'key') # connect to an AP
-     wlan.disconnect()           # disconnect from the connected AP
-     wlan.status()               # check the link status and returns 1 for linkup & 0 for linkdown
-     wlan.ifconfig()             # get the interface's IP/netmask/gateway/DNS addresses
+
+  
+  wlan.active(True)           # activate the interface
+  wlan.scan()                 # scan for access points
+  wlan.isconnected()          # check if the station is connected to an AP
+  wlan.connect('ssid', 'key') # connect to an AP
+  wlan.disconnect()           # disconnect from the connected AP
+  wlan.status()               # check the link status and returns 1 for linkup & 0 for linkdown
+  wlan.ifconfig()             # get the interface's IP/netmask/gateway/DNS addresses
      
    
 Here is a function you can run (or put in your boot.py file) to automatically connect to your WiFi network:
