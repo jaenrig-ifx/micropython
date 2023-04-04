@@ -109,6 +109,9 @@ DEFINES=$(MBEDTLSFLAGS) CYBSP_WIFI_CAPABLE CY_RETARGET_IO_CONVERT_LF_TO_CRLF CY_
 # disabled by setting CY_WIFI_HOST_WAKE_SW_FORCE to '0'.
 DEFINES+=CY_WIFI_HOST_WAKE_SW_FORCE=0
 
+# Logging options, but not yet working
+# DEFINES += LWIP_DEBUG=1 ENABLE_CONNECTIVITY_MIDDLEWARE_LOGS ENABLE_WCM_LOGS ENABLE_SECURE_SOCKETS_LOGS
+
 # Like SOURCES, but for include directories. Value should be paths to
 # directories (without a leading -I).
 INCLUDES=

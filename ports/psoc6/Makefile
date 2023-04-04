@@ -195,7 +195,14 @@ include $(BOARD_DIR)/makefile_mtb.mk
 # include py core make definitions
 include $(TOP)/py/mkrules.mk
 
-all: $(MPY_MAIN_BUILD_DIR)/firmware.hex $(MPY_PATH_TO_MAIN_MAKEFILE)
+
+# TODO: Workaround to have identical settings in MTB and MPY !
+prepare:
+	perl -pi -e 's/(#define +LWIP_IPV6 +)\(? *1 *\)?/$$1(0)/;' boards/mtb_shared/wifi-core-freertos-lwip-mbedtls/release-v1.0.0/configs/lwipopts.h
+	cat mbedtls/mbedtls_config.h $(TOP)/extmod/mbedtls/mbedtls_config_common.h >> boards/mtb_shared/wifi-core-freertos-lwip-mbedtls/release-v1.0.0/configs/mbedtls_user_config.h
+
+all: prepare $(MPY_MAIN_BUILD_DIR)/firmware.hex $(MPY_PATH_TO_MAIN_MAKEFILE)
+
 
 rebuild: clean mpy_mtb_clean all
 
