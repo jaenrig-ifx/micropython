@@ -128,9 +128,9 @@ soft_reset:
 
 
     #if MICROPY_VFS_FAT
-    pyexec_frozen_module("vfs_fat.py");
+    pyexec_frozen_module("vfs_fat.py", false);
     #elif MICROPY_VFS_LFS2
-    pyexec_frozen_module("vfs_lfs2.py");
+    pyexec_frozen_module("vfs_lfs2.py", false);
     #endif
 
     // Execute user scripts.
