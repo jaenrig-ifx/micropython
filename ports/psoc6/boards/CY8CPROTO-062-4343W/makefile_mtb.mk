@@ -42,6 +42,14 @@ mpy_mtb_init:
 	$(Q) cd $(BOARD_DIR); $(MAKE) getlibs
 
 
+# Remove MTB retrieved lib and dependencies
+mpy_mtb_deinit:
+	$(info )
+	$(info Removing mtb_shared and libs folder ...)
+	-$(Q) rm -rf boards/$(BOARD)/libs
+	-$(Q) rm -rf boards/mtb_shared
+
+
 # build MTB project
 mpy_mtb_build:
 	$(info )
