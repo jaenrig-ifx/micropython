@@ -104,4 +104,4 @@ mpy_program_unix: $(MPY_MAIN_BUILD_DIR)/firmware.hex
 mpy_program: mpy_program_unix
 
 
-.PHONY: mpy_mtb_init mpy_mtb_build mpy_define_mtb_vars mpy_program
+.PHONY: mpy_mtb_init mpy_mtb_deinit mpy_mtb_build mpy_define_mtb_vars mpy_program
