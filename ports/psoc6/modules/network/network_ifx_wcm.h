@@ -24,8 +24,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#ifndef MICROPY_INCLUDED_EXTMOD_NETWORK_IFX_WHD_H
-#define MICROPY_INCLUDED_EXTMOD_NETWORK_IFX_WHD_H
+#ifndef MICROPY_INCLUDED_EXTMOD_NETWORK_IFX_WCM_H
+#define MICROPY_INCLUDED_EXTMOD_NETWORK_IFX_WCM_H
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -123,12 +123,9 @@ enum scan_filter_mode
     SCAN_FILTER_INVALID
 };
 
-extern const mp_obj_type_t mp_network_ifx_whd_type;
-extern whd_driver_t whd;
-extern whd_interface_t itf_sta;
-extern whd_interface_t itf_ap;
+extern const mp_obj_type_t mp_network_ifx_wcm_type;
 
 void network_ifx_init(void);
 void error_handler(cy_rslt_t result, char *message);
 
-#endif // MICROPY_INCLUDED_EXTMOD_NETWORK_IFX_WHD_H
+#endif // MICROPY_INCLUDED_EXTMOD_NETWORK_IFX_WCM_H
