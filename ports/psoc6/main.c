@@ -11,7 +11,6 @@
 #include "cy_retarget_io.h"
 #include "cyhal.h"
 #include "cy_wcm.h"
-// #include "cy_log.h"
 
 // FreeRTOS header file
 #include <FreeRTOS.h>
@@ -56,31 +55,6 @@ void mpy_task(void *arg);
 
 TaskHandle_t mpy_task_handle;
 
-
-// TODO: Logging of MTB functionality, but not yet working. To be removed ?
-// int app_log_output_callback(CY_LOG_FACILITY_T facility, CY_LOG_LEVEL_T level, char *logmsg)
-// {
-//     (void)facility;     // Can be used to decide to reduce output or send output to remote logging
-//     (void)level;        // Can be used to decide to reduce output, although the output has already been
-//                         // limited by the log routines
-
-//     return printf( "%s\n", logmsg);   // print directly to console
-// }
-
-
-// //  Log time callback - get the current time for the log message timestamp in millseconds
-
-// cy_rslt_t app_log_time(uint32_t* time)
-// {
-//     if (time != NULL)
-//     {
-//         *time = 0UL;//get_time_ms(); // get system time (in milliseconds)
-//     }
-//     return CY_RSLT_SUCCESS;
-// }
-
-
-
 int main(int argc, char **argv) {
     // Initialize the device and board peripherals
     cy_rslt_t result = cybsp_init();
@@ -93,19 +67,6 @@ int main(int argc, char **argv) {
     if (result != CY_RSLT_SUCCESS) {
         mp_raise_ValueError(MP_ERROR_TEXT("cy_retarget_io_init failed !\n"));
     }
-
-
-
-// TODO: Logging of MTB functionality, but not yet working. To be removed ?
-//  Log initialization - default os OFF, no output from any facility
-
-// result = cy_log_init(CY_LOG_ERR, app_log_output_callback, app_log_time);
-
-// if (result != CY_RSLT_SUCCESS)
-// {
-//     printf("cy_log_init() FAILED %ld\n", result);
-// }
-
 
     xTaskCreate(mpy_task, "MicroPython task", MPY_TASK_STACK_SIZE, NULL, MPY_TASK_PRIORITY, &mpy_task_handle);
     vTaskStartScheduler();
