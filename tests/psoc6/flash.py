@@ -4,7 +4,7 @@ import os, psoc6
 # create block device object based on whichever flash is active
 bdev = psoc6.QSPI_Flash() if "QSPI_Flash" in dir(psoc6) else psoc6.Flash()
 # unmount the filesystem in case its already mounted
-os.umount("/flash")
+os.umount("/")
 
 test_string = "This is a test string."
 print(test_string)
