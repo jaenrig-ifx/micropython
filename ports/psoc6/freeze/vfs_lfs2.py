@@ -18,12 +18,12 @@ write_size = 0x200
 
 try:
     vfs = os.VfsLfs2(bdev, progsize=write_size, readsize=read_size)
-    os.mount(vfs, "/flash")
+    os.mount(vfs, "/")
 except:
     os.VfsLfs2.mkfs(bdev, progsize=write_size, readsize=read_size)
     vfs = os.VfsLfs2(bdev, progsize=write_size, readsize=read_size)
-    os.mount(vfs, "/flash")
+    os.mount(vfs, "/")
 
-print("LFS2 filesystem mounted at /flash\n")
+print("LFS2 filesystem mounted at /\n")
 
 del machine, os, psoc6, bdev, vfs, read_size, write_size

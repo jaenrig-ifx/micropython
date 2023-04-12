@@ -117,31 +117,32 @@ soft_reset:
     mp_printf(&mp_plat_print, "; " MICROPY_BANNER_MACHINE);
     mp_printf(&mp_plat_print, "\nUse Ctrl-D to exit, Ctrl-E for paste mode\n");
 
-    mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash));
-    // mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_flash_slash_lib));
-
     // indicate in REPL console when debug mode is selected
     mplogger_print("\n...LOGGER DEBUG MODE...\n\n");
 
     readline_init0();
     machine_init();
 
-
+    #if MICROPY_VFS
+    mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_));
+    mp_obj_list_append(mp_sys_path, MP_OBJ_NEW_QSTR(MP_QSTR__slash_lib));
     #if MICROPY_VFS_FAT
     pyexec_frozen_module("vfs_fat.py");
     #elif MICROPY_VFS_LFS2
     pyexec_frozen_module("vfs_lfs2.py");
     #endif
 
+    #endif
+
     // Execute user scripts.
-    int ret = pyexec_file_if_exists("flash/boot.py");
+    int ret = pyexec_file_if_exists("/boot.py");
 
     if (ret & PYEXEC_FORCED_EXIT) {
         goto soft_reset;
     }
 
     if (pyexec_mode_kind == PYEXEC_MODE_FRIENDLY_REPL) {
-        ret = pyexec_file_if_exists("flash/main.py");
+        ret = pyexec_file_if_exists("/main.py");
 
         if (ret & PYEXEC_FORCED_EXIT) {
             goto soft_reset;
