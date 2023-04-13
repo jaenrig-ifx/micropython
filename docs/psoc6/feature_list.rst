@@ -40,6 +40,7 @@ Enabled modules
     * micropython
     * ucryptolib
     * uctypes
+    * network
 
 
 * Port specific modules and micro-libraries
@@ -54,7 +55,6 @@ Not yet enabled
 
 * Micropython specific modules and libraries
     * btree
-    * network
     * ubluetooth
 
 
@@ -112,4 +112,15 @@ Table :ref:`configuration details <table_mpy_configuration>` below lists specifi
 | psoc6           | Option to enable the external instead of the internal flash: ``MICROPY_ENABLE_EXT_QSPI_FLASH``.                      |
 |                 |                                                                                                                      |
 |                 | Option to enable the port specific debug logger: ``MICROPY_LOGGER_DEBUG``.                                           |
++-----------------+----------------------------------------------------------------------------------------------------------------------+
+| network         |  Option ``MICROPY_NETWORK`` enabled.                                                                                 |
+|                 |                                                                                                                      |
+|                 |  Functions not yet implemented: *phy_mode()*.                                                                        |
+|                 |                                                                                                                      |                                                                             
+|                 |  Classes not yet implemented: *LAN*.                                                                                 |                                  
++-----------------+----------------------------------------------------------------------------------------------------------------------+
+| network.WLAN    |  Mode not yet implemented: *STA_AP*.                                                                                 |                                
+|                 |                                                                                                                      |                                                                             
+|                 |  Functions not yet implemented: *config*.                                                                            |               
+|                 |                                                                                                                      |
 +-----------------+----------------------------------------------------------------------------------------------------------------------+

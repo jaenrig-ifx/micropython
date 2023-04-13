@@ -68,6 +68,7 @@ CFLAGS  += $(INC) -Wall -Werror -std=c11 $(CFLAGS_CORTEX_M4) $(COPT) -D_XOPEN_SO
 CFLAGS  += -Wno-error=double-promotion -Wno-error=overflow -Wno-error=analyzer-null-dereference -Wno-error=unused-local-typedefs -Wno-error=unused-function -Wno-error=maybe-uninitialized
 
 ifeq ($(MICROPY_PSOC6_SSL_MBEDTLS),1)
+  INC += -I$(TOP)/extmod/mbedtls
   CFLAGS += -DMBEDTLS_CONFIG_FILE=\"mbedtls/mbedtls_config.h\" 
   CFLAGS += -DMICROPY_SSL_MBEDTLS=1
 endif
