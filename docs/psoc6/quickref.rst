@@ -236,3 +236,77 @@ See :ref:`machine.RTC <machine.RTC>` ::
     Setting a random week day in 'wday' field is not valid. The underlying library implements the logic to always
     calculate the right weekday based on the year, date and month passed. However, datetime() will not raise an error 
     for this, but rather re-write the field with last calculated actual value.
+
+Network Module
+--------------
+
+The :mod:`network` module
+
+See :ref:`network.WLAN <network.WLAN>`
+
+The network module is used to configure the WiFi connection.The WiFi interface for the station mode is only configured for
+this port.Create WLAN interface object using ::
+
+    import network
+    wlan = network.WLAN(network.STA_IF) # create station interface
+
+Scan for the available wireless networks using 
+
+::
+
+   wlan.scan()             
+    
+Scan function returns a list of tuple information about access points
+(ssid, bssid, channel, RSSI, security, hidden) .There are 7 levels of security:
+
+ * ``0 - open``,
+ * ``1 - WEP``,
+ * ``2 - WPA``,
+ * ``3 - WPA2``,
+ * ``4 - WPA2_WPA``,
+ * ``5 - WPA3``,
+ * ``6 - WPS``,
+ * ``7 - Unknown security``.          
+    
+These are the other functions available in the network module
+
+::   
+
+  wlan.active(True)           # activate the interface
+  wlan.scan()                 # scan for access points
+  wlan.isconnected()          # check if the station is connected to an AP
+  wlan.connect('ssid', 'key') # connect to an AP
+  wlan.disconnect()           # disconnect from the connected AP
+  wlan.status()               # check the link status and returns 1 for linkup & 0 for linkdown
+  wlan.ifconfig()             # get the interface's IP/netmask/gateway/DNS addresses
+     
+   
+Here is a function you can run (or put in your boot.py file) to automatically connect to your WiFi network:
+
+::
+
+    def network_connect() :
+        import network
+        from utime import sleep,sleep_ms
+        wlan = network.WLAN(network.STA_IF)
+        if wlan.isconnected():
+            print('[Network] already connected')
+            return
+
+        # enable and connect wlan
+        wlan.active(True)
+        wlan.connect('<ssid>','<key>')
+
+        # wait for connection to establish
+        sleep(5)
+        for i in range(0,100):
+        if not wlan.isconnected() and wlan.status() >= 0:
+            print("[Network] Waiting to connect..")
+            sleep(2)
+
+        # check connection
+        if not wlan.isconnected():
+            print("[Network] Connection failed!")
+        else:
+            print(wlan.ifconfig())
+

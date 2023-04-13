@@ -1,9 +1,7 @@
 #ifndef PSOC6_MPY_MBEDTLS_USER_CONFIG_HEADER
 #define PSOC6_MPY_MBEDTLS_USER_CONFIG_HEADER
 
-// Used to add MPY settings to MTB settings in file "boards/mtb_shared/wifi-core-freertos-lwip-mbedtls/release-v1.0.0/configs/mbedtls_user_config.h"
-// such that both use an identical set of options.
-// Further MTB configs can be found at : boards/mtb_shared/mbedtls/mbedtls-2.25.0/configs/
+#include "mbedtls_mtb_config.h"
 
 // Set mbedtls configuration
 #define MBEDTLS_ECP_NIST_OPTIM
@@ -27,9 +25,9 @@
 #define MICROPY_MBEDTLS_CONFIG_BARE_METAL (1)
 
 // Include common mbedtls configuration.
-#ifdef MICROPY_CONFIG_ROM_LEVEL
-#include "extmod/mbedtls/mbedtls_config_common.h"
-#endif
+// #ifdef MICROPY_CONFIG_ROM_LEVEL
+#include "mbedtls_config_common.h"
+// #endif
 
 // #undef MBEDTLS_ENTROPY_HARDWARE_ALT
 
