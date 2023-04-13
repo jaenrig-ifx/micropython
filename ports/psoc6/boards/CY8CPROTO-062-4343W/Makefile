@@ -114,10 +114,12 @@ DEFINES+=CY_WIFI_HOST_WAKE_SW_FORCE=0
 
 # Like SOURCES, but for include directories. Value should be paths to
 # directories (without a leading -I).
-TOP_MPY_DIR = ../../
-LWIP_OPTS_DIR = $(TOP_MPY_DIR)/lwip_inc
-MBEDTLS_CONF_DIR = $(TOP_MPY_DIR)/mbedtls
-INCLUDES= $(LWIP_OPTS_DIR) $(MBEDTLS_CONF_DIR)
+MPY_PSOC6_PORT_DIR = ../..
+MPY_TOP_DIR = $(MPY_PSOC6_PORT_DIR)/../..
+LWIP_OPTS_DIR = $(MPY_PSOC6_PORT_DIR)/lwip_inc
+MBEDTLS_CONF_DIR = $(MPY_PSOC6_PORT_DIR)/mbedtls
+MBEDTLS_MPY_CONF_DIR = $(MPY_TOP_DIR)/extmod/mbedtls
+INCLUDES= $(LWIP_OPTS_DIR) $(MBEDTLS_CONF_DIR) $(MBEDTLS_MPY_CONF_DIR)
 #../mtb_shared/wifi-host-driver/release-v2.5.0/External/rtos ../mtb_shared/lwip/STABLE-2_1_2_RELEASE/src/include ../../lwip_inc
 
 # Add additional defines to the build process (without a leading -D).
