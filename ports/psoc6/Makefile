@@ -52,7 +52,7 @@ INC += -I$(TOP)
 INC += -I$(BUILD)
 
 ifeq ($(MICROPY_PSOC6_LWIP),1)
-  INC += -Ilwip_inc
+	INC += -Ilwip_inc
 endif
 
 ### for testing purposes only
@@ -68,6 +68,7 @@ CFLAGS  += $(INC) -Wall -Werror -std=c11 $(CFLAGS_CORTEX_M4) $(COPT) -D_XOPEN_SO
 CFLAGS  += -Wno-error=double-promotion -Wno-error=overflow -Wno-error=analyzer-null-dereference -Wno-error=unused-local-typedefs -Wno-error=unused-function -Wno-error=maybe-uninitialized
 
 ifeq ($(MICROPY_PSOC6_SSL_MBEDTLS),1)
+  INC += -I$(TOP)/extmod/mbedtls
   CFLAGS += -DMBEDTLS_CONFIG_FILE=\"mbedtls/mbedtls_config.h\" 
   CFLAGS += -DMICROPY_SSL_MBEDTLS=1
 endif
@@ -176,7 +177,7 @@ ifeq ($(MP_LOGGER_DEBUG), 1)
 endif
 
 
-$(MPY_MAIN_BUILD_DIR)/firmware.elf: mpy_define_mtb_vars $(OBJ) $(MPY_MTB_LIBRARIES) $(LIBS)
+$(MPY_MAIN_BUILD_DIR)/firmware.elf: $(OBJ) $(MPY_MTB_LIBRARIES) $(LIBS)
 	$(info )
 	$(info Linking $@     $^  $(LIBS) ...)
 	$(Q) $(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
@@ -195,7 +196,10 @@ include $(BOARD_DIR)/makefile_mtb.mk
 # include py core make definitions
 include $(TOP)/py/mkrules.mk
 
-all: $(MPY_MAIN_BUILD_DIR)/firmware.hex $(MPY_PATH_TO_MAIN_MAKEFILE)
+
+build: mpy_define_mtb_vars $(MPY_PATH_TO_MAIN_MAKEFILE) $(MPY_MAIN_BUILD_DIR)/firmware.hex
+
+all: build
 
 rebuild: clean mpy_mtb_clean all
 
@@ -204,5 +208,6 @@ test:
 	$(info Running PSoC6 tests)
 	$(Q) cd ../../tests ; ./run-tests.py --target psoc6 --device /dev/ttyACM0 -d psoc6
 
+program: mpy_program_unix
 
-.PHONY: test
+.PHONY: test build

@@ -25,6 +25,9 @@
  *
  *  This file is part of mbed TLS (https://tls.mbed.org)
  */
+/*
+ * File copied from: https://github.com/Infineon/wifi-core-freertos-lwip-mbedtls/blob/release-v1.0.0/configs/mbedtls_user_config.h
+ */
 
 #ifndef MBEDTLS_USER_CONFIG_HEADER
 #define MBEDTLS_USER_CONFIG_HEADER

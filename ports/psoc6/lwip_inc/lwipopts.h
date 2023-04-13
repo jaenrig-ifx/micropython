@@ -56,7 +56,6 @@
 //
 // Enable IPV6 networking
 //
-// changed by JB
 #define LWIP_IPV6                       (0)
 
 #define ETHARP_SUPPORT_STATIC_ENTRIES   (1)
@@ -263,9 +262,6 @@
 
 #define LWIP_NETIF_TX_SINGLE_PBUF      (1)
 
-#include <stdlib.h>
-#include <sys/time.h>
-#define LWIP_AUTOIP_RAND        (1)
 #define LWIP_RAND               rand
 
 #define LWIP_FREERTOS_CHECK_CORE_LOCKING             (1)
@@ -279,8 +275,3 @@
 #define LWIP_CHKSUM_ALGORITHM         (3)
 
 extern void sys_check_core_locking();
-
-
-// added by JB
-// this file was copied copied from boards/mtb_shared/wifi-core-freertos-lwip-mbedtls/release-v1.0.0/configs/lwipopts.h
-typedef uint32_t sys_prot_t;
