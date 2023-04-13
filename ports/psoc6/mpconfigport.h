@@ -132,12 +132,12 @@
 #define MICROPY_PY_WEBREPL                      (1)
 #define MICROPY_PY_OS_DUPTERM                   (1)
 
-extern const struct _mp_obj_type_t mp_network_ifx_whd_type;
-#define MICROPY_HW_NIC_IFX_WHD  \
-    { MP_ROM_QSTR(MP_QSTR_WLAN), MP_ROM_PTR(&mp_network_ifx_whd_type) },
+extern const struct _mp_obj_type_t mp_network_ifx_wcm_type;
+#define MICROPY_HW_NIC_IFX_WCM  \
+    { MP_ROM_QSTR(MP_QSTR_WLAN), MP_ROM_PTR(&mp_network_ifx_wcm_type) },
 
 #define MICROPY_PORT_NETWORK_INTERFACES \
-    MICROPY_HW_NIC_IFX_WHD
+    MICROPY_HW_NIC_IFX_WCM
 
 // Miscellaneous settings
 #define MICROPY_MAKE_POINTER_CALLABLE(p)        ((void *)((mp_uint_t)(p) | 1))

@@ -143,10 +143,10 @@ MOD_SRC_C += $(addprefix modules/,\
 	time/modutime.c \
 	)
 
-ifeq ($(MICROPY_PY_NETWORK_IFX_WHD),1)
-CFLAGS += -DMICROPY_PY_NETWORK_IFX_WHD=1 -Wno-stringop-truncation
+ifeq ($(MICROPY_PY_NETWORK_IFX_WCM),1)
+CFLAGS += -DMICROPY_PY_NETWORK_IFX_WCM=1 -Wno-stringop-truncation
 	MOD_SRC_C += $(addprefix modules/network/,\
-		network_ifx_whd.c \
+		network_ifx_wcm.c \
 		)
 	INC += -Imodules/network
 endif
