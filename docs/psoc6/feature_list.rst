@@ -23,6 +23,7 @@ Enabled modules
     * urandom
     * ure
     * uselect
+    * usocket
     * ussl
     * ustruct
     * usys
@@ -50,7 +51,6 @@ Enabled modules
 Not yet enabled
 ---------------
 * Python standard modules and libraries
-    * usocket
     * _thread
 
 * Micropython specific modules and libraries
@@ -80,6 +80,8 @@ Table :ref:`configuration details <table_mpy_configuration>` below lists specifi
 | urandom         | Function *seed()* not yet implemented.                                                                               |
 +-----------------+----------------------------------------------------------------------------------------------------------------------+
 | ure             | Options ``MICROPY_PY_URE_DEBUG``, ``MICROPY_PY_URE_MATCH_GROUPS``, ``MICROPY_PY_URE_MATCH_SPAN_START_END`` enabled.  |
++-----------------+----------------------------------------------------------------------------------------------------------------------+
+| usocket         | Options ``MICROPY_PY_USOCKET`` enabled.                                                                              |
 +-----------------+----------------------------------------------------------------------------------------------------------------------+
 | ussl            | Options ``MICROPY_PY_USSL`` enabled. Has 2 failing tests.                                                            |
 +-----------------+----------------------------------------------------------------------------------------------------------------------+
