@@ -414,10 +414,9 @@ def run_tests(pyb, tests, args, result_dir, num_threads=1):
         # run-tests.py script itself so use base_path.
 
         # Check if micropython.native is supported, and skip such tests if it's not
-        # output = run_feature_check(pyb, args, base_path, "native_check.py")
-        # if output != b"native\n":
-        #     skip_native = True
-        skip_native = False
+        output = run_feature_check(pyb, args, base_path, "native_check.py")
+        if output != b"native\n":
+            skip_native = True
 
         # Check if arbitrary-precision integers are supported, and skip such tests if it's not
         output = run_feature_check(pyb, args, base_path, "int_big.py")
@@ -706,21 +705,14 @@ def run_tests(pyb, tests, args, result_dir, num_threads=1):
             with open(test_file_expected, "rb") as f:
                 output_expected = f.read()
         else:
-            # Write expected output from target (instead of CPython)
-            if args.write_exp_on_target:
-                args.write_exp = True
-                output_expected = run_micropython(pyb, args, test_file)
-                with open(test_file_expected, "wb") as f:
-                    f.write(output_expected)
-            else:
-                # run CPython to work out expected output
-                try:
-                    output_expected = subprocess.check_output(CPYTHON3_CMD + [test_file])
-                    if args.write_exp:
-                        with open(test_file_expected, "wb") as f:
-                            f.write(output_expected)
-                except subprocess.CalledProcessError:
-                    output_expected = b"CPYTHON3 CRASH"
+            # run CPython to work out expected output
+            try:
+                output_expected = subprocess.check_output(CPYTHON3_CMD + [test_file])
+                if args.write_exp:
+                    with open(test_file_expected, "wb") as f:
+                        f.write(output_expected)
+            except subprocess.CalledProcessError:
+                output_expected = b"CPYTHON3 CRASH"
 
         # canonical form for all host platforms is to use \n for end-of-line
         output_expected = output_expected.replace(b"\r\n", b"\n")
@@ -863,11 +855,6 @@ the last matching regex is used:
         "--write-exp",
         action="store_true",
         help="use CPython to generate .exp files to run tests w/o CPython",
-    )
-    cmd_parser.add_argument(
-        "--write-exp-on-target",
-        action="store_true",
-        help="dry run of the tests on target to generate .exp files",
     )
     cmd_parser.add_argument(
         "--list-tests", action="store_true", help="list tests instead of running them"
