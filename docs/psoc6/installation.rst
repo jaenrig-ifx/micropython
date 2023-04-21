@@ -167,7 +167,7 @@ The binary *.hex* files are available in the `GitHub release section <https://gi
 All PSoC6™ firmware versions for each of the supported boards can be found there. 
 
 
-    .. image:: img/gh-releases.jpg
+    .. image:: img/gh-releases.png
         :alt: GitHub MicroPython Releases
         :width: 520px
 
