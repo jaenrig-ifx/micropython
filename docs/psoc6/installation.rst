@@ -138,7 +138,27 @@ version need to be passed as arguments.
 Direct binary flashing
 ^^^^^^^^^^^^^^^^^^^^^^
 
-*To be completed. Placeholder.*
+Another alternative to program the board is to directly provide the binary file. The ``firmware-deploy`` command is providing this option. 
+This commands is skipping all the tools download and installation, neither download the MicoPython firmware.
+Therefore, it requires that `openocd <https://www.infineon.com/cms/en/design-support/software/free-and-open-source-software-foss/modustoolbox-foss-packages/?searchTerm=~%27openocd#!designsupport>`_ is already installed and available in the system path.
+In exchange, it will be faster for batch flashing, or any situation where subsequent binary flashing needs to be performed.
+
+The board needs to be specified, and the path and name of the ``.hex`` file:
+
+.. tabs::
+
+    .. group-tab:: Linux
+        
+            .. code-block:: bash
+
+                ./mpy-psoc6.sh firmware-deploy CY8CPROTO-062-4343W pathtodir/mpy-psoc6_CY8CPROTO-062-4343W.hex
+
+    .. group-tab:: Windows
+
+            .. code-block:: bash
+                
+                mpy-psoc6.cmd firmware-deploy CY8CPROTO-062-4343W pathtodir/mpy-psoc6_CY8CPROTO-062-4343W.hex
+
 
 Getting the firmware
 ^^^^^^^^^^^^^^^^^^^^
@@ -146,15 +166,10 @@ Getting the firmware
 The binary *.hex* files are available in the `GitHub release section <https://github.com/jaenrig-ifx/MicroPython/releases>`_. 
 All PSoC6™ firmware versions for each of the supported boards can be found there. 
 
-..
-    .. image:: img/gh-releases.jpg
-..
-    :alt: GitHub MicroPython Releases
-..
-    :width: 520px
 
-
-*To be completed. Placeholder.*
+    .. image:: img/gh-releases.png
+        :alt: GitHub MicroPython Releases
+        :width: 520px
 
 
 Other installation methods
